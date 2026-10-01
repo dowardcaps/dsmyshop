@@ -53,7 +53,7 @@ export const TOOL_ITEMS: readonly ToolItem[] = [
   {
     slug: "bgremover",
     title: "Background Remover",
-    href: "http://localhost:3001/",
+    href: "http://localhost:3000/",
     description: "Remove image backgrounds locally. (Dev only — runs on port 3001.)",
     category: "Design",
   },
