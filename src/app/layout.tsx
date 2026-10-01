@@ -9,6 +9,10 @@ import "./globals.css";
 export const metadata: Metadata = {
   title: "DS Finance",
   description: "Sales, GCash, expense, and debt management for a small business.",
+    icons: {
+    icon: "/icon.png",
+  },
+
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
