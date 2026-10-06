@@ -7,8 +7,6 @@ import { cn } from "@/lib/utils";
 
 const DropdownMenu = DropdownMenuPrimitive.Root;
 const DropdownMenuTrigger = DropdownMenuPrimitive.Trigger;
-// ❌ Removed: const DropdownMenuLabel = DropdownMenuPrimitive.Label;
-// ❌ Removed: const DropdownMenuSeparator = DropdownMenuPrimitive.Separator;
 
 function DropdownMenuContent({
   className,
@@ -36,7 +34,7 @@ function DropdownMenuItem({
   return (
     <DropdownMenuPrimitive.Item
       className={cn(
-        "relative flex cursor-default select-none items-center gap-2 rounded-sm px-2 py-1.5 text-sm outline-hidden focus:bg-accent focus:text-accent-foreground data-disabled:pointer-events-none data-disabled:opacity-50 [&_svg:not([class*='size-'])]:size-4",
+        "relative flex cursor-default select-none items-center gap-2 rounded-sm px-2 py-1.5 text-sm outline-hidden focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50 [&_svg:not([class*='size-'])]:size-4",
         className,
       )}
       {...props}
@@ -44,35 +42,4 @@ function DropdownMenuItem({
   );
 }
 
-function DropdownMenuLabel({
-  className,
-  ...props
-}: React.ComponentProps<typeof DropdownMenuPrimitive.Label>) {
-  return (
-    <DropdownMenuPrimitive.Label
-      className={cn("px-2 py-1.5 text-sm font-medium", className)}
-      {...props}
-    />
-  );
-}
-
-function DropdownMenuSeparator({
-  className,
-  ...props
-}: React.ComponentProps<typeof DropdownMenuPrimitive.Separator>) {
-  return (
-    <DropdownMenuPrimitive.Separator
-      className={cn("-mx-1 my-1 h-px bg-muted", className)}
-      {...props}
-    />
-  );
-}
-
-export {
-  DropdownMenu,
-  DropdownMenuTrigger,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-};
+export { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem };

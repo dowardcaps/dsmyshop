@@ -9,30 +9,20 @@ export function generateStaticParams() {
   return TOOL_ITEMS.map((tool) => ({ slug: tool.slug }));
 }
 
-export async function generateMetadata({
-  params,
-}: {
-  params: Promise<{ slug: string }>;
-}) {
+export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
   const tool = getToolBySlug(slug);
   return { title: tool ? `${tool.title} | DS Finance` : "Tool | DS Finance" };
 }
 
-export default async function ToolPage({
-  params,
-}: {
-  params: Promise<{ slug: string }>;
-}) {
+export default async function ToolPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
   const tool = getToolBySlug(slug);
-
   if (!tool) notFound();
 
   return (
     <div className="flex h-full min-h-0 flex-1 flex-col">
-
-      {/* ── Slim toolbar ─────────────────────────────────────── */}
+      {/* Slim toolbar */}
       <div className="flex h-11 shrink-0 items-center gap-2 border-b bg-background px-3">
         <Button variant="ghost" size="sm" asChild>
           <Link href="/tools">
@@ -53,7 +43,7 @@ export default async function ToolPage({
         </Button>
       </div>
 
-      {/* ── 👇 THIS is the part you asked about 👇 ───────────── */}
+      {/* The embedded tool fills the rest of the screen */}
       <div className="relative min-h-0 flex-1">
         <iframe
           src={tool.href}
@@ -63,8 +53,6 @@ export default async function ToolPage({
           referrerPolicy="no-referrer"
         />
       </div>
-      {/* ─────────────────────────────────────────────────────── */}
-
     </div>
   );
 }
