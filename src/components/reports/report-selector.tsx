@@ -52,7 +52,7 @@ export function ReportSelector({ monthOptions, initial, error }: ReportSelectorP
                   aria-pressed={s.mode === mode}
                   onClick={() => s.setMode(mode)}
                   className={cn(
-                    "rounded px-3 py-1.5 text-sm font-medium transition-colors",
+                    "cursor-pointer rounded px-3 py-1.5 text-sm font-medium transition-colors",
                     s.mode === mode ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground",
                   )}
                 >
@@ -78,7 +78,7 @@ export function ReportSelector({ monthOptions, initial, error }: ReportSelectorP
                   <div key={year} className="space-y-2">
                     <div className="flex items-center gap-3">
                       <h3 className="text-sm font-medium">{year}</h3>
-                      <button type="button" onClick={() => s.toggleYear(keys)} className="text-xs text-primary hover:underline">
+                      <button type="button" onClick={() => s.toggleYear(keys)} className="cursor-pointer text-xs text-primary hover:underline">
                         {keys.every((key) => s.selectedMonths.has(key)) ? "Unselect year" : "Select year"}
                       </button>
                     </div>

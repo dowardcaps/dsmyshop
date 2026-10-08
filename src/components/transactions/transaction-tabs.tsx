@@ -35,7 +35,7 @@ export function TransactionTabs({ tabs, activeId, onSelect, onAdd, onRemove }: T
                 role="tab"
                 aria-selected={active}
                 onClick={() => onSelect(tab.id)}
-                className="rounded-md px-3 py-1.5 outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
+                className="cursor-pointer rounded-md px-3 py-1.5 outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
               >
                 {tab.name}
                 {count > 0 ? <span className="ml-1.5 text-xs opacity-80">({count})</span> : null}
@@ -45,7 +45,7 @@ export function TransactionTabs({ tabs, activeId, onSelect, onAdd, onRemove }: T
                   type="button"
                   onClick={() => onRemove(tab.id)}
                   aria-label={`Close ${tab.name}`}
-                  className="mr-1 rounded p-1 opacity-70 outline-none hover:opacity-100 focus-visible:ring-[3px] focus-visible:ring-ring/50"
+                  className="mr-1 cursor-pointer rounded p-1 opacity-70 outline-none hover:opacity-100 focus-visible:ring-[3px] focus-visible:ring-ring/50"
                 >
                   <X className="size-3.5" />
                 </button>

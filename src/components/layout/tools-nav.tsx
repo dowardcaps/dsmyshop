@@ -36,7 +36,7 @@ export function ToolsNav({ onNavigate }: ToolsNavProps) {
         aria-expanded={open}
         aria-controls="tools-nav-list"
         className={cn(
-          "flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors",
+          "flex cursor-pointer items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors",
           "outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50",
           "text-muted-foreground hover:bg-sidebar-accent/60 hover:text-sidebar-foreground",
           (open || onToolsRoute) && "text-sidebar-foreground",

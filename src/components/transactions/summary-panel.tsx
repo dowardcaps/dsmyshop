@@ -38,8 +38,8 @@ export function SummaryPanel({ summary, checkout, onPay }: SummaryPanelProps) {
   }
 
   return (
-    <Card className="gap-0 py-0 lg:sticky lg:top-4">
-      <div className="flex items-center justify-between border-b px-5 py-3">
+    <Card className="gap-0 py-0 lg:sticky lg:top-4 lg:max-h-[calc(100dvh-6rem)]">
+      <div className="flex shrink-0 items-center justify-between border-b px-5 py-3">
         <h2 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">Summary</h2>
         <Button type="button" variant="outline" size="sm" onClick={copySummary} disabled={empty} title="Copy as an Excel row">
           {copied ? <Check /> : <ClipboardCopy />}
@@ -47,7 +47,14 @@ export function SummaryPanel({ summary, checkout, onPay }: SummaryPanelProps) {
         </Button>
       </div>
 
-      <div className="max-h-72 min-h-32 overflow-y-auto px-5 py-4 lg:max-h-[22rem]" aria-live="polite">
+      {/* Only this list scrolls: on a long order the fields, total and Pay stay in view. */}
+      <div
+        className="min-h-24 max-h-[45dvh] flex-1 overflow-y-auto overscroll-contain px-5 py-4 lg:max-h-none"
+        tabIndex={0}
+        role="region"
+        aria-label="Order items"
+        aria-live="polite"
+      >
         {empty ? <p className="text-sm italic text-muted-foreground">No items added yet…</p> : null}
         {summary.groups.map((group) => (
           <div key={group.category} className="mb-3 last:mb-0">
@@ -63,7 +70,7 @@ export function SummaryPanel({ summary, checkout, onPay }: SummaryPanelProps) {
         ))}
       </div>
 
-      <div className="grid gap-3 border-t px-5 py-4 sm:grid-cols-2 lg:grid-cols-1 2xl:grid-cols-2">
+      <div className="grid shrink-0 gap-3 border-t px-5 py-4 sm:grid-cols-2 lg:grid-cols-1 2xl:grid-cols-2">
         <div className="space-y-1">
           <Label htmlFor="saleDate">Date</Label>
           <Input id="saleDate" type="date" value={checkout.transactionDate} onChange={(e) => checkout.setTransactionDate(e.target.value)} />
@@ -90,7 +97,7 @@ export function SummaryPanel({ summary, checkout, onPay }: SummaryPanelProps) {
         </div>
       </div>
 
-      <div className="grid gap-3 border-t border-dashed px-5 py-4">
+      <div className="grid shrink-0 gap-3 border-t border-dashed px-5 py-4">
         <div className="flex items-end justify-between gap-3">
           <div>
             <p className="text-xs text-muted-foreground">
