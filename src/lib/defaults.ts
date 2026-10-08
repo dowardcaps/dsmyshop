@@ -4,6 +4,9 @@ export const DEFAULT_SALE_CATEGORIES = [
   "Xerox",
   "Rush ID",
   "Lamination",
+  "Photo",
+  "Scan",
+  "Assistance",
   "Stationery",
   "Other",
 ] as const;

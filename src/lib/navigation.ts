@@ -1,4 +1,5 @@
 import {
+  Calculator,
   LayoutDashboard,
   ShoppingCart,
   Smartphone,
@@ -17,6 +18,7 @@ export interface NavItem {
 
 export const NAV_ITEMS: readonly NavItem[] = [
   { title: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
+  { title: "Transactions", href: "/transactions", icon: Calculator },
   { title: "Sales", href: "/sales", icon: ShoppingCart },
   { title: "GCash Transactions", href: "/gcash", icon: Smartphone },
   { title: "Expenses", href: "/expenses", icon: Receipt },
