@@ -27,11 +27,21 @@ The first visit to `/transactions` fills the table with the default list (it als
 Photo, Scan and Assistance sale categories if missing; "Laminate" maps to the existing
 "Lamination" category). **Reset to defaults** on the services page restores the original list.
 
+## Bulk edit (services & prices page)
+
+Press **Bulk edit** to show checkboxes. Tick rows (shift-click selects a range; the header box
+selects everything shown). A bar appears with **Edit selected** (change prices and/or move to
+another category) and **Delete**. Price options: set to, increase/decrease by %, increase/decrease
+by a peso amount, with a live before -> after preview. It is all-or-nothing: if one service would
+drop below 0.01 or clash with a name in the target category, nothing is changed. Actions only
+apply to rows currently shown, so searching first narrows what you change.
+
 ## Code map
 
 - `src/lib/transactions/cart.ts` pure calculator logic (tabs, totals, summary text, Excel row)
 - `src/lib/transactions/cart-store.ts` localStorage-backed store for the open tabs
-- `src/lib/transactions/catalog.ts` price list queries and rules (server)
+- `src/lib/transactions/catalog.ts` price list queries and rules (server), incl. bulk edit/delete
+- `src/lib/transactions/bulk.ts` price-change math shared by the preview and the server
 - `src/lib/transactions/checkout.ts` cart -> Sale (server)
 - `src/lib/actions/transactions.ts` server actions
 - `src/hooks/use-transaction-cart.ts`, `use-checkout.ts`, `use-service-form.ts`

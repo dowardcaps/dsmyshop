@@ -10,6 +10,7 @@ import { debtInputSchema, debtPaymentInputSchema } from "@/lib/validation/debt";
 
 function refresh(debtId?: string) {
   revalidatePath("/debts");
+  revalidatePath("/records");
   if (debtId) revalidatePath(`/debts/${debtId}`);
   revalidatePath("/dashboard");
 }

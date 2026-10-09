@@ -14,7 +14,7 @@ import type { DebtInput } from "@/lib/validation/debt";
 interface DebtFormProps {
   defaultValues: DebtInput;
   debtId?: string;
-  cancelHref: string;
+  returnHref: string;
 }
 
 function FieldError({ message }: { message?: string }) {
@@ -25,8 +25,8 @@ function FieldError({ message }: { message?: string }) {
   ) : null;
 }
 
-export function DebtForm({ defaultValues, debtId, cancelHref }: DebtFormProps) {
-  const { form, submit } = useDebtForm({ defaultValues, debtId });
+export function DebtForm({ defaultValues, debtId, returnHref }: DebtFormProps) {
+  const { form, submit } = useDebtForm({ defaultValues, debtId, returnHref });
   const {
     register,
     formState: { errors, isSubmitting },
@@ -69,7 +69,7 @@ export function DebtForm({ defaultValues, debtId, cancelHref }: DebtFormProps) {
 
       <div className="flex justify-end gap-2">
         <Button asChild variant="ghost">
-          <Link href={cancelHref}>Cancel</Link>
+          <Link href={returnHref}>Cancel</Link>
         </Button>
         <Button type="submit" disabled={isSubmitting}>
           {isSubmitting ? <Loader2 className="animate-spin" /> : null}

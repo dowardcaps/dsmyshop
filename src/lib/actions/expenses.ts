@@ -10,6 +10,7 @@ import { expenseInputSchema } from "@/lib/validation/expense";
 
 function refresh() {
   revalidatePath("/expenses");
+  revalidatePath("/records");
   revalidatePath("/dashboard");
 }
 

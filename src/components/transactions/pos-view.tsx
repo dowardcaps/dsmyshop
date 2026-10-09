@@ -52,7 +52,7 @@ export function PosView({ services }: { services: PosService[] }) {
         </Button>
       </div>
 
-      <div className="grid grid-cols-1 items-start gap-5 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
+      <div className="grid grid-cols-1 gap-5 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)] lg:items-stretch">
         <ServiceTable
           services={cart.visibleServices}
           quantityOf={cart.quantityOf}
@@ -60,9 +60,13 @@ export function PosView({ services }: { services: PosService[] }) {
           onSet={cart.setQuantity}
           page={cart.page}
           pageCount={cart.pageCount}
+          total={cart.total}
           onPage={cart.setPage}
         />
-        <SummaryPanel summary={cart.summary} checkout={checkout} onPay={() => setPayOpen(true)} />
+        {/* On wide screens the panel is pinned inside this box, so it is always exactly as tall as the table. */}
+        <div className="lg:relative">
+          <SummaryPanel summary={cart.summary} checkout={checkout} onPay={() => setPayOpen(true)} />
+        </div>
       </div>
 
       <PaymentDialog open={payOpen} onOpenChange={setPayOpen} totalCents={cart.summary.totalCents} saving={checkout.saving} onConfirm={checkout.save} />

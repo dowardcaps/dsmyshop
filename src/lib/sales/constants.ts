@@ -1,3 +1,5 @@
+import { TABLE_PAGE_SIZE } from "@/lib/pagination";
+
 export const PAYMENT_METHODS = ["CASH", "GCASH", "BANK_TRANSFER", "OTHER"] as const;
 export type PaymentMethodValue = (typeof PAYMENT_METHODS)[number];
 
@@ -8,5 +10,5 @@ export const PAYMENT_METHOD_LABELS: Record<PaymentMethodValue, string> = {
   OTHER: "Other",
 };
 
-export const SALES_PAGE_SIZE = 20;
+export const SALES_PAGE_SIZE = TABLE_PAGE_SIZE;
 export const MAX_ITEMS_PER_SALE = 50;

@@ -1,3 +1,5 @@
+import { TABLE_PAGE_SIZE } from "@/lib/pagination";
+
 export const GCASH_TRANSACTION_TYPES = ["CASH_IN", "CASH_OUT", "LOAD"] as const;
 export type GcashTransactionTypeValue = (typeof GCASH_TRANSACTION_TYPES)[number];
 
@@ -20,4 +22,4 @@ export const GCASH_PROVIDER_LABELS: Record<GcashProviderValue, string> = {
   OTHER: "Other",
 };
 
-export const GCASH_PAGE_SIZE = 25;
+export const GCASH_PAGE_SIZE = TABLE_PAGE_SIZE;

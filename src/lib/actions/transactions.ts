@@ -6,13 +6,15 @@ import { actionFailure } from "@/lib/actions/helpers";
 import type { ActionResult } from "@/lib/actions/types";
 import { requireUser } from "@/lib/auth/require-user";
 import {
+  bulkDeleteServices,
+  bulkEditServices,
   createService,
   deleteService,
   resetServicesToDefault,
   updateService,
 } from "@/lib/transactions/catalog";
 import { recordCheckout, type CheckoutResult } from "@/lib/transactions/checkout";
-import { checkoutInputSchema, serviceInputSchema } from "@/lib/validation/transaction";
+import { bulkDeleteSchema, bulkEditSchema, checkoutInputSchema, serviceInputSchema } from "@/lib/validation/transaction";
 
 /** Saves a calculator cart as a Sale. /sales and /dashboard show it right away. */
 export async function checkoutAction(input: unknown): Promise<ActionResult<CheckoutResult>> {
@@ -23,6 +25,7 @@ export async function checkoutAction(input: unknown): Promise<ActionResult<Check
   try {
     const result = await recordCheckout(user.id, parsed.data);
     revalidatePath("/sales");
+    revalidatePath("/records");
     revalidatePath("/dashboard");
     revalidatePath("/reports");
     return { ok: true, data: result };
@@ -81,5 +84,31 @@ export async function resetServicesAction(): Promise<ActionResult> {
     return { ok: true, data: undefined };
   } catch (error) {
     return actionFailure(error, "Could not reset the service list. Please try again.");
+  }
+}
+
+export async function bulkEditServicesAction(input: unknown): Promise<ActionResult<{ count: number }>> {
+  const user = await requireUser();
+  const parsed = bulkEditSchema.safeParse(input);
+  if (!parsed.success) return { ok: false, error: parsed.error.issues[0]?.message ?? "Please check the changes." };
+  try {
+    const count = await bulkEditServices(user.id, parsed.data);
+    refreshServices();
+    return { ok: true, data: { count } };
+  } catch (error) {
+    return actionFailure(error, "Could not update the services. Please try again.");
+  }
+}
+
+export async function bulkDeleteServicesAction(input: unknown): Promise<ActionResult<{ count: number }>> {
+  const user = await requireUser();
+  const parsed = bulkDeleteSchema.safeParse(input);
+  if (!parsed.success) return { ok: false, error: parsed.error.issues[0]?.message ?? "Select at least one service." };
+  try {
+    const count = await bulkDeleteServices(user.id, parsed.data.ids);
+    refreshServices();
+    return { ok: true, data: { count } };
+  } catch (error) {
+    return actionFailure(error, "Could not delete the services. Please try again.");
   }
 }

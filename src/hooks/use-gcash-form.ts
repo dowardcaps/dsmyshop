@@ -12,9 +12,11 @@ interface UseGcashFormOptions {
   defaultValues: GcashInput;
   /** When set, the form edits this transaction instead of creating a new one. */
   transactionId?: string;
+  /** Where to go after saving (the Records page, dialog closed). */
+  returnHref: string;
 }
 
-export function useGcashForm({ defaultValues, transactionId }: UseGcashFormOptions) {
+export function useGcashForm({ defaultValues, transactionId, returnHref }: UseGcashFormOptions) {
   const router = useRouter();
   const form = useForm<GcashInput>({ resolver: zodResolver(gcashInputSchema), defaultValues });
   const [amount, charge] = useWatch({ control: form.control, name: ["amount", "charge"] });
@@ -26,7 +28,7 @@ export function useGcashForm({ defaultValues, transactionId }: UseGcashFormOptio
       return;
     }
     toast.success(transactionId ? "Transaction updated." : "Transaction saved.");
-    router.push("/gcash");
+    router.replace(returnHref, { scroll: false });
     router.refresh();
   });
 

@@ -9,7 +9,7 @@ import { deleteDebtAction } from "@/lib/actions/debts";
 import type { DebtRow } from "@/lib/debts/queries";
 import { formatDate, formatPeso } from "@/lib/format";
 
-export function DebtsTable({ rows }: { rows: DebtRow[] }) {
+export function DebtsTable({ rows, editHref }: { rows: DebtRow[]; editHref: (id: string) => string }) {
   return (
     <div className="rounded-xl border bg-card">
       <Table>
@@ -47,7 +47,7 @@ export function DebtsTable({ rows }: { rows: DebtRow[] }) {
                     </Link>
                   </Button>
                   <Button asChild variant="ghost" size="icon" aria-label={`Edit ${debt.name}`}>
-                    <Link href={`/debts/${debt.id}/edit`}>
+                    <Link href={editHref(debt.id)} scroll={false}>
                       <Pencil className="size-4" />
                     </Link>
                   </Button>

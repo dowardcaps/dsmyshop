@@ -1,8 +1,8 @@
 import { Download, FileSpreadsheet, FileText, Table2 } from "lucide-react";
 
+import { MonthlySummaryTable } from "@/components/reports/monthly-summary-table";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Table, TableBody, TableCell, TableFooter, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { formatPeso } from "@/lib/format";
 import { NET_INCOME_EXPLANATION } from "@/lib/reports/calc";
 import { selectionToQuery } from "@/lib/reports/period";
@@ -96,46 +96,30 @@ export function ReportPreview({ report }: { report: Report }) {
                 <CardTitle>Monthly summary</CardTitle>
               </CardHeader>
               <CardContent>
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Month</TableHead>
-                      <TableHead className="text-right">Sales</TableHead>
-                      <TableHead className="text-right">GCash charges</TableHead>
-                      <TableHead className="text-right">Expenses</TableHead>
-                      <TableHead className="text-right">Net income</TableHead>
-                      <TableHead className="text-right">Debt payments</TableHead>
-                      <TableHead className="text-right">Adjustments</TableHead>
-                      <TableHead className="text-right">Txns</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {report.monthly.map((m) => (
-                      <TableRow key={m.key}>
-                        <TableCell className="whitespace-nowrap font-medium">{m.label}</TableCell>
-                        <TableCell className="text-right tabular-nums">{val(included.sales, m.salesCents)}</TableCell>
-                        <TableCell className="text-right tabular-nums">{val(included.gcash, m.gcashChargesCents)}</TableCell>
-                        <TableCell className="text-right tabular-nums">{val(included.expenses, m.expensesCents)}</TableCell>
-                        <TableCell className="text-right tabular-nums">{m.netIncomeCents === null ? "n/a" : peso(m.netIncomeCents)}</TableCell>
-                        <TableCell className="text-right tabular-nums">{val(included.debts, m.debtPaymentsCents)}</TableCell>
-                        <TableCell className="text-right tabular-nums">{val(included.adjustments, m.adjustmentsCents)}</TableCell>
-                        <TableCell className="text-right tabular-nums">{m.transactionCount}</TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                  <TableFooter>
-                    <TableRow>
-                      <TableCell>Combined total</TableCell>
-                      <TableCell className="text-right tabular-nums">{val(included.sales, totals.salesCents)}</TableCell>
-                      <TableCell className="text-right tabular-nums">{val(included.gcash, totals.gcashChargesCents)}</TableCell>
-                      <TableCell className="text-right tabular-nums">{val(included.expenses, totals.expensesCents)}</TableCell>
-                      <TableCell className="text-right tabular-nums">{net === null ? "n/a" : peso(net)}</TableCell>
-                      <TableCell className="text-right tabular-nums">{val(included.debts, totals.debtPaymentsCents)}</TableCell>
-                      <TableCell className="text-right tabular-nums">{val(included.adjustments, totals.adjustmentsCents)}</TableCell>
-                      <TableCell className="text-right tabular-nums">{totals.transactionCount}</TableCell>
-                    </TableRow>
-                  </TableFooter>
-                </Table>
+                <MonthlySummaryTable
+                  rows={report.monthly.map((m) => ({
+                    key: m.key,
+                    label: m.label,
+                    cells: [
+                      val(included.sales, m.salesCents),
+                      val(included.gcash, m.gcashChargesCents),
+                      val(included.expenses, m.expensesCents),
+                      m.netIncomeCents === null ? "n/a" : peso(m.netIncomeCents),
+                      val(included.debts, m.debtPaymentsCents),
+                      val(included.adjustments, m.adjustmentsCents),
+                      String(m.transactionCount),
+                    ],
+                  }))}
+                  totals={[
+                    val(included.sales, totals.salesCents),
+                    val(included.gcash, totals.gcashChargesCents),
+                    val(included.expenses, totals.expensesCents),
+                    net === null ? "n/a" : peso(net),
+                    val(included.debts, totals.debtPaymentsCents),
+                    val(included.adjustments, totals.adjustmentsCents),
+                    String(totals.transactionCount),
+                  ]}
+                />
               </CardContent>
             </Card>
           ) : null}

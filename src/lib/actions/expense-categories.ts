@@ -14,6 +14,7 @@ import { expenseCategoryInputSchema } from "@/lib/validation/expense";
 
 function refresh() {
   revalidatePath("/expenses", "layout");
+  revalidatePath("/records");
 }
 
 export async function createExpenseCategoryAction(input: unknown): Promise<ActionResult<{ id: string }>> {

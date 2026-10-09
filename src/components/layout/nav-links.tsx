@@ -13,7 +13,7 @@ interface NavLinksProps {
 
 function NavLink({ item, onNavigate }: { item: NavItem; onNavigate?: () => void }) {
   const pathname = usePathname();
-  const active = pathname === item.href || pathname.startsWith(`${item.href}/`);
+  const active = [item.href, ...(item.alsoActiveOn ?? [])].some((href) => pathname === href || pathname.startsWith(`${href}/`));
   const Icon = item.icon;
 
   return (

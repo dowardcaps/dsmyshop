@@ -4,8 +4,10 @@ import { Prisma } from "@/generated/prisma/client";
 import { db } from "@/lib/db";
 import { ServiceError } from "@/lib/errors";
 import { centsToDecimalString, toCents } from "@/lib/cents";
+import { applyPriceChange } from "@/lib/transactions/bulk";
 import { DEFAULT_SERVICES } from "@/lib/transactions/constants";
-import type { ServiceInput } from "@/lib/validation/transaction";
+import { formatPeso } from "@/lib/format";
+import type { BulkEditInput, ServiceInput } from "@/lib/validation/transaction";
 
 export class ServiceCatalogError extends ServiceError {}
 
@@ -119,4 +121,59 @@ export async function resetServicesToDefault(userId: string): Promise<void> {
     await tx.serviceItem.deleteMany({ where: { userId } });
     await seedDefaults(tx, userId);
   });
+}
+
+/**
+ * Changes the price and/or category of many services in one all-or-nothing step: if any single
+ * service cannot take the change (a price would drop below ₱0.01, or a name would clash in the new
+ * category), nothing is changed. Returns how many services were updated.
+ */
+export async function bulkEditServices(userId: string, input: BulkEditInput): Promise<number> {
+  const ids = [...new Set(input.ids)];
+  if (input.categoryId) await assertCategory(userId, input.categoryId);
+
+  try {
+    return await db.$transaction(async (tx) => {
+      const services = await tx.serviceItem.findMany({
+        where: { userId, id: { in: ids } },
+        select: { id: true, name: true, price: true },
+      });
+      if (services.length !== ids.length) {
+        throw new ServiceCatalogError("Some selected services no longer exist. Refresh the page and try again.");
+      }
+
+      const updates = services.map((service) => {
+        let price: Prisma.Decimal | undefined;
+        if (input.priceChange) {
+          const cents = applyPriceChange(toCents(service.price.toNumber()), input.priceChange);
+          if (cents === null) {
+            throw new ServiceCatalogError(
+              `"${service.name}" (${formatPeso(service.price.toNumber())}) would end up below ₱0.01 or too large. Nothing was changed.`,
+            );
+          }
+          price = new Prisma.Decimal(centsToDecimalString(cents));
+        }
+        return { id: service.id, price };
+      });
+
+      for (const update of updates) {
+        await tx.serviceItem.update({
+          where: { id: update.id },
+          data: { ...(update.price ? { price: update.price } : {}), ...(input.categoryId ? { categoryId: input.categoryId } : {}) },
+        });
+      }
+      return updates.length;
+    });
+  } catch (error) {
+    if (isUniqueViolation(error)) {
+      throw new ServiceCatalogError("Another service in that category already has the same name as one you selected. Nothing was changed.");
+    }
+    throw error;
+  }
+}
+
+export async function bulkDeleteServices(userId: string, ids: string[]): Promise<number> {
+  const { count } = await db.serviceItem.deleteMany({ where: { userId, id: { in: [...new Set(ids)] } } });
+  if (count === 0) throw new ServiceCatalogError("Those services no longer exist.");
+  return count;
 }

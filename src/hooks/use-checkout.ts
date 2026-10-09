@@ -49,7 +49,7 @@ export function useCheckout({ items, onSaved }: UseCheckoutOptions) {
       }
       toast.success(`Saved ${result.data.transactionNumber} · ${formatPeso(result.data.totalAmount)}`, {
         description: "It now shows on the Sales page.",
-        action: { label: "View sales", onClick: () => router.push("/sales") },
+        action: { label: "View sales", onClick: () => router.push("/records?tab=sales") },
       });
       setCustomerName("");
       setDateOverride(null);

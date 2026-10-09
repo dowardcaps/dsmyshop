@@ -38,6 +38,7 @@ export function useTransactionCart(services: readonly PosService[]) {
     visibleServices: pageData.rows,
     page: pageData.page,
     pageCount: pageData.pageCount,
+    total: filtered.length,
     quantityOf: useCallback((serviceId: string) => active.cart[serviceId] ?? 0, [active.cart]),
     selectTab: useCallback((id: string) => updateCartState((s) => selectTab(s, id)), []),
     addTab: useCallback(() => updateCartState((s) => addTab(s, newTabId())), []),

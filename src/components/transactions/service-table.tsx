@@ -1,7 +1,8 @@
 "use client";
 
-import { ChevronLeft, ChevronRight, Minus, Plus } from "lucide-react";
+import { Minus, Plus } from "lucide-react";
 
+import { ClientPagination } from "@/components/shared/client-pagination";
 import { CategoryBadge } from "@/components/transactions/category-badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -9,6 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { formatPeso } from "@/lib/format";
 import type { PosService } from "@/lib/transactions/cart";
+import { TABLE_PAGE_SIZE } from "@/lib/pagination";
 import { MAX_QUANTITY } from "@/lib/transactions/constants";
 import { cn } from "@/lib/utils";
 
@@ -19,12 +21,13 @@ interface ServiceTableProps {
   onSet: (serviceId: string, qty: number) => void;
   page: number;
   pageCount: number;
+  total: number;
   onPage: (page: number) => void;
 }
 
-export function ServiceTable({ services, quantityOf, onChange, onSet, page, pageCount, onPage }: ServiceTableProps) {
+export function ServiceTable({ services, quantityOf, onChange, onSet, page, pageCount, total, onPage }: ServiceTableProps) {
   return (
-    <Card className="gap-0 overflow-hidden py-0">
+    <Card className="gap-0 overflow-hidden py-0 lg:min-h-[35rem]">
       <Table>
         <TableHeader>
           <TableRow>
@@ -99,17 +102,7 @@ export function ServiceTable({ services, quantityOf, onChange, onSet, page, page
         </TableBody>
       </Table>
 
-      <div className="flex items-center justify-center gap-4 border-t px-4 py-3">
-        <Button type="button" variant="outline" size="sm" onClick={() => onPage(page - 1)} disabled={page <= 1} aria-label="Previous page">
-          <ChevronLeft />
-        </Button>
-        <span className="text-sm text-muted-foreground">
-          Page {page} of {pageCount}
-        </span>
-        <Button type="button" variant="outline" size="sm" onClick={() => onPage(page + 1)} disabled={page >= pageCount} aria-label="Next page">
-          <ChevronRight />
-        </Button>
-      </div>
+      <ClientPagination page={page} pageCount={pageCount} total={total} pageSize={TABLE_PAGE_SIZE} onPageChange={onPage} className="mt-auto border-t px-4 py-3" />
     </Card>
   );
 }

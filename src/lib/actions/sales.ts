@@ -10,6 +10,7 @@ import { saleInputSchema } from "@/lib/validation/sale";
 
 function refresh() {
   revalidatePath("/sales");
+  revalidatePath("/records");
   revalidatePath("/dashboard");
 }
 

@@ -1,9 +1,13 @@
+"use client";
+
 import { Pencil } from "lucide-react";
 
 import { PaymentDialog } from "@/components/debts/payment-dialog";
+import { ClientPagination } from "@/components/shared/client-pagination";
 import { ConfirmDeleteButton } from "@/components/shared/confirm-delete-button";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { usePagination } from "@/hooks/use-pagination";
 import { deletePaymentAction } from "@/lib/actions/debts";
 import type { DebtPaymentRow } from "@/lib/debts/queries";
 import { formatDate, formatPeso } from "@/lib/format";
@@ -16,46 +20,51 @@ interface PaymentsTableProps {
 }
 
 export function PaymentsTable({ debtId, payments, balance }: PaymentsTableProps) {
+  const pager = usePagination(payments);
+
   return (
-    <Table>
-      <TableHeader>
-        <TableRow className="hover:bg-transparent">
-          <TableHead>Date</TableHead>
-          <TableHead className="text-right">Amount</TableHead>
-          <TableHead>Notes</TableHead>
-          <TableHead className="text-right">Actions</TableHead>
-        </TableRow>
-      </TableHeader>
-      <TableBody>
-        {payments.map((payment) => {
-          const label = `payment of ${formatPeso(payment.amount)} on ${formatDate(payment.paymentDate)}`;
-          return (
-            <TableRow key={payment.id}>
-              <TableCell className="whitespace-nowrap">{formatDate(payment.paymentDate)}</TableCell>
-              <TableCell className="text-right font-medium tabular-nums">{formatPeso(payment.amount)}</TableCell>
-              <TableCell className="max-w-64 truncate text-muted-foreground">{payment.notes ?? "-"}</TableCell>
-              <TableCell>
-                <div className="flex justify-end gap-1">
-                  <PaymentDialog debtId={debtId} payment={payment} maxAmount={balance + payment.amount}>
-                    <Button variant="ghost" size="icon" aria-label={`Edit ${label}`}>
-                      <Pencil className="size-4" />
-                    </Button>
-                  </PaymentDialog>
-                  <ConfirmDeleteButton
-                    action={deletePaymentAction.bind(null, debtId, payment.id)}
-                    title="Delete this payment?"
-                    description={`The ${label} will be removed and the debt's balance and status will be updated.`}
-                    successMessage="Payment deleted."
-                    ariaLabel={`Delete ${label}`}
-                    confirmLabel="Delete payment"
-                    iconOnly
-                  />
-                </div>
-              </TableCell>
-            </TableRow>
-          );
-        })}
-      </TableBody>
-    </Table>
+    <>
+      <Table>
+        <TableHeader>
+          <TableRow className="hover:bg-transparent">
+            <TableHead>Date</TableHead>
+            <TableHead className="text-right">Amount</TableHead>
+            <TableHead>Notes</TableHead>
+            <TableHead className="text-right">Actions</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {pager.rows.map((payment) => {
+            const label = `payment of ${formatPeso(payment.amount)} on ${formatDate(payment.paymentDate)}`;
+            return (
+              <TableRow key={payment.id}>
+                <TableCell className="whitespace-nowrap">{formatDate(payment.paymentDate)}</TableCell>
+                <TableCell className="text-right font-medium tabular-nums">{formatPeso(payment.amount)}</TableCell>
+                <TableCell className="max-w-64 truncate text-muted-foreground">{payment.notes ?? "-"}</TableCell>
+                <TableCell>
+                  <div className="flex justify-end gap-1">
+                    <PaymentDialog debtId={debtId} payment={payment} maxAmount={balance + payment.amount}>
+                      <Button variant="ghost" size="icon" aria-label={`Edit ${label}`}>
+                        <Pencil className="size-4" />
+                      </Button>
+                    </PaymentDialog>
+                    <ConfirmDeleteButton
+                      action={deletePaymentAction.bind(null, debtId, payment.id)}
+                      title="Delete this payment?"
+                      description={`The ${label} will be removed and the debt's balance and status will be updated.`}
+                      successMessage="Payment deleted."
+                      ariaLabel={`Delete ${label}`}
+                      confirmLabel="Delete payment"
+                      iconOnly
+                    />
+                  </div>
+                </TableCell>
+              </TableRow>
+            );
+          })}
+        </TableBody>
+      </Table>
+      <ClientPagination page={pager.page} pageCount={pager.pageCount} total={pager.total} pageSize={pager.pageSize} onPageChange={pager.setPage} className="mt-3" />
+    </>
   );
 }

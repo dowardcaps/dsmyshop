@@ -21,6 +21,7 @@ import type { GcashInput } from "@/lib/validation/gcash";
 interface GcashFormProps {
   defaultValues: GcashInput;
   transactionId?: string;
+  returnHref: string;
 }
 
 function FieldError({ message }: { message?: string }) {
@@ -31,8 +32,8 @@ function FieldError({ message }: { message?: string }) {
   ) : null;
 }
 
-export function GcashForm({ defaultValues, transactionId }: GcashFormProps) {
-  const { form, submit } = useGcashForm({ defaultValues, transactionId });
+export function GcashForm({ defaultValues, transactionId, returnHref }: GcashFormProps) {
+  const { form, submit } = useGcashForm({ defaultValues, transactionId, returnHref });
   const {
     register,
     formState: { errors, isSubmitting },
@@ -112,7 +113,7 @@ export function GcashForm({ defaultValues, transactionId }: GcashFormProps) {
 
       <div className="flex justify-end gap-2">
         <Button asChild variant="ghost">
-          <Link href="/gcash">Cancel</Link>
+          <Link href={returnHref}>Cancel</Link>
         </Button>
         <Button type="submit" disabled={isSubmitting}>
           {isSubmitting ? <Loader2 className="animate-spin" /> : null}

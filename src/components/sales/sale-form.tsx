@@ -18,7 +18,7 @@ interface SaleFormProps {
   categories: { id: string; name: string }[];
   defaultValues: SaleInput;
   saleId?: string;
-  cancelHref: string;
+  returnHref: string;
 }
 
 function FieldError({ message }: { message?: string }) {
@@ -29,10 +29,11 @@ function FieldError({ message }: { message?: string }) {
   ) : null;
 }
 
-export function SaleForm({ categories, defaultValues, saleId, cancelHref }: SaleFormProps) {
+export function SaleForm({ categories, defaultValues, saleId, returnHref }: SaleFormProps) {
   const { form, fields, subtotals, total, submit, canAddItem, canRemoveItem, addItem, removeItem } = useSaleForm({
     defaultValues,
     saleId,
+    returnHref,
   });
   const {
     register,
@@ -166,7 +167,7 @@ export function SaleForm({ categories, defaultValues, saleId, cancelHref }: Sale
 
       <div className="flex justify-end gap-2">
         <Button asChild variant="ghost">
-          <Link href={cancelHref}>Cancel</Link>
+          <Link href={returnHref}>Cancel</Link>
         </Button>
         <Button type="submit" disabled={isSubmitting}>
           {isSubmitting ? <Loader2 className="animate-spin" /> : null}

@@ -2,7 +2,7 @@ import "server-only";
 
 import { Prisma } from "@/generated/prisma/client";
 import { db } from "@/lib/db";
-import { toDateInputValue } from "@/lib/dates";
+import { parseDateInput, toDateInputValue } from "@/lib/dates";
 import { centsToAmount } from "@/lib/cents";
 import { debtBalanceCents } from "@/lib/debts/calc";
 import type { DebtStatusValue } from "@/lib/debts/constants";
@@ -45,10 +45,13 @@ export interface DebtDetail extends DebtRow {
 const zero = new Prisma.Decimal(0);
 
 function buildWhere(userId: string, filters: DebtFilters): Prisma.DebtWhereInput {
-  const { q, status } = filters;
+  const { q, from, to, status } = filters;
   return {
     userId,
     ...(status ? { status } : {}),
+    ...(from || to
+      ? { debtDate: { ...(from ? { gte: parseDateInput(from) } : {}), ...(to ? { lte: parseDateInput(to) } : {}) } }
+      : {}),
     ...(q
       ? {
           OR: [

@@ -27,7 +27,7 @@ export function SummaryCards({ data }: { data: DashboardData }) {
       label: "Outstanding Debt",
       value: summary.outstandingDebtCents,
       hint: `${summary.openDebtCount} open debt${summary.openDebtCount === 1 ? "" : "s"}, as of today`,
-      href: "/debts",
+      href: "/records?tab=debts",
     },
   ] as const;
 

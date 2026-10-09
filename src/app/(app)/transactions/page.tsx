@@ -23,7 +23,7 @@ export default async function TransactionsPage() {
         </Link>
       </Button>
       <Button asChild variant="outline">
-        <Link href="/sales">
+        <Link href="/records?tab=sales">
           <ShoppingCart /> View sales
         </Link>
       </Button>

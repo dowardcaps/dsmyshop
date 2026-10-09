@@ -4,7 +4,8 @@
  */
 
 import { toCents } from "@/lib/cents";
-import { MAX_QUANTITY, SERVICES_PER_PAGE } from "@/lib/transactions/constants";
+import { paginate as paginateRows } from "@/lib/pagination";
+import { MAX_QUANTITY } from "@/lib/transactions/constants";
 
 export interface PosService {
   id: string;
@@ -137,11 +138,8 @@ export function filterServices(services: readonly PosService[], term: string): P
   return matches.sort((a, b) => a.categoryName.localeCompare(b.categoryName));
 }
 
-export function paginate<T>(rows: readonly T[], page: number, perPage = SERVICES_PER_PAGE) {
-  const pageCount = Math.max(1, Math.ceil(rows.length / perPage));
-  const current = Math.min(Math.max(page, 1), pageCount);
-  return { rows: rows.slice((current - 1) * perPage, current * perPage), page: current, pageCount };
-}
+/** One page of the filtered services (8 per page, see lib/pagination). */
+export const paginate = paginateRows;
 
 /** "₱5.00": the same format the Excel sales log already uses. */
 export function summaryPeso(amount: number): string {

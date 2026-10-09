@@ -35,7 +35,7 @@ export default async function DebtDetailPage({ params }: { params: Promise<{ id:
   return (
     <div className="space-y-6">
       <Button asChild variant="ghost" size="sm" className="-ml-3">
-        <Link href="/debts">
+        <Link href="/records?tab=debts">
           <ArrowLeft /> Back to debts
         </Link>
       </Button>
@@ -51,7 +51,7 @@ export default async function DebtDetailPage({ params }: { params: Promise<{ id:
               </Button>
             </PaymentDialog>
             <Button asChild variant="outline">
-              <Link href={`/debts/${debt.id}/edit`}>
+              <Link href={`/records?tab=debts&edit=${debt.id}`}>
                 <Pencil /> Edit
               </Link>
             </Button>
@@ -61,7 +61,7 @@ export default async function DebtDetailPage({ params }: { params: Promise<{ id:
               description={`"${debt.name}" will be permanently removed. This cannot be undone.`}
               successMessage={`Deleted ${debt.name}.`}
               confirmLabel="Delete debt"
-              redirectTo="/debts"
+              redirectTo="/records?tab=debts"
               disabled={debt.paymentCount > 0}
               disabledReason="Delete the payments first, or keep this debt as a record."
             />

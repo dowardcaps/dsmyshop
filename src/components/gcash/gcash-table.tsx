@@ -20,7 +20,7 @@ const TYPE_VARIANT: Record<GcashTransactionTypeValue, "success" | "warning" | "i
   LOAD: "info",
 };
 
-export function GcashTable({ rows }: { rows: GcashRow[] }) {
+export function GcashTable({ rows, editHref }: { rows: GcashRow[]; editHref: (id: string) => string }) {
   return (
     <div className="rounded-xl border bg-card">
       <Table>
@@ -51,7 +51,7 @@ export function GcashTable({ rows }: { rows: GcashRow[] }) {
                 <TableCell>
                   <div className="flex justify-end gap-1">
                     <Button asChild variant="ghost" size="icon" aria-label={`Edit ${label}`}>
-                      <Link href={`/gcash/${row.id}/edit`}>
+                      <Link href={editHref(row.id)} scroll={false}>
                         <Pencil className="size-4" />
                       </Link>
                     </Button>

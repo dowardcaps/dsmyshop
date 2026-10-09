@@ -9,7 +9,7 @@ import { formatDate, formatPeso } from "@/lib/format";
 import { PAYMENT_METHOD_LABELS } from "@/lib/sales/constants";
 import type { SaleListRow } from "@/lib/sales/queries";
 
-export function SalesTable({ rows }: { rows: SaleListRow[] }) {
+export function SalesTable({ rows, editHref }: { rows: SaleListRow[]; editHref: (id: string) => string }) {
   return (
     <div className="rounded-xl border bg-card">
       <Table>
@@ -42,7 +42,7 @@ export function SalesTable({ rows }: { rows: SaleListRow[] }) {
               <TableCell>
                 <div className="flex justify-end gap-1">
                   <Button asChild variant="ghost" size="icon" aria-label={`Edit ${sale.transactionNumber}`}>
-                    <Link href={`/sales/${sale.id}/edit`}>
+                    <Link href={editHref(sale.id)} scroll={false}>
                       <Pencil className="size-4" />
                     </Link>
                   </Button>

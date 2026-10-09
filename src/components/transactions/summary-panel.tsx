@@ -38,7 +38,7 @@ export function SummaryPanel({ summary, checkout, onPay }: SummaryPanelProps) {
   }
 
   return (
-    <Card className="gap-0 py-0 lg:sticky lg:top-4 lg:max-h-[calc(100dvh-6rem)]">
+    <Card className="gap-0 overflow-hidden py-0 lg:absolute lg:inset-0">
       <div className="flex shrink-0 items-center justify-between border-b px-5 py-3">
         <h2 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">Summary</h2>
         <Button type="button" variant="outline" size="sm" onClick={copySummary} disabled={empty} title="Copy as an Excel row">
@@ -70,7 +70,7 @@ export function SummaryPanel({ summary, checkout, onPay }: SummaryPanelProps) {
         ))}
       </div>
 
-      <div className="grid shrink-0 gap-3 border-t px-5 py-4 sm:grid-cols-2 lg:grid-cols-1 2xl:grid-cols-2">
+      <div className="grid shrink-0 gap-x-3 gap-y-2 border-t px-5 py-3 sm:grid-cols-2 lg:grid-cols-1 xl:grid-cols-[auto_minmax(0,1fr)]">
         <div className="space-y-1">
           <Label htmlFor="saleDate">Date</Label>
           <Input id="saleDate" type="date" value={checkout.transactionDate} onChange={(e) => checkout.setTransactionDate(e.target.value)} />
@@ -85,7 +85,7 @@ export function SummaryPanel({ summary, checkout, onPay }: SummaryPanelProps) {
             ))}
           </Select>
         </div>
-        <div className="space-y-1 sm:col-span-2 lg:col-span-1 2xl:col-span-2">
+        <div className="space-y-1 sm:col-span-2 lg:col-span-1 xl:col-span-2">
           <Label htmlFor="saleCustomer">Customer (optional)</Label>
           <Input
             id="saleCustomer"

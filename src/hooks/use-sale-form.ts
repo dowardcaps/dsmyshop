@@ -15,9 +15,11 @@ interface UseSaleFormOptions {
   defaultValues: SaleInput;
   /** When set, the form edits this sale instead of creating a new one. */
   saleId?: string;
+  /** Where to go after saving (the Records page, dialog closed). */
+  returnHref: string;
 }
 
-export function useSaleForm({ defaultValues, saleId }: UseSaleFormOptions) {
+export function useSaleForm({ defaultValues, saleId, returnHref }: UseSaleFormOptions) {
   const router = useRouter();
   const form = useForm<SaleInput>({ resolver: zodResolver(saleInputSchema), defaultValues });
   const { fields, append, remove } = useFieldArray({ control: form.control, name: "items" });
@@ -36,7 +38,7 @@ export function useSaleForm({ defaultValues, saleId }: UseSaleFormOptions) {
       return;
     }
     toast.success(saleId ? "Sale updated." : "Sale saved.");
-    router.push(`/sales/${result.data.id}`);
+    router.replace(returnHref, { scroll: false });
     router.refresh();
   });
 

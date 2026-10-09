@@ -33,15 +33,15 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
           action={
             <div className="flex flex-wrap justify-center gap-2">
               <Button asChild>
-                <Link href="/sales/new">
+                <Link href="/records?tab=sales&new=1">
                   <Plus /> Add a sale
                 </Link>
               </Button>
               <Button asChild variant="outline">
-                <Link href="/expenses/new">Add an expense</Link>
+                <Link href="/records?tab=expenses&new=1">Add an expense</Link>
               </Button>
               <Button asChild variant="outline">
-                <Link href="/gcash/new">Add GCash</Link>
+                <Link href="/records?tab=gcash&new=1">Add GCash</Link>
               </Button>
             </div>
           }

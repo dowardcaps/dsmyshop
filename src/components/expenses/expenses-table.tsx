@@ -9,7 +9,7 @@ import { deleteExpenseAction } from "@/lib/actions/expenses";
 import type { ExpenseRow } from "@/lib/expenses/queries";
 import { formatDate, formatPeso } from "@/lib/format";
 
-export function ExpensesTable({ rows }: { rows: ExpenseRow[] }) {
+export function ExpensesTable({ rows, editHref }: { rows: ExpenseRow[]; editHref: (id: string) => string }) {
   return (
     <div className="rounded-xl border bg-card">
       <Table>
@@ -38,7 +38,7 @@ export function ExpensesTable({ rows }: { rows: ExpenseRow[] }) {
                 <TableCell>
                   <div className="flex justify-end gap-1">
                     <Button asChild variant="ghost" size="icon" aria-label={`Edit ${label}`}>
-                      <Link href={`/expenses/${row.id}/edit`}>
+                      <Link href={editHref(row.id)} scroll={false}>
                         <Pencil className="size-4" />
                       </Link>
                     </Button>

@@ -16,6 +16,7 @@ interface ExpenseFormProps {
   categories: { id: string; name: string }[];
   defaultValues: ExpenseInput;
   expenseId?: string;
+  returnHref: string;
 }
 
 function FieldError({ message }: { message?: string }) {
@@ -26,8 +27,8 @@ function FieldError({ message }: { message?: string }) {
   ) : null;
 }
 
-export function ExpenseForm({ categories, defaultValues, expenseId }: ExpenseFormProps) {
-  const { form, submit } = useExpenseForm({ defaultValues, expenseId });
+export function ExpenseForm({ categories, defaultValues, expenseId, returnHref }: ExpenseFormProps) {
+  const { form, submit } = useExpenseForm({ defaultValues, expenseId, returnHref });
   const {
     register,
     formState: { errors, isSubmitting },
@@ -84,7 +85,7 @@ export function ExpenseForm({ categories, defaultValues, expenseId }: ExpenseFor
 
       <div className="flex justify-end gap-2">
         <Button asChild variant="ghost">
-          <Link href="/expenses">Cancel</Link>
+          <Link href={returnHref}>Cancel</Link>
         </Button>
         <Button type="submit" disabled={isSubmitting}>
           {isSubmitting ? <Loader2 className="animate-spin" /> : null}

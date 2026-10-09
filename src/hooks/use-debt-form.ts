@@ -12,9 +12,11 @@ interface UseDebtFormOptions {
   defaultValues: DebtInput;
   /** When set, the form edits this debt instead of creating a new one. */
   debtId?: string;
+  /** Where to go after saving (the Records page, dialog closed). */
+  returnHref: string;
 }
 
-export function useDebtForm({ defaultValues, debtId }: UseDebtFormOptions) {
+export function useDebtForm({ defaultValues, debtId, returnHref }: UseDebtFormOptions) {
   const router = useRouter();
   const form = useForm<DebtInput>({ resolver: zodResolver(debtInputSchema), defaultValues });
 
@@ -25,7 +27,7 @@ export function useDebtForm({ defaultValues, debtId }: UseDebtFormOptions) {
       return;
     }
     toast.success(debtId ? "Debt updated." : "Debt saved.");
-    router.push(`/debts/${result.data.id}`);
+    router.replace(returnHref, { scroll: false });
     router.refresh();
   });
 

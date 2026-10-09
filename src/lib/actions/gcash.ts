@@ -14,6 +14,7 @@ import { gcashInputSchema } from "@/lib/validation/gcash";
 
 function refresh() {
   revalidatePath("/gcash");
+  revalidatePath("/records");
   revalidatePath("/dashboard");
 }
 

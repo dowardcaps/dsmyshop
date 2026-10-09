@@ -3,13 +3,13 @@ import { notFound } from "next/navigation";
 import { ArrowLeft, Pencil } from "lucide-react";
 
 import { PageHeader } from "@/components/layout/page-header";
+import { SaleItemsTable } from "@/components/sales/sale-items-table";
 import { ConfirmDeleteButton } from "@/components/shared/confirm-delete-button";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { deleteSaleAction } from "@/lib/actions/sales";
 import { requireUser } from "@/lib/auth/require-user";
-import { formatDate, formatPeso } from "@/lib/format";
+import { formatDate } from "@/lib/format";
 import { PAYMENT_METHOD_LABELS } from "@/lib/sales/constants";
 import { getSale } from "@/lib/sales/queries";
 
@@ -30,7 +30,7 @@ export default async function SaleDetailPage({ params }: { params: Promise<{ id:
   return (
     <div className="space-y-6">
       <Button asChild variant="ghost" size="sm" className="-ml-3">
-        <Link href="/sales">
+        <Link href="/records?tab=sales">
           <ArrowLeft /> Back to sales
         </Link>
       </Button>
@@ -40,7 +40,7 @@ export default async function SaleDetailPage({ params }: { params: Promise<{ id:
         actions={
           <>
             <Button asChild variant="outline">
-              <Link href={`/sales/${sale.id}/edit`}>
+              <Link href={`/records?tab=sales&edit=${sale.id}`}>
                 <Pencil /> Edit
               </Link>
             </Button>
@@ -50,7 +50,7 @@ export default async function SaleDetailPage({ params }: { params: Promise<{ id:
               description={`${sale.transactionNumber} and all of its items will be permanently removed. This cannot be undone.`}
               successMessage={`Deleted ${sale.transactionNumber}.`}
               confirmLabel="Delete sale"
-              redirectTo="/sales"
+              redirectTo="/records?tab=sales"
             />
           </>
         }
@@ -78,34 +78,7 @@ export default async function SaleDetailPage({ params }: { params: Promise<{ id:
           <CardTitle>Items</CardTitle>
         </CardHeader>
         <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow className="hover:bg-transparent">
-                <TableHead>Category</TableHead>
-                <TableHead>Description</TableHead>
-                <TableHead className="text-right">Qty</TableHead>
-                <TableHead className="text-right">Unit price</TableHead>
-                <TableHead className="text-right">Subtotal</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {sale.items.map((item) => (
-                <TableRow key={item.id}>
-                  <TableCell>{item.categoryName}</TableCell>
-                  <TableCell>{item.description}</TableCell>
-                  <TableCell className="text-right tabular-nums">{item.quantity}</TableCell>
-                  <TableCell className="text-right tabular-nums">{formatPeso(item.unitPrice)}</TableCell>
-                  <TableCell className="text-right font-medium tabular-nums">{formatPeso(item.subtotal)}</TableCell>
-                </TableRow>
-              ))}
-              <TableRow className="hover:bg-transparent">
-                <TableCell colSpan={4} className="text-right font-semibold">
-                  Total
-                </TableCell>
-                <TableCell className="text-right text-base font-semibold tabular-nums">{formatPeso(sale.totalAmount)}</TableCell>
-              </TableRow>
-            </TableBody>
-          </Table>
+          <SaleItemsTable items={sale.items} totalAmount={sale.totalAmount} />
         </CardContent>
       </Card>
     </div>

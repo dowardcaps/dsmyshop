@@ -4,6 +4,7 @@ import { Prisma } from "@/generated/prisma/client";
 import { db } from "@/lib/db";
 import { parseDateInput } from "@/lib/dates";
 import { decimalToCents } from "@/lib/money";
+import { TABLE_PAGE_SIZE } from "@/lib/pagination";
 import {
   buildMonthlySeries,
   netIncomeCents,
@@ -53,7 +54,7 @@ export interface DashboardData {
   earliestYear: number | null;
 }
 
-const RECENT_LIMIT = 10;
+const RECENT_LIMIT = TABLE_PAGE_SIZE;
 
 const cents = (value: Prisma.Decimal | null | undefined) => (value ? decimalToCents(value) : 0);
 
@@ -218,7 +219,7 @@ export async function getDashboardData(userId: string, period: DashboardPeriod):
       detail: expense.category.name,
       amountCents: cents(expense.amount),
       chargeCents: null,
-      href: `/expenses/${expense.id}/edit`,
+      href: `/records?tab=expenses&edit=${expense.id}`,
       created: expense.createdAt.getTime(),
     })),
     ...recentGcash.map((tx) => ({
@@ -229,7 +230,7 @@ export async function getDashboardData(userId: string, period: DashboardPeriod):
       detail: tx.provider,
       amountCents: cents(tx.amount),
       chargeCents: cents(tx.charge),
-      href: `/gcash/${tx.id}/edit`,
+      href: `/records?tab=gcash&edit=${tx.id}`,
       created: tx.createdAt.getTime(),
     })),
   ]

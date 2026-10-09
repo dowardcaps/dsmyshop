@@ -12,9 +12,11 @@ interface UseExpenseFormOptions {
   defaultValues: ExpenseInput;
   /** When set, the form edits this expense instead of creating a new one. */
   expenseId?: string;
+  /** Where to go after saving (the Records page, dialog closed). */
+  returnHref: string;
 }
 
-export function useExpenseForm({ defaultValues, expenseId }: UseExpenseFormOptions) {
+export function useExpenseForm({ defaultValues, expenseId, returnHref }: UseExpenseFormOptions) {
   const router = useRouter();
   const form = useForm<ExpenseInput>({ resolver: zodResolver(expenseInputSchema), defaultValues });
 
@@ -25,7 +27,7 @@ export function useExpenseForm({ defaultValues, expenseId }: UseExpenseFormOptio
       return;
     }
     toast.success(expenseId ? "Expense updated." : "Expense saved.");
-    router.push("/expenses");
+    router.replace(returnHref, { scroll: false });
     router.refresh();
   });
 

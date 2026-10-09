@@ -121,5 +121,4 @@ export const CATEGORY_COLORS: Record<string, string> = {
 
 export const FALLBACK_CATEGORY_COLOR = "#5B5560";
 
-export const SERVICES_PER_PAGE = 8;
 export const MAX_QUANTITY = 100_000;

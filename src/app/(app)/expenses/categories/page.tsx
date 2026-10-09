@@ -26,7 +26,7 @@ export default async function ExpenseCategoriesPage() {
   return (
     <div className="space-y-6">
       <Button asChild variant="ghost" size="sm" className="-ml-3">
-        <Link href="/expenses">
+        <Link href="/records?tab=expenses">
           <ArrowLeft /> Back to expenses
         </Link>
       </Button>
