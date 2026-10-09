@@ -2,7 +2,7 @@
 
 `/records` replaces the separate Sales, GCash, Expenses and Debts list pages.
 
-Layout: filter bar -> tabs (Sales / GCash / Expenses / Debts) -> summary + table (8 rows per page).
+Layout: filter bar -> tabs (Sales / GCash / Expenses / Debts / Excess money) -> summary + table (8 rows per page).
 
 ## Filters
 - Shared by every tab: **Search**, **From**, **To** (debts use the debt date).
@@ -20,3 +20,8 @@ refreshes the table. These links also work from the dashboard and from the sale/
 - `/sales`, `/gcash`, `/expenses`, `/debts` redirect to `/records?tab=...` (query kept).
 - `/sales/new`, `/gcash/new`, `/expenses/new`, `/debts/new` and every `/.../edit` page are gone (modals).
 - Kept: `/sales/[id]`, `/debts/[id]` (line items / payments), `/expenses/categories`.
+
+## Excess money tab
+Cash overage: extra cash found versus what the records say. Fields: date, amount (> 0), notes. It is stored in its own table
+(`ExcessMoney`) and is **not** included in sales income, the dashboard or the reports. Search (notes) and the date range apply like on
+every other tab. Needs a migration: `npm run db:migrate -- --name add_excess_money`.

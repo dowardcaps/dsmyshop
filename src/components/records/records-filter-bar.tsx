@@ -35,6 +35,7 @@ const SEARCH_PLACEHOLDER: Record<RecordTab, string> = {
   gcash: "Notes, e.g. name or reference",
   expenses: "Description, notes or category",
   debts: "Name or description",
+  excess: "Notes",
 };
 
 function selectsFor(tab: RecordTab, categories: Option[]): { key: string; label: string; allLabel: string; options: Option[] }[] {
@@ -51,6 +52,8 @@ function selectsFor(tab: RecordTab, categories: Option[]): { key: string; label:
       ];
     case "expenses":
       return [{ key: "category", label: "Category", allLabel: "All categories", options: categories }];
+    case "excess":
+      return [];
     case "debts":
       return [{ key: "status", label: "Status", allLabel: "All", options: DEBT_STATUSES.map((s) => ({ value: s, label: DEBT_STATUS_LABELS[s] })) }];
   }
