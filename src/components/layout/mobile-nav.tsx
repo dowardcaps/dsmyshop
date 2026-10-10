@@ -5,10 +5,11 @@ import { Menu } from "lucide-react";
 
 import { Brand } from "@/components/layout/brand";
 import { NavLinks } from "@/components/layout/nav-links";
+import { SidebarFooter } from "@/components/layout/sidebar-footer";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetDescription, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 
-export function MobileNav() {
+export function MobileNav({ userName }: { userName: string }) {
   const [open, setOpen] = useState(false);
 
   return (
@@ -21,8 +22,13 @@ export function MobileNav() {
       <SheetContent>
         <SheetTitle className="sr-only">Navigation</SheetTitle>
         <SheetDescription className="sr-only">Main application navigation</SheetDescription>
-        <Brand />
-        <NavLinks onNavigate={() => setOpen(false)} />
+        <div className="flex h-full flex-col">
+          <Brand />
+          <div className="min-h-0 flex-1 overflow-y-auto pb-3">
+            <NavLinks onNavigate={() => setOpen(false)} />
+          </div>
+          <SidebarFooter name={userName} />
+        </div>
       </SheetContent>
     </Sheet>
   );

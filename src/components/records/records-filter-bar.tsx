@@ -11,6 +11,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select } from "@/components/ui/select";
 import { useRecordFilters } from "@/hooks/use-record-filters";
+import { todayInManila } from "@/lib/dates";
+import { DATE_PRESETS, DATE_PRESET_LABELS, matchingPreset, presetRange, type DatePreset } from "@/lib/records/date-presets";
 import { getSnapshot } from "@/lib/records/filter-store";
 import { DEBT_STATUSES, DEBT_STATUS_LABELS } from "@/lib/debts/constants";
 import { GCASH_PROVIDERS, GCASH_PROVIDER_LABELS, GCASH_TRANSACTION_TYPES, GCASH_TYPE_LABELS } from "@/lib/gcash/constants";
@@ -37,6 +39,7 @@ const SEARCH_PLACEHOLDER: Record<RecordTab, string> = {
   expenses: "Description, notes or category",
   debts: "Name or description",
   excess: "Notes",
+  reimbursement: "Description or notes",
   salary: "Employee or notes",
 };
 
@@ -55,6 +58,7 @@ function selectsFor(tab: RecordTab, categories: Option[]): { key: string; label:
     case "expenses":
       return [{ key: "category", label: "Category", allLabel: "All categories", options: categories }];
     case "excess":
+    case "reimbursement":
       return [];
     case "salary":
       return [
@@ -87,6 +91,20 @@ export function RecordsFilterBar({ tab, values, categories }: RecordsFilterBarPr
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  const submit = (nextDraft: FilterValues) => {
+    const next = applyFilters(stored, tab, nextDraft);
+    apply(tab, nextDraft);
+    router.push(recordsHrefFor(next, tab), { scroll: false });
+  };
+
+  const applyPreset = (preset: DatePreset) => {
+    const nextDraft = { ...draft, ...presetRange(preset, todayInManila()) };
+    setDraft(nextDraft);
+    submit(nextDraft);
+  };
+
+  const activePreset = matchingPreset(values.from ?? "", values.to ?? "", todayInManila());
+
   const set = (key: string, value: string) => setDraft((current) => ({ ...current, [key]: value }));
   const selects = selectsFor(tab, categories);
   const active = Object.values(values).some(Boolean);
@@ -99,9 +117,7 @@ export function RecordsFilterBar({ tab, values, categories }: RecordsFilterBarPr
           className="grid grid-cols-2 gap-3 lg:grid-cols-[2fr_1fr_1fr_1fr_1fr]"
           onSubmit={(event) => {
             event.preventDefault();
-            const next = applyFilters(stored, tab, draft);
-            apply(tab, draft);
-            router.push(recordsHrefFor(next, tab), { scroll: false });
+            submit(draft);
           }}
         >
           <div className="col-span-2 space-y-1 lg:col-span-1">
@@ -129,6 +145,20 @@ export function RecordsFilterBar({ tab, values, categories }: RecordsFilterBarPr
               </Select>
             </div>
           ))}
+          <div role="group" aria-label="Quick date filters" className="col-span-2 flex flex-wrap gap-2 lg:col-span-5">
+            {DATE_PRESETS.map((preset) => (
+              <Button
+                key={preset}
+                type="button"
+                size="sm"
+                variant={activePreset === preset ? "default" : "outline"}
+                aria-pressed={activePreset === preset}
+                onClick={() => applyPreset(preset)}
+              >
+                {DATE_PRESET_LABELS[preset]}
+              </Button>
+            ))}
+          </div>
           <div className="col-span-2 flex items-end justify-end gap-2 lg:col-span-5">
             {active ? <ClearFiltersButton tab={tab} variant="ghost">Clear</ClearFiltersButton> : null}
             <Button type="submit">

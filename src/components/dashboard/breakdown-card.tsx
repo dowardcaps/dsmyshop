@@ -31,7 +31,11 @@ export function BreakdownCard({ data }: { data: DashboardData }) {
     {
       title: "Expenses",
       note: "Subtracted from revenue + excess",
-      rows: [["Total expenses", money(summary.expensesCents)]],
+      rows: [
+        ["Total expenses", money(summary.expensesCents)],
+        ["Reimbursements", money(summary.reimbursementsCents)],
+        ["Total deducted", money(summary.expensesCents + summary.reimbursementsCents)],
+      ],
     },
     {
       title: "Adjustments",

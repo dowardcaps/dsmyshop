@@ -2,7 +2,7 @@
  * Dashboard formulas (all money in integer centavos).
  *
  * Revenue    = sales + GCash charges (the fees we earn)
- * Net income = revenue + excess money - expenses
+ * Net income = revenue + excess money - expenses - reimbursements
  * Excess money (cash overage) is not revenue, but it is added to net income.
  * NOT revenue: GCash Cash In / Cash Out / Load amounts (cash movements), and
  *              adjustments (salary, reimbursements, other income), which are shown separately.
@@ -12,8 +12,8 @@ export function revenueCents(salesCents: number, gcashChargesCents: number): num
   return salesCents + gcashChargesCents;
 }
 
-export function netIncomeCents(salesCents: number, gcashChargesCents: number, expensesCents: number, excessCents = 0): number {
-  return revenueCents(salesCents, gcashChargesCents) + excessCents - expensesCents;
+export function netIncomeCents(salesCents: number, gcashChargesCents: number, expensesCents: number, excessCents = 0, reimbursementsCents = 0): number {
+  return revenueCents(salesCents, gcashChargesCents) + excessCents - expensesCents - reimbursementsCents;
 }
 
 export interface MonthlyPoint {
@@ -23,6 +23,7 @@ export interface MonthlyPoint {
   gcashChargesCents: number;
   expensesCents: number;
   excessCents: number;
+  reimbursementsCents: number;
   netIncomeCents: number;
 }
 
@@ -32,6 +33,7 @@ export function buildMonthlySeries(
   charges: ReadonlyMap<number, number>,
   expenses: ReadonlyMap<number, number>,
   excess: ReadonlyMap<number, number> = new Map(),
+  reimbursements: ReadonlyMap<number, number> = new Map(),
 ): MonthlyPoint[] {
   return Array.from({ length: 12 }, (_, index) => {
     const month = index + 1;
@@ -39,13 +41,15 @@ export function buildMonthlySeries(
     const gcashChargesCents = charges.get(month) ?? 0;
     const expensesCents = expenses.get(month) ?? 0;
     const excessCents = excess.get(month) ?? 0;
+    const reimbursementsCents = reimbursements.get(month) ?? 0;
     return {
       month,
       salesCents,
       gcashChargesCents,
       expensesCents,
       excessCents,
-      netIncomeCents: netIncomeCents(salesCents, gcashChargesCents, expensesCents, excessCents),
+      reimbursementsCents,
+      netIncomeCents: netIncomeCents(salesCents, gcashChargesCents, expensesCents, excessCents, reimbursementsCents),
     };
   });
 }

@@ -9,7 +9,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
 
   return (
     <div className="flex h-dvh flex-col lg:pl-64">
-      <AppSidebar />
+      <AppSidebar userName={user.name} />
       <AppHeader userName={user.name} />
       <AppMain>{children}</AppMain>
     </div>

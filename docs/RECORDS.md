@@ -39,3 +39,12 @@ month: the **15th** and the **30th** (last day of February), ₱1,500 each.
 - Salary is kept separate: it is not part of the dashboard net income or the reports.
 - Tables: `Employee`, `SalaryPeriod`, `SalaryAdvance`. Migration: `npm run db:migrate -- --name add_salary`.
 - Code: `src/lib/salary/` (calc, service, queries), `src/components/salary/`, `src/components/records/salary-panel.tsx`.
+
+## Reimbursements tab
+Money paid back to someone (an employee, the owner...) for a business cost. Fields: date, "Paid to / for what", amount (> 0), notes.
+Add, edit and delete work like Excess money (modal, 8 rows per page, shared search and date filters; search also matches the description).
+
+**Dashboard**: a Reimbursements card, and it is **subtracted** from Net Income:
+Net income = sales + GCash charges + excess money − expenses − reimbursements (the monthly net chart includes it too).
+The **Reports** page does not include excess money or reimbursements yet.
+Needs a migration: `npm run db:migrate -- --name add_reimbursements`.
