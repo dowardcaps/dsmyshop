@@ -22,6 +22,7 @@ export const TAB_FILTER_KEYS: Record<RecordTab, readonly string[]> = {
   expenses: ["category"],
   debts: ["status"],
   excess: [],
+  salary: ["employee", "status"],
 };
 
 export type FilterValues = Record<string, string>;
@@ -36,7 +37,7 @@ export interface RecordFilterState {
 const MAX_VALUE_LENGTH = 100;
 
 function emptyTabs(): Record<RecordTab, FilterValues> {
-  return { sales: {}, gcash: {}, expenses: {}, debts: {}, excess: {} };
+  return { sales: {}, gcash: {}, expenses: {}, debts: {}, excess: {}, salary: {} };
 }
 
 export function createEmptyFilterState(): RecordFilterState {

@@ -21,6 +21,13 @@ const ALL_TOOLS: readonly ToolItem[] = [
     category: "Uploads",
   },
   {
+    slug: "transcalc",
+    title: "Transaction Calculator",
+    href: "https://dstranscalc.vercel.app/",
+    description: "Quick transaction math and fee calculations.",
+    category: "Calculators",
+  },
+  {
     slug: "photocollage",
     title: "Photo Collage",
     href: "https://dsphotocollage.vercel.app",

@@ -16,6 +16,7 @@ import { DEBT_STATUSES, DEBT_STATUS_LABELS } from "@/lib/debts/constants";
 import { GCASH_PROVIDERS, GCASH_PROVIDER_LABELS, GCASH_TRANSACTION_TYPES, GCASH_TYPE_LABELS } from "@/lib/gcash/constants";
 import { applyFilters, recordsHrefFor, restoreQuery, type FilterValues } from "@/lib/records/filter-state";
 import type { RecordTab } from "@/lib/records/tabs";
+import { SALARY_STATUSES, SALARY_STATUS_LABELS } from "@/lib/salary/constants";
 import { PAYMENT_METHODS, PAYMENT_METHOD_LABELS } from "@/lib/sales/constants";
 
 interface Option {
@@ -36,6 +37,7 @@ const SEARCH_PLACEHOLDER: Record<RecordTab, string> = {
   expenses: "Description, notes or category",
   debts: "Name or description",
   excess: "Notes",
+  salary: "Employee or notes",
 };
 
 function selectsFor(tab: RecordTab, categories: Option[]): { key: string; label: string; allLabel: string; options: Option[] }[] {
@@ -54,6 +56,11 @@ function selectsFor(tab: RecordTab, categories: Option[]): { key: string; label:
       return [{ key: "category", label: "Category", allLabel: "All categories", options: categories }];
     case "excess":
       return [];
+    case "salary":
+      return [
+        { key: "employee", label: "Employee", allLabel: "All", options: categories },
+        { key: "status", label: "Status", allLabel: "All", options: SALARY_STATUSES.map((s) => ({ value: s, label: SALARY_STATUS_LABELS[s] })) },
+      ];
     case "debts":
       return [{ key: "status", label: "Status", allLabel: "All", options: DEBT_STATUSES.map((s) => ({ value: s, label: DEBT_STATUS_LABELS[s] })) }];
   }

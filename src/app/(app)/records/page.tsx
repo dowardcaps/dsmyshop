@@ -8,14 +8,18 @@ import { GcashPanel } from "@/components/records/gcash-panel";
 import { PageHeader } from "@/components/layout/page-header";
 import { RecordsFilterBar } from "@/components/records/records-filter-bar";
 import { RecordsTabs } from "@/components/records/records-tabs";
+import { SalaryPanel } from "@/components/records/salary-panel";
 import { SalesPanel } from "@/components/records/sales-panel";
 import { Button } from "@/components/ui/button";
 import { requireUser } from "@/lib/auth/require-user";
 import { listExpenseCategories } from "@/lib/expenses/queries";
 import { createRecordHrefs } from "@/lib/records/href";
 import { parseRecordTab, type RecordTab } from "@/lib/records/tabs";
-import { debtFilterValues, excessFilterValues, expenseFilterValues, gcashFilterValues, saleFilterValues } from "@/lib/records/values";
+import { debtFilterValues, excessFilterValues, expenseFilterValues, salaryFilterValues, gcashFilterValues, saleFilterValues } from "@/lib/records/values";
+import { ensureSalaryPeriods } from "@/lib/salary/service";
+import { listAdvanceOptions } from "@/lib/salary/queries";
 import { listSaleCategories } from "@/lib/sales/queries";
+import { parseSalaryFilters } from "@/lib/validation/salary-filters";
 import { parseExcessFilters } from "@/lib/validation/excess-filters";
 import { parseDebtFilters } from "@/lib/validation/debt-filters";
 import { parseExpenseFilters } from "@/lib/validation/expense-filters";
@@ -32,6 +36,7 @@ const ADD_LABEL: Record<RecordTab, string> = {
   expenses: "Add expense",
   debts: "Add debt",
   excess: "Add excess money",
+  salary: "Add cash advance",
 };
 
 export default async function RecordsPage({ searchParams }: { searchParams: Promise<RawSearchParams> }) {
@@ -79,6 +84,13 @@ export default async function RecordsPage({ searchParams }: { searchParams: Prom
     const values = expenseFilterValues(filters);
     bar = <RecordsFilterBar key={JSON.stringify(values)} tab={tab} values={values} categories={categories.map((c) => ({ value: c.id, label: c.name }))} />;
     panel = <ExpensesPanel userId={user.id} filters={filters} categories={categories} hrefs={hrefs} openNew={openNew} editId={editId} />;
+  } else if (tab === "salary") {
+    await ensureSalaryPeriods(user.id);
+    const filters = parseSalaryFilters(params);
+    const { employees } = await listAdvanceOptions(user.id);
+    const values = salaryFilterValues(filters);
+    bar = <RecordsFilterBar key={JSON.stringify(values)} tab={tab} values={values} categories={employees.map((e) => ({ value: e.id, label: e.name }))} />;
+    panel = <SalaryPanel userId={user.id} filters={filters} hrefs={hrefs} openNew={openNew} editId={editId} />;
   } else if (tab === "excess") {
     const filters = parseExcessFilters(params);
     const values = excessFilterValues(filters);
@@ -93,7 +105,7 @@ export default async function RecordsPage({ searchParams }: { searchParams: Prom
 
   return (
     <div className="space-y-6">
-      <PageHeader title="Records" description="Sales, GCash, expenses, debts and excess money. One set of filters for all of them." actions={actions} />
+      <PageHeader title="Records" description="Sales, GCash, expenses, debts, excess money and salary. One set of filters for all of them." actions={actions} />
       {bar}
       <RecordsTabs active={tab} />
       {panel}

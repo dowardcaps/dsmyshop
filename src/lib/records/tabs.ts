@@ -1,5 +1,5 @@
 /** The four record types shown on the Records page, in tab order. */
-export const RECORD_TABS = ["sales", "gcash", "expenses", "debts", "excess"] as const;
+export const RECORD_TABS = ["sales", "gcash", "expenses", "debts", "excess", "salary"] as const;
 export type RecordTab = (typeof RECORD_TABS)[number];
 
 export const DEFAULT_RECORD_TAB: RecordTab = "sales";
@@ -10,6 +10,7 @@ export const RECORD_TAB_LABELS: Record<RecordTab, string> = {
   expenses: "Expenses",
   debts: "Debts",
   excess: "Excess money",
+  salary: "Salary",
 };
 
 export function parseRecordTab(value: string | string[] | undefined | null): RecordTab {

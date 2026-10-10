@@ -15,6 +15,8 @@ export function BreakdownCard({ data }: { data: DashboardData }) {
         ["Sales", money(summary.salesCents)],
         ["GCash charges", money(summary.gcashChargesCents)],
         ["Total revenue", money(summary.revenueCents)],
+        ["Excess money", money(summary.excessCents)],
+        ["Revenue + excess", money(summary.revenueCents + summary.excessCents)],
       ],
     },
     {
@@ -28,7 +30,7 @@ export function BreakdownCard({ data }: { data: DashboardData }) {
     },
     {
       title: "Expenses",
-      note: "Subtracted from revenue",
+      note: "Subtracted from revenue + excess",
       rows: [["Total expenses", money(summary.expensesCents)]],
     },
     {

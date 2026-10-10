@@ -11,6 +11,8 @@ export interface RecordHrefs {
   addHref: string;
   editHref: (id: string) => string;
   pageHref: (page: number) => string;
+  /** Page links for a second table on the same tab, which keeps its page in another param (e.g. "apage"). */
+  pageHrefFor: (param: string) => (page: number) => string;
   /** Same tab and filters, back on page 1. */
   clearHref: string;
 }
@@ -40,16 +42,19 @@ export function createRecordHrefs(tab: RecordTab, params: RawParams): RecordHref
     return asHref(next);
   };
 
+  const pageLink = (param: string, page: number) => {
+    const next = new URLSearchParams(base);
+    if (page > 1) next.set(param, String(page));
+    else next.delete(param);
+    return asHref(next);
+  };
+
   return {
     closeHref: asHref(base),
     addHref: withExtra("new", "1"),
     editHref: (id) => withExtra("edit", id),
-    pageHref: (page) => {
-      const next = new URLSearchParams(base);
-      if (page > 1) next.set("page", String(page));
-      else next.delete("page");
-      return asHref(next);
-    },
+    pageHref: (page) => pageLink("page", page),
+    pageHrefFor: (param) => (page) => pageLink(param, page),
     clearHref: `/records?tab=${tab}`,
   };
 }

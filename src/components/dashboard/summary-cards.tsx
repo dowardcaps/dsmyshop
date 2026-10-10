@@ -16,10 +16,17 @@ export function SummaryCards({ data }: { data: DashboardData }) {
     { id: "total-expenses", label: "Total Expenses", value: summary.expensesCents, hint: `${data.counts.expenses} expense${data.counts.expenses === 1 ? "" : "s"} in ${label}` },
     { id: "gcash-charges", label: "GCash Charges", value: summary.gcashChargesCents, hint: "Fees earned. Cash in/out amounts are not income" },
     {
+      id: "excess-money",
+      label: "Excess Money",
+      value: summary.excessCents,
+      hint: `${data.counts.excess} record${data.counts.excess === 1 ? "" : "s"} in ${label}. Added to net income`,
+      href: "/records?tab=excess",
+    },
+    {
       id: "net-income",
       label: "Net Income",
       value: net,
-      hint: "Sales + GCash charges − expenses",
+      hint: "Sales + GCash charges + excess − expenses",
       tone: net < 0 ? "negative" : net > 0 ? "positive" : "neutral",
     },
     {
@@ -32,7 +39,7 @@ export function SummaryCards({ data }: { data: DashboardData }) {
   ] as const;
 
   return (
-    <section aria-label={`Summary for ${label}`} className="grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
+    <section aria-label={`Summary for ${label}`} className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
       {cards.map((card) => {
         const tone = "tone" in card ? card.tone : "neutral";
         const body = (
@@ -41,7 +48,7 @@ export function SummaryCards({ data }: { data: DashboardData }) {
               <p className="text-xs uppercase tracking-wide text-muted-foreground">{card.label}</p>
               <p
                 className={cn(
-                  "mt-1 text-2xl font-semibold tabular-nums",
+                  "mt-1 break-words text-2xl font-semibold tabular-nums xl:text-xl 2xl:text-2xl",
                   tone === "negative" && "text-destructive",
                   tone === "positive" && "text-primary",
                 )}

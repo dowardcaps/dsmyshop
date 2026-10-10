@@ -36,6 +36,8 @@ export interface DashboardData {
     salesCents: number;
     expensesCents: number;
     gcashChargesCents: number;
+    /** Cash overage in the period. Added to net income, not part of revenue. */
+    excessCents: number;
     revenueCents: number;
     netIncomeCents: number;
     /** Outstanding on ALL debts as of today (not limited to the period). */
@@ -48,7 +50,7 @@ export interface DashboardData {
   monthly: MonthlyPoint[];
   salesByCategory: CategorySlice[];
   recent: RecentTransaction[];
-  counts: { sales: number; expenses: number; gcash: number };
+  counts: { sales: number; expenses: number; gcash: number; excess: number };
   /** True when the account has no sales, expenses, GCash or debt records at all. */
   isEmpty: boolean;
   earliestYear: number | null;
@@ -74,6 +76,7 @@ export async function getDashboardData(userId: string, period: DashboardPeriod):
   const [
     salesAgg,
     expensesAgg,
+    excessAgg,
     gcashByType,
     adjustmentsAgg,
     debtOriginal,
@@ -83,6 +86,7 @@ export async function getDashboardData(userId: string, period: DashboardPeriod):
     monthlySales,
     monthlyCharges,
     monthlyExpenses,
+    monthlyExcess,
     categoryRows,
     recentSales,
     recentExpenses,
@@ -96,6 +100,11 @@ export async function getDashboardData(userId: string, period: DashboardPeriod):
     }),
     db.expense.aggregate({
       where: { userId, expenseDate: inPeriod },
+      _sum: { amount: true },
+      _count: true,
+    }),
+    db.excessMoney.aggregate({
+      where: { userId, excessDate: inPeriod },
       _sum: { amount: true },
       _count: true,
     }),
@@ -118,6 +127,7 @@ export async function getDashboardData(userId: string, period: DashboardPeriod):
       db.expense.count({ where: { userId } }),
       db.gcashTransaction.count({ where: { userId } }),
       db.debt.count({ where: { userId } }),
+      db.excessMoney.count({ where: { userId } }),
     ]),
     db.$queryRaw<{ month: number; total: Prisma.Decimal | null }[]>`
       SELECT EXTRACT(MONTH FROM "transactionDate")::int AS month, SUM("totalAmount") AS total
@@ -133,6 +143,11 @@ export async function getDashboardData(userId: string, period: DashboardPeriod):
       SELECT EXTRACT(MONTH FROM "expenseDate")::int AS month, SUM("amount") AS total
       FROM "Expense"
       WHERE "userId" = ${userId} AND "expenseDate" BETWEEN ${yearStart}::date AND ${yearEnd}::date
+      GROUP BY 1`,
+    db.$queryRaw<{ month: number; total: Prisma.Decimal | null }[]>`
+      SELECT EXTRACT(MONTH FROM "excessDate")::int AS month, SUM("amount") AS total
+      FROM "ExcessMoney"
+      WHERE "userId" = ${userId} AND "excessDate" BETWEEN ${yearStart}::date AND ${yearEnd}::date
       GROUP BY 1`,
     db.$queryRaw<{ name: string; total: Prisma.Decimal | null }[]>`
       SELECT c."name" AS name, SUM(i."subtotal") AS total
@@ -187,12 +202,14 @@ export async function getDashboardData(userId: string, period: DashboardPeriod):
         SELECT EXTRACT(YEAR FROM MIN("transactionDate")) AS y FROM "Sale" WHERE "userId" = ${userId}
         UNION ALL SELECT EXTRACT(YEAR FROM MIN("expenseDate")) FROM "Expense" WHERE "userId" = ${userId}
         UNION ALL SELECT EXTRACT(YEAR FROM MIN("transactionDate")) FROM "GcashTransaction" WHERE "userId" = ${userId}
+        UNION ALL SELECT EXTRACT(YEAR FROM MIN("excessDate")) FROM "ExcessMoney" WHERE "userId" = ${userId}
       ) t`,
   ]);
 
   // ── summary ──
   const salesCents = cents(salesAgg._sum.totalAmount);
   const expensesCents = cents(expensesAgg._sum.amount);
+  const excessCents = cents(excessAgg._sum.amount);
   const gcashChargesCents = gcashByType.reduce((sum, row) => sum + cents(row._sum.charge), 0);
   const outstandingDebtCents = cents(debtOriginal._sum.originalAmount) - cents(debtPaid._sum.amount);
 
@@ -237,7 +254,7 @@ export async function getDashboardData(userId: string, period: DashboardPeriod):
     .sort((a, b) => b.date.getTime() - a.date.getTime() || b.created - a.created)
     .slice(0, RECENT_LIMIT);
 
-  const [saleCount, expenseCount, gcashCount, debtCount] = totalCounts;
+  const [saleCount, expenseCount, gcashCount, debtCount, excessCount] = totalCounts;
 
   return {
     period,
@@ -245,8 +262,9 @@ export async function getDashboardData(userId: string, period: DashboardPeriod):
       salesCents,
       expensesCents,
       gcashChargesCents,
+      excessCents,
       revenueCents: revenueCents(salesCents, gcashChargesCents),
-      netIncomeCents: netIncomeCents(salesCents, gcashChargesCents, expensesCents),
+      netIncomeCents: netIncomeCents(salesCents, gcashChargesCents, expensesCents, excessCents),
       outstandingDebtCents,
       openDebtCount,
     },
@@ -257,7 +275,7 @@ export async function getDashboardData(userId: string, period: DashboardPeriod):
       count: gcashByType.reduce((sum, row) => sum + row._count, 0),
     },
     adjustments: { totalCents: cents(adjustmentsAgg._sum.amount), count: adjustmentsAgg._count },
-    monthly: buildMonthlySeries(toMonthMap(monthlySales), toMonthMap(monthlyCharges), toMonthMap(monthlyExpenses)),
+    monthly: buildMonthlySeries(toMonthMap(monthlySales), toMonthMap(monthlyCharges), toMonthMap(monthlyExpenses), toMonthMap(monthlyExcess)),
     salesByCategory: topCategories(categoryRows.map((row) => ({ name: row.name, cents: cents(row.total) }))),
     recent: recent.map((row) => ({
       key: row.key,
@@ -269,8 +287,8 @@ export async function getDashboardData(userId: string, period: DashboardPeriod):
       chargeCents: row.chargeCents,
       href: row.href,
     })),
-    counts: { sales: salesAgg._count, expenses: expensesAgg._count, gcash: gcashByType.reduce((s, r) => s + r._count, 0) },
-    isEmpty: saleCount + expenseCount + gcashCount + debtCount === 0,
+    counts: { sales: salesAgg._count, expenses: expensesAgg._count, gcash: gcashByType.reduce((s, r) => s + r._count, 0), excess: excessAgg._count },
+    isEmpty: saleCount + expenseCount + gcashCount + debtCount + excessCount === 0,
     earliestYear: earliest[0]?.year ?? null,
   };
 }

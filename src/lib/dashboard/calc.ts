@@ -2,7 +2,8 @@
  * Dashboard formulas (all money in integer centavos).
  *
  * Revenue    = sales + GCash charges (the fees we earn)
- * Net income = revenue - expenses
+ * Net income = revenue + excess money - expenses
+ * Excess money (cash overage) is not revenue, but it is added to net income.
  * NOT revenue: GCash Cash In / Cash Out / Load amounts (cash movements), and
  *              adjustments (salary, reimbursements, other income), which are shown separately.
  */
@@ -11,8 +12,8 @@ export function revenueCents(salesCents: number, gcashChargesCents: number): num
   return salesCents + gcashChargesCents;
 }
 
-export function netIncomeCents(salesCents: number, gcashChargesCents: number, expensesCents: number): number {
-  return revenueCents(salesCents, gcashChargesCents) - expensesCents;
+export function netIncomeCents(salesCents: number, gcashChargesCents: number, expensesCents: number, excessCents = 0): number {
+  return revenueCents(salesCents, gcashChargesCents) + excessCents - expensesCents;
 }
 
 export interface MonthlyPoint {
@@ -21,6 +22,7 @@ export interface MonthlyPoint {
   salesCents: number;
   gcashChargesCents: number;
   expensesCents: number;
+  excessCents: number;
   netIncomeCents: number;
 }
 
@@ -29,18 +31,21 @@ export function buildMonthlySeries(
   sales: ReadonlyMap<number, number>,
   charges: ReadonlyMap<number, number>,
   expenses: ReadonlyMap<number, number>,
+  excess: ReadonlyMap<number, number> = new Map(),
 ): MonthlyPoint[] {
   return Array.from({ length: 12 }, (_, index) => {
     const month = index + 1;
     const salesCents = sales.get(month) ?? 0;
     const gcashChargesCents = charges.get(month) ?? 0;
     const expensesCents = expenses.get(month) ?? 0;
+    const excessCents = excess.get(month) ?? 0;
     return {
       month,
       salesCents,
       gcashChargesCents,
       expensesCents,
-      netIncomeCents: netIncomeCents(salesCents, gcashChargesCents, expensesCents),
+      excessCents,
+      netIncomeCents: netIncomeCents(salesCents, gcashChargesCents, expensesCents, excessCents),
     };
   });
 }

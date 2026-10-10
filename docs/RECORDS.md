@@ -23,5 +23,19 @@ refreshes the table. These links also work from the dashboard and from the sale/
 
 ## Excess money tab
 Cash overage: extra cash found versus what the records say. Fields: date, amount (> 0), notes. It is stored in its own table
-(`ExcessMoney`) and is **not** included in sales income, the dashboard or the reports. Search (notes) and the date range apply like on
+(`ExcessMoney`). The **dashboard** shows an Excess Money card and adds it to Net Income (Net income = sales + GCash charges + excess − expenses; the monthly net chart includes it too). It is not counted as revenue, and the **Reports** page does not include it yet. Search (notes) and the date range apply like on
 every other tab. Needs a migration: `npm run db:migrate -- --name add_excess_money`.
+
+## Salary tab
+Two employees (Doward and Sophia, ₱3,000 a month each, created automatically the first time the tab opens). The salary is paid twice a
+month: the **15th** and the **30th** (last day of February), ₱1,500 each.
+
+- Pay dates are generated automatically from the employee's start month (the month the tab was first opened) through the current month.
+- **Cash advance / salary advance**: Add cash advance -> employee, the pay date to deduct from (their unpaid 15th/30th), amount, date given.
+  An advance can never be more than what is left of that pay date.
+- **Remaining balance** of a pay date = salary - advances. The cards show each employee's remaining balance (unpaid pay dates only),
+  how much was deducted as advances, and how much was already paid out.
+- **Mark paid** closes a pay date; its advances are locked until you press Undo.
+- Salary is kept separate: it is not part of the dashboard net income or the reports.
+- Tables: `Employee`, `SalaryPeriod`, `SalaryAdvance`. Migration: `npm run db:migrate -- --name add_salary`.
+- Code: `src/lib/salary/` (calc, service, queries), `src/components/salary/`, `src/components/records/salary-panel.tsx`.
