@@ -39,6 +39,7 @@ const SEARCH_PLACEHOLDER: Record<RecordTab, string> = {
   expenses: "Description, notes or category",
   debts: "Name or description",
   excess: "Notes",
+  short: "Notes",
   reimbursement: "Description or notes",
   salary: "Employee or notes",
 };
@@ -58,6 +59,7 @@ function selectsFor(tab: RecordTab, categories: Option[]): { key: string; label:
     case "expenses":
       return [{ key: "category", label: "Category", allLabel: "All categories", options: categories }];
     case "excess":
+    case "short":
     case "reimbursement":
       return [];
     case "salary":

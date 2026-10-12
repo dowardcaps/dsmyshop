@@ -132,7 +132,14 @@ function addSummarySheet(workbook: ExcelJS.Workbook, report: Report) {
   line("Total GCash charges", off(included.gcash, totals.gcashChargesCents), notIncluded(included.gcash) || "Fees earned. Counted as revenue");
   line("Total revenue", included.sales && included.gcash ? totals.revenueCents : null, "Sales + GCash charges", true);
   line("Total expenses", off(included.expenses, totals.expensesCents), notIncluded(included.expenses));
-  line("Net income", totals.netIncomeCents, totals.netIncomeCents === null ? "Needs sales, GCash and expenses all included" : "Revenue − expenses", true);
+  line("Net income", totals.netIncomeCents, totals.netIncomeCents === null ? "Needs sales, GCash and expenses all included" : "Revenue + excess − expenses − reimbursements − salary − short", true);
+  const adjustedNote = totals.netIncomeCents === null ? "Not calculated" : "";
+  line("Excess money", totals.netIncomeCents === null ? null : totals.excessCents, adjustedNote || "Added to net income");
+  line("Reimbursements", totals.netIncomeCents === null ? null : totals.reimbursementsCents, adjustedNote || "Subtracted from net income");
+  line("Salary paid out", totals.netIncomeCents === null ? null : totals.salaryPaidCents, adjustedNote || "Advances + paid pay dates. Subtracted");
+  line("Short", totals.netIncomeCents === null ? null : totals.shortCents, adjustedNote || "Subtracted from net income");
+  line("Brought forward", totals.netIncomeCents === null ? null : report.broughtForwardCents, adjustedNote || "Net income before the first day of this report");
+  line("Total net income", totals.netIncomeCents === null ? null : report.broughtForwardCents + totals.netIncomeCents, adjustedNote || "Brought forward + net income", true);
   r += 1;
   section("Shown separately (not part of net income)");
   line("Total debt payments", off(included.debts, totals.debtPaymentsCents), notIncluded(included.debts) || "Repaying money owed. Not an expense");

@@ -11,37 +11,68 @@ export function SummaryCards({ data }: { data: DashboardData }) {
   const label = periodLabel(period);
   const net = summary.netIncomeCents;
 
+  const plural = (count: number, word: string) => `${count} ${word}${count === 1 ? "" : "s"}`;
+  const total = summary.totalNetIncomeCents;
+
   const cards = [
-    { id: "total-sales", label: "Total Sales", value: summary.salesCents, hint: `${data.counts.sales} sale${data.counts.sales === 1 ? "" : "s"} in ${label}` },
-    { id: "total-expenses", label: "Total Expenses", value: summary.expensesCents, hint: `${data.counts.expenses} expense${data.counts.expenses === 1 ? "" : "s"} in ${label}` },
+    { id: "total-sales", label: "Total Sales", value: summary.salesCents, hint: `${plural(data.counts.sales, "sale")} in ${label}` },
     { id: "gcash-charges", label: "GCash Charges", value: summary.gcashChargesCents, hint: "Fees earned. Cash in/out amounts are not income" },
+    { id: "total-expenses", label: "Total Expenses", value: summary.expensesCents, hint: `${plural(data.counts.expenses, "expense")} in ${label}` },
     {
       id: "excess-money",
       label: "Excess Money",
       value: summary.excessCents,
-      hint: `${data.counts.excess} record${data.counts.excess === 1 ? "" : "s"} in ${label}. Added to net income`,
+      hint: `${plural(data.counts.excess, "record")} in ${label}. Added to net income`,
       href: "/records?tab=excess",
     },
     {
       id: "reimbursements",
       label: "Reimbursements",
       value: summary.reimbursementsCents,
-      hint: `${data.counts.reimbursements} record${data.counts.reimbursements === 1 ? "" : "s"} in ${label}. Subtracted from net income`,
+      hint: `${plural(data.counts.reimbursements, "record")} in ${label}. Subtracted from net income`,
       href: "/records?tab=reimbursement",
     },
     {
-      id: "net-income",
-      label: "Net Income",
-      value: net,
-      hint: "Sales + GCash charges + excess − expenses − reimbursements",
-      tone: net < 0 ? "negative" : net > 0 ? "positive" : "neutral",
+      id: "salary-paid",
+      label: "Salary Paid Out",
+      value: summary.salaryPaidCents,
+      hint: "Advances + paid pay dates. Subtracted from net income",
+      href: "/records?tab=salary",
+    },
+    {
+      id: "short",
+      label: "Short",
+      value: summary.shortCents,
+      hint: `${plural(data.counts.short, "record")} in ${label}. Subtracted from net income`,
+      href: "/records?tab=short",
     },
     {
       id: "outstanding-debt",
       label: "Outstanding Debt",
       value: summary.outstandingDebtCents,
-      hint: `${summary.openDebtCount} open debt${summary.openDebtCount === 1 ? "" : "s"}, as of today`,
+      hint: `${plural(summary.openDebtCount, "open debt")}, as of today`,
       href: "/records?tab=debts",
+    },
+    {
+      id: "net-income",
+      label: `Net Income (${label})`,
+      value: net,
+      hint: "Sales + GCash charges + excess − expenses − reimbursements − salary − short",
+      tone: net < 0 ? "negative" : net > 0 ? "positive" : "neutral",
+    },
+    {
+      id: "brought-forward",
+      label: "Brought Forward",
+      value: summary.broughtForwardCents,
+      hint: "Net income of all earlier months",
+      tone: summary.broughtForwardCents < 0 ? "negative" : "neutral",
+    },
+    {
+      id: "total-net-income",
+      label: "Total Net Income",
+      value: total,
+      hint: "Brought forward + net income. Same as TOTAL NET INCOME in Sales.xlsx",
+      tone: total < 0 ? "negative" : total > 0 ? "positive" : "neutral",
     },
   ] as const;
 

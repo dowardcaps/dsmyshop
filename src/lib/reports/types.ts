@@ -92,6 +92,13 @@ export interface ReportAdjustmentRow {
   notes: string;
 }
 
+/** Excess money, reimbursements, short and salary paid out. Always part of net income, so always fetched. */
+export interface ReportLedgerRow {
+  date: string;
+  key: "excess" | "reimbursements" | "short" | "salary";
+  cents: number;
+}
+
 export interface ReportRows {
   sales: ReportSaleRow[];
   gcash: ReportGcashRow[];
@@ -99,6 +106,7 @@ export interface ReportRows {
   debtPayments: ReportDebtPaymentRow[];
   debtsOpened: ReportDebtOpenedRow[];
   adjustments: ReportAdjustmentRow[];
+  ledger: ReportLedgerRow[];
 }
 
 // ───────── computed report ─────────
@@ -114,6 +122,11 @@ export interface ReportTotals {
   debtPaymentsCents: number;
   debtsOpenedCents: number;
   adjustmentsCents: number;
+  /** Excess money (added), and reimbursements, salary paid out and short (subtracted). */
+  excessCents: number;
+  reimbursementsCents: number;
+  salaryPaidCents: number;
+  shortCents: number;
   /** null when sales, GCash and expenses are not all included, so it cannot be calculated honestly. */
   netIncomeCents: number | null;
   transactionCount: number;
@@ -135,4 +148,6 @@ export interface Report {
   /** One entry per calendar month with a selected day, in order (empty months included). */
   monthly: ReportMonth[];
   counts: Record<ReportType, number>;
+  /** Net income of everything before the first day of the report (the sheet's "From prev. month"). */
+  broughtForwardCents: number;
 }

@@ -33,7 +33,7 @@ function FieldError({ message }: { message?: string }) {
 }
 
 export function GcashForm({ defaultValues, transactionId, returnHref }: GcashFormProps) {
-  const { form, submit } = useGcashForm({ defaultValues, transactionId, returnHref });
+  const { form, submit, suggestCharge } = useGcashForm({ defaultValues, transactionId, returnHref });
   const {
     register,
     formState: { errors, isSubmitting },
@@ -50,7 +50,10 @@ export function GcashForm({ defaultValues, transactionId, returnHref }: GcashFor
           </div>
           <div className="space-y-2">
             <Label htmlFor="transactionType">Type</Label>
-            <Select id="transactionType" {...register("transactionType")}>
+            <Select
+              id="transactionType"
+              {...register("transactionType", { onChange: (event) => suggestCharge(event.target.value, form.getValues("amount")) })}
+            >
               {GCASH_TRANSACTION_TYPES.map((type) => (
                 <option key={type} value={type}>
                   {GCASH_TYPE_LABELS[type]}
@@ -79,7 +82,10 @@ export function GcashForm({ defaultValues, transactionId, returnHref }: GcashFor
               step="0.01"
               aria-invalid={!!errors.amount}
               aria-describedby="amount-help"
-              {...register("amount", { valueAsNumber: true })}
+              {...register("amount", {
+                valueAsNumber: true,
+                onChange: (event) => suggestCharge(form.getValues("transactionType"), Number(event.target.value)),
+              })}
             />
             <p id="amount-help" className="text-xs text-muted-foreground">
               The money moved. This is not counted as income.
@@ -99,7 +105,7 @@ export function GcashForm({ defaultValues, transactionId, returnHref }: GcashFor
               {...register("charge", { valueAsNumber: true })}
             />
             <p id="charge-help" className="text-xs text-muted-foreground">
-              Your fee. This is the part counted as income.
+              Your fee. This is the part counted as income. Cash Out fills it in from your fee table; you can change it.
             </p>
             <FieldError message={errors.charge?.message} />
           </div>

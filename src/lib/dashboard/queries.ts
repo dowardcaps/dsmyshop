@@ -7,12 +7,12 @@ import { decimalToCents } from "@/lib/money";
 import { TABLE_PAGE_SIZE } from "@/lib/pagination";
 import {
   buildMonthlySeries,
-  netIncomeCents,
-  revenueCents,
   topCategories,
   type CategorySlice,
   type MonthlyPoint,
 } from "@/lib/dashboard/calc";
+import { getComponentsBefore, getComponentsBetween, getComponentsByMonth } from "@/lib/finance/ledger";
+import { netIncomeOf, revenueOf, totalDeductionsOf, totalNetIncomeOf } from "@/lib/finance/components";
 import { periodRange, type DashboardPeriod } from "@/lib/dashboard/period";
 
 export type RecentKind = "SALE" | "EXPENSE" | "GCASH";
@@ -40,8 +40,19 @@ export interface DashboardData {
     excessCents: number;
     /** Reimbursements paid in the period. Subtracted from net income. */
     reimbursementsCents: number;
+    /** Salary and cash advances actually paid out in the period. Subtracted from net income. */
+    salaryPaidCents: number;
+    /** Cash short in the period. Subtracted from net income. */
+    shortCents: number;
+    /** Expenses + reimbursements + salary paid + short. */
+    totalDeductionsCents: number;
     revenueCents: number;
+    /** This period only. */
     netIncomeCents: number;
+    /** Net income of every earlier month, carried over (the "From prev. month" box in Sales.xlsx). */
+    broughtForwardCents: number;
+    /** Brought forward + this period's net income (the "TOTAL NET INCOME" box in Sales.xlsx). */
+    totalNetIncomeCents: number;
     /** Outstanding on ALL debts as of today (not limited to the period). */
     outstandingDebtCents: number;
     openDebtCount: number;
@@ -52,7 +63,7 @@ export interface DashboardData {
   monthly: MonthlyPoint[];
   salesByCategory: CategorySlice[];
   recent: RecentTransaction[];
-  counts: { sales: number; expenses: number; gcash: number; excess: number; reimbursements: number };
+  counts: { sales: number; expenses: number; gcash: number; excess: number; reimbursements: number; short: number };
   /** True when the account has no sales, expenses, GCash or debt records at all. */
   isEmpty: boolean;
   earliestYear: number | null;
@@ -61,11 +72,6 @@ export interface DashboardData {
 const RECENT_LIMIT = TABLE_PAGE_SIZE;
 
 const cents = (value: Prisma.Decimal | null | undefined) => (value ? decimalToCents(value) : 0);
-
-/** month (1..12) -> centavos from a raw "month, total" result. */
-function toMonthMap(rows: { month: number; total: Prisma.Decimal | null }[]): Map<number, number> {
-  return new Map(rows.map((row) => [Number(row.month), cents(row.total)]));
-}
 
 export async function getDashboardData(userId: string, period: DashboardPeriod): Promise<DashboardData> {
   const { from, to } = periodRange(period);
@@ -80,22 +86,21 @@ export async function getDashboardData(userId: string, period: DashboardPeriod):
     expensesAgg,
     excessAgg,
     reimbursementAgg,
+    shortAgg,
     gcashByType,
     adjustmentsAgg,
     debtOriginal,
     debtPaid,
     openDebtCount,
     totalCounts,
-    monthlySales,
-    monthlyCharges,
-    monthlyExpenses,
-    monthlyExcess,
-    monthlyReimbursements,
     categoryRows,
     recentSales,
     recentExpenses,
     recentGcash,
     earliest,
+    periodTotals,
+    broughtForward,
+    monthlyTotals,
   ] = await Promise.all([
     db.sale.aggregate({
       where: { userId, transactionDate: inPeriod },
@@ -114,6 +119,11 @@ export async function getDashboardData(userId: string, period: DashboardPeriod):
     }),
     db.reimbursement.aggregate({
       where: { userId, reimbursementDate: inPeriod },
+      _sum: { amount: true },
+      _count: true,
+    }),
+    db.cashShort.aggregate({
+      where: { userId, shortDate: inPeriod },
       _sum: { amount: true },
       _count: true,
     }),
@@ -138,32 +148,8 @@ export async function getDashboardData(userId: string, period: DashboardPeriod):
       db.debt.count({ where: { userId } }),
       db.excessMoney.count({ where: { userId } }),
       db.reimbursement.count({ where: { userId } }),
+      db.cashShort.count({ where: { userId } }),
     ]),
-    db.$queryRaw<{ month: number; total: Prisma.Decimal | null }[]>`
-      SELECT EXTRACT(MONTH FROM "transactionDate")::int AS month, SUM("totalAmount") AS total
-      FROM "Sale"
-      WHERE "userId" = ${userId} AND "transactionDate" BETWEEN ${yearStart}::date AND ${yearEnd}::date
-      GROUP BY 1`,
-    db.$queryRaw<{ month: number; total: Prisma.Decimal | null }[]>`
-      SELECT EXTRACT(MONTH FROM "transactionDate")::int AS month, SUM("charge") AS total
-      FROM "GcashTransaction"
-      WHERE "userId" = ${userId} AND "transactionDate" BETWEEN ${yearStart}::date AND ${yearEnd}::date
-      GROUP BY 1`,
-    db.$queryRaw<{ month: number; total: Prisma.Decimal | null }[]>`
-      SELECT EXTRACT(MONTH FROM "expenseDate")::int AS month, SUM("amount") AS total
-      FROM "Expense"
-      WHERE "userId" = ${userId} AND "expenseDate" BETWEEN ${yearStart}::date AND ${yearEnd}::date
-      GROUP BY 1`,
-    db.$queryRaw<{ month: number; total: Prisma.Decimal | null }[]>`
-      SELECT EXTRACT(MONTH FROM "excessDate")::int AS month, SUM("amount") AS total
-      FROM "ExcessMoney"
-      WHERE "userId" = ${userId} AND "excessDate" BETWEEN ${yearStart}::date AND ${yearEnd}::date
-      GROUP BY 1`,
-    db.$queryRaw<{ month: number; total: Prisma.Decimal | null }[]>`
-      SELECT EXTRACT(MONTH FROM "reimbursementDate")::int AS month, SUM("amount") AS total
-      FROM "Reimbursement"
-      WHERE "userId" = ${userId} AND "reimbursementDate" BETWEEN ${yearStart}::date AND ${yearEnd}::date
-      GROUP BY 1`,
     db.$queryRaw<{ name: string; total: Prisma.Decimal | null }[]>`
       SELECT c."name" AS name, SUM(i."subtotal") AS total
       FROM "SaleItem" i
@@ -219,15 +205,18 @@ export async function getDashboardData(userId: string, period: DashboardPeriod):
         UNION ALL SELECT EXTRACT(YEAR FROM MIN("transactionDate")) FROM "GcashTransaction" WHERE "userId" = ${userId}
         UNION ALL SELECT EXTRACT(YEAR FROM MIN("excessDate")) FROM "ExcessMoney" WHERE "userId" = ${userId}
         UNION ALL SELECT EXTRACT(YEAR FROM MIN("reimbursementDate")) FROM "Reimbursement" WHERE "userId" = ${userId}
+        UNION ALL SELECT EXTRACT(YEAR FROM MIN("shortDate")) FROM "CashShort" WHERE "userId" = ${userId}
+        UNION ALL SELECT EXTRACT(YEAR FROM MIN("advanceDate")) FROM "SalaryAdvance" WHERE "userId" = ${userId}
       ) t`,
+    getComponentsBetween(userId, from, to),
+    getComponentsBefore(userId, from),
+    getComponentsByMonth(userId, yearStart, yearEnd),
   ]);
 
   // ── summary ──
-  const salesCents = cents(salesAgg._sum.totalAmount);
-  const expensesCents = cents(expensesAgg._sum.amount);
-  const excessCents = cents(excessAgg._sum.amount);
-  const reimbursementsCents = cents(reimbursementAgg._sum.amount);
-  const gcashChargesCents = gcashByType.reduce((sum, row) => sum + cents(row._sum.charge), 0);
+  // Every amount below comes from the shared ledger so the dashboard, charts and reports agree.
+  const { salesCents, expensesCents, excessCents, reimbursementsCents, gcashChargesCents, salaryPaidCents, shortCents } = periodTotals;
+  const netIncomeCents = netIncomeOf(periodTotals);
   const outstandingDebtCents = cents(debtOriginal._sum.originalAmount) - cents(debtPaid._sum.amount);
 
   const movement = (type: string) => cents(gcashByType.find((row) => row.transactionType === type)?._sum.amount);
@@ -271,7 +260,7 @@ export async function getDashboardData(userId: string, period: DashboardPeriod):
     .sort((a, b) => b.date.getTime() - a.date.getTime() || b.created - a.created)
     .slice(0, RECENT_LIMIT);
 
-  const [saleCount, expenseCount, gcashCount, debtCount, excessCount, reimbursementCount] = totalCounts;
+  const [saleCount, expenseCount, gcashCount, debtCount, excessCount, reimbursementCount, shortCount] = totalCounts;
 
   return {
     period,
@@ -281,8 +270,13 @@ export async function getDashboardData(userId: string, period: DashboardPeriod):
       gcashChargesCents,
       excessCents,
       reimbursementsCents,
-      revenueCents: revenueCents(salesCents, gcashChargesCents),
-      netIncomeCents: netIncomeCents(salesCents, gcashChargesCents, expensesCents, excessCents, reimbursementsCents),
+      salaryPaidCents,
+      shortCents,
+      totalDeductionsCents: totalDeductionsOf(periodTotals),
+      revenueCents: revenueOf(periodTotals),
+      netIncomeCents,
+      broughtForwardCents: netIncomeOf(broughtForward),
+      totalNetIncomeCents: totalNetIncomeOf(netIncomeOf(broughtForward), periodTotals),
       outstandingDebtCents,
       openDebtCount,
     },
@@ -293,7 +287,7 @@ export async function getDashboardData(userId: string, period: DashboardPeriod):
       count: gcashByType.reduce((sum, row) => sum + row._count, 0),
     },
     adjustments: { totalCents: cents(adjustmentsAgg._sum.amount), count: adjustmentsAgg._count },
-    monthly: buildMonthlySeries(toMonthMap(monthlySales), toMonthMap(monthlyCharges), toMonthMap(monthlyExpenses), toMonthMap(monthlyExcess), toMonthMap(monthlyReimbursements)),
+    monthly: buildMonthlySeries(period.year, monthlyTotals),
     salesByCategory: topCategories(categoryRows.map((row) => ({ name: row.name, cents: cents(row.total) }))),
     recent: recent.map((row) => ({
       key: row.key,
@@ -305,8 +299,8 @@ export async function getDashboardData(userId: string, period: DashboardPeriod):
       chargeCents: row.chargeCents,
       href: row.href,
     })),
-    counts: { sales: salesAgg._count, expenses: expensesAgg._count, gcash: gcashByType.reduce((s, r) => s + r._count, 0), excess: excessAgg._count, reimbursements: reimbursementAgg._count },
-    isEmpty: saleCount + expenseCount + gcashCount + debtCount + excessCount + reimbursementCount === 0,
+    counts: { sales: salesAgg._count, expenses: expensesAgg._count, gcash: gcashByType.reduce((s, r) => s + r._count, 0), excess: excessAgg._count, reimbursements: reimbursementAgg._count, short: shortAgg._count },
+    isEmpty: saleCount + expenseCount + gcashCount + debtCount + excessCount + reimbursementCount + shortCount === 0,
     earliestYear: earliest[0]?.year ?? null,
   };
 }

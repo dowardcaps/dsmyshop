@@ -1,20 +1,9 @@
 /**
- * Dashboard formulas (all money in integer centavos).
- *
- * Revenue    = sales + GCash charges (the fees we earn)
- * Net income = revenue + excess money - expenses - reimbursements
- * Excess money (cash overage) is not revenue, but it is added to net income.
- * NOT revenue: GCash Cash In / Cash Out / Load amounts (cash movements), and
- *              adjustments (salary, reimbursements, other income), which are shown separately.
+ * Dashboard calculations. The net income formula itself lives in `@/lib/finance/components`
+ * (Sales.xlsx rules). This file only shapes data for the charts.
  */
 
-export function revenueCents(salesCents: number, gcashChargesCents: number): number {
-  return salesCents + gcashChargesCents;
-}
-
-export function netIncomeCents(salesCents: number, gcashChargesCents: number, expensesCents: number, excessCents = 0, reimbursementsCents = 0): number {
-  return revenueCents(salesCents, gcashChargesCents) + excessCents - expensesCents - reimbursementsCents;
-}
+import { emptyComponents, netIncomeOf, type CashComponents } from "@/lib/finance/components";
 
 export interface MonthlyPoint {
   /** 1..12 */
@@ -24,32 +13,26 @@ export interface MonthlyPoint {
   expensesCents: number;
   excessCents: number;
   reimbursementsCents: number;
+  salaryPaidCents: number;
+  shortCents: number;
   netIncomeCents: number;
 }
 
-/** Combines sparse per-month totals into a full 12-month series (missing months = 0). */
-export function buildMonthlySeries(
-  sales: ReadonlyMap<number, number>,
-  charges: ReadonlyMap<number, number>,
-  expenses: ReadonlyMap<number, number>,
-  excess: ReadonlyMap<number, number> = new Map(),
-  reimbursements: ReadonlyMap<number, number> = new Map(),
-): MonthlyPoint[] {
+/** Combines sparse per-month components ("2026-07" -> components) into a full 12-month series. */
+export function buildMonthlySeries(year: number, byMonth: ReadonlyMap<string, CashComponents>): MonthlyPoint[] {
   return Array.from({ length: 12 }, (_, index) => {
     const month = index + 1;
-    const salesCents = sales.get(month) ?? 0;
-    const gcashChargesCents = charges.get(month) ?? 0;
-    const expensesCents = expenses.get(month) ?? 0;
-    const excessCents = excess.get(month) ?? 0;
-    const reimbursementsCents = reimbursements.get(month) ?? 0;
+    const c = byMonth.get(`${year}-${String(month).padStart(2, "0")}`) ?? emptyComponents();
     return {
       month,
-      salesCents,
-      gcashChargesCents,
-      expensesCents,
-      excessCents,
-      reimbursementsCents,
-      netIncomeCents: netIncomeCents(salesCents, gcashChargesCents, expensesCents, excessCents, reimbursementsCents),
+      salesCents: c.salesCents,
+      gcashChargesCents: c.gcashChargesCents,
+      expensesCents: c.expensesCents,
+      excessCents: c.excessCents,
+      reimbursementsCents: c.reimbursementsCents,
+      salaryPaidCents: c.salaryPaidCents,
+      shortCents: c.shortCents,
+      netIncomeCents: netIncomeOf(c),
     };
   });
 }

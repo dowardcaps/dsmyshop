@@ -4,7 +4,7 @@ import { formatPeso } from "@/lib/format";
 
 /** Keeps revenue, cash movements, expenses and adjustments visibly apart. */
 export function BreakdownCard({ data }: { data: DashboardData }) {
-  const { summary, cashMovements, adjustments } = data;
+  const { summary, cashMovements } = data;
   const money = (cents: number) => formatPeso(cents / 100);
 
   const groups = [
@@ -29,18 +29,24 @@ export function BreakdownCard({ data }: { data: DashboardData }) {
       ],
     },
     {
-      title: "Expenses",
+      title: "Deductions",
       note: "Subtracted from revenue + excess",
       rows: [
         ["Total expenses", money(summary.expensesCents)],
         ["Reimbursements", money(summary.reimbursementsCents)],
-        ["Total deducted", money(summary.expensesCents + summary.reimbursementsCents)],
+        ["Salary paid out", money(summary.salaryPaidCents)],
+        ["Short", money(summary.shortCents)],
+        ["Total deducted", money(summary.totalDeductionsCents)],
       ],
     },
     {
-      title: "Adjustments",
-      note: "Salary, reimbursements, other. Kept separate",
-      rows: [[`${adjustments.count} adjustment${adjustments.count === 1 ? "" : "s"}`, money(adjustments.totalCents)]],
+      title: "Net income",
+      note: "Like the sheet's TOTAL NET INCOME",
+      rows: [
+        ["This period", money(summary.netIncomeCents)],
+        ["Brought forward", money(summary.broughtForwardCents)],
+        ["Total net income", money(summary.totalNetIncomeCents)],
+      ],
     },
   ];
 
@@ -48,7 +54,7 @@ export function BreakdownCard({ data }: { data: DashboardData }) {
     <Card>
       <CardHeader>
         <CardTitle>Where the money is</CardTitle>
-        <CardDescription>Revenue, cash movements, expenses and adjustments are never mixed together.</CardDescription>
+        <CardDescription>Revenue, cash movements and deductions are never mixed together.</CardDescription>
       </CardHeader>
       <CardContent className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
         {groups.map((group) => (

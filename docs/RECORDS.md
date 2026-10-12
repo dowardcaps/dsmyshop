@@ -48,3 +48,15 @@ Add, edit and delete work like Excess money (modal, 8 rows per page, shared sear
 Net income = sales + GCash charges + excess money − expenses − reimbursements (the monthly net chart includes it too).
 The **Reports** page does not include excess money or reimbursements yet.
 Needs a migration: `npm run db:migrate -- --name add_reimbursements`.
+
+
+## Short tab
+
+Cash that is missing versus the records (the "Short" column in Sales.xlsx). Date, amount, notes. Same modal and
+8-rows-per-page table as Excess money. It is **subtracted** from net income. Model: `CashShort`.
+Migration: `npm run db:migrate -- --name add_cash_short`.
+
+## Net income
+
+See `docs/NET_INCOME.md`. Salary paid out, short and reimbursements are subtracted; excess money is added; the
+balance of earlier months is brought forward.

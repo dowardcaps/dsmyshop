@@ -81,8 +81,20 @@ export function ReportPreview({ report }: { report: Report }) {
               "r-net",
               "Net income",
               net === null ? "Not calculated" : peso(net),
-              net === null ? "Needs sales, GCash and expenses included" : "Sales + GCash charges − expenses",
+              net === null ? "Needs sales, GCash and expenses included" : "Revenue + excess − expenses − reimbursements − salary − short",
               net === null ? undefined : net < 0 ? "negative" : net > 0 ? "positive" : undefined,
+            )}
+            {stat("r-excess", "Excess money", net === null ? "Not calculated" : peso(totals.excessCents), "Added to net income")}
+            {stat("r-reimb", "Reimbursements", net === null ? "Not calculated" : peso(totals.reimbursementsCents), "Subtracted from net income")}
+            {stat("r-salary", "Salary paid out", net === null ? "Not calculated" : peso(totals.salaryPaidCents), "Advances + paid pay dates. Subtracted")}
+            {stat("r-short", "Short", net === null ? "Not calculated" : peso(totals.shortCents), "Subtracted from net income")}
+            {stat("r-bf", "Brought forward", net === null ? "Not calculated" : peso(report.broughtForwardCents), "Net income before the first day of this report")}
+            {stat(
+              "r-total-net",
+              "Total net income",
+              net === null ? "Not calculated" : peso(report.broughtForwardCents + net),
+              "Brought forward + net income",
+              net === null ? undefined : report.broughtForwardCents + net < 0 ? "negative" : "positive",
             )}
             {stat("r-debt", "Debt payments", val(included.debts, totals.debtPaymentsCents), "Shown separately, not an expense")}
             {stat("r-adjust", "Adjustments", val(included.adjustments, totals.adjustmentsCents), "Shown separately, not in net income")}

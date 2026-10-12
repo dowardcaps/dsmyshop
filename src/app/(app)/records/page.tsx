@@ -3,6 +3,7 @@ import { Plus, Tags } from "lucide-react";
 
 import { DebtsPanel } from "@/components/records/debts-panel";
 import { ExcessPanel } from "@/components/records/excess-panel";
+import { ShortPanel } from "@/components/records/short-panel";
 import { ExpensesPanel } from "@/components/records/expenses-panel";
 import { GcashPanel } from "@/components/records/gcash-panel";
 import { PageHeader } from "@/components/layout/page-header";
@@ -16,13 +17,14 @@ import { requireUser } from "@/lib/auth/require-user";
 import { listExpenseCategories } from "@/lib/expenses/queries";
 import { createRecordHrefs } from "@/lib/records/href";
 import { parseRecordTab, type RecordTab } from "@/lib/records/tabs";
-import { debtFilterValues, excessFilterValues, expenseFilterValues, reimbursementFilterValues, salaryFilterValues, gcashFilterValues, saleFilterValues } from "@/lib/records/values";
+import { debtFilterValues, excessFilterValues, shortFilterValues, expenseFilterValues, reimbursementFilterValues, salaryFilterValues, gcashFilterValues, saleFilterValues } from "@/lib/records/values";
 import { ensureSalaryPeriods } from "@/lib/salary/service";
 import { listAdvanceOptions } from "@/lib/salary/queries";
 import { listSaleCategories } from "@/lib/sales/queries";
 import { parseReimbursementFilters } from "@/lib/validation/reimbursement-filters";
 import { parseSalaryFilters } from "@/lib/validation/salary-filters";
 import { parseExcessFilters } from "@/lib/validation/excess-filters";
+import { parseShortFilters } from "@/lib/validation/short-filters";
 import { parseDebtFilters } from "@/lib/validation/debt-filters";
 import { parseExpenseFilters } from "@/lib/validation/expense-filters";
 import { parseGcashFilters } from "@/lib/validation/gcash-filters";
@@ -38,6 +40,7 @@ const ADD_LABEL: Record<RecordTab, string> = {
   expenses: "Add expense",
   debts: "Add debt",
   excess: "Add excess money",
+  short: "Add short",
   reimbursement: "Add reimbursement",
   salary: "Add cash advance",
 };
@@ -99,6 +102,11 @@ export default async function RecordsPage({ searchParams }: { searchParams: Prom
     const values = reimbursementFilterValues(filters);
     bar = <RecordsFilterBar key={JSON.stringify(values)} tab={tab} values={values} categories={[]} />;
     panel = <ReimbursementPanel userId={user.id} filters={filters} hrefs={hrefs} openNew={openNew} editId={editId} />;
+  } else if (tab === "short") {
+    const filters = parseShortFilters(params);
+    const values = shortFilterValues(filters);
+    bar = <RecordsFilterBar key={JSON.stringify(values)} tab={tab} values={values} categories={[]} />;
+    panel = <ShortPanel userId={user.id} filters={filters} hrefs={hrefs} openNew={openNew} editId={editId} />;
   } else if (tab === "excess") {
     const filters = parseExcessFilters(params);
     const values = excessFilterValues(filters);
@@ -113,7 +121,7 @@ export default async function RecordsPage({ searchParams }: { searchParams: Prom
 
   return (
     <div className="space-y-6">
-      <PageHeader title="Records" description="Sales, GCash, expenses, debts, excess money, reimbursements and salary. One set of filters for all of them." actions={actions} />
+      <PageHeader title="Records" description="Sales, GCash, expenses, debts, excess money, short, reimbursements and salary. One set of filters for all of them." actions={actions} />
       {bar}
       <RecordsTabs active={tab} />
       {panel}

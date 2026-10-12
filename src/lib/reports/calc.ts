@@ -15,26 +15,30 @@ import {
 } from "@/lib/reports/types";
 
 /**
- * HOW THE NUMBERS ARE CALCULATED (shown to the user on the page, in Excel and in the PDF):
+ * HOW THE NUMBERS ARE CALCULATED (shown to the user on the page, in Excel and in the PDF).
+ * Same formula as the dashboard and Sales.xlsx (see `@/lib/finance/components`):
  *
  *   Revenue    = Sales + GCash charges
- *   Net income = Revenue - Expenses
+ *   Net income = Revenue + Excess money - Expenses - Reimbursements - Salary paid out - Short
+ *   Total net income = Brought forward + Net income
  *
  * NOT counted in revenue or net income (reported separately instead):
  *   - GCash Cash In / Cash Out / Load amounts: money moved for customers, not income.
  *   - Debt payments: repaying money already owed, not a new expense (record the original cost as an expense).
  *   - Debts opened: money owed, not income or an expense.
- *   - Monthly adjustments (salary, reimbursements, other): reported on their own.
+ *   - Old "monthly adjustments": reported on their own.
  *
  * Net income is only calculated when Sales, GCash and Expenses are all included.
  * Otherwise it is left blank rather than guessed.
  */
 export const NET_INCOME_EXPLANATION = [
   "Revenue = Sales + GCash charges (the fees you earn).",
-  "Net income = Revenue − Expenses.",
+  "Net income = Revenue + Excess money − Expenses − Reimbursements − Salary paid out − Short.",
+  "Total net income = Brought forward (net income of everything before the first day of the report) + Net income.",
   "GCash Cash In, Cash Out and Load amounts are money moved for customers. They are never counted as sales or revenue.",
   "Debt payments and newly opened debts are not counted as expenses or revenue.",
-  "Monthly adjustments (salary, reimbursements, other income) are shown separately and are not part of net income.",
+  "Salary paid out is the cash actually handed over: advances on the day given, plus the rest of a pay date on the day it was marked paid.",
+  "Old monthly adjustments are shown separately and are not part of net income.",
   "Net income is only calculated when Sales, GCash and Expenses are all included in the report.",
 ];
 
@@ -48,7 +52,7 @@ export function includedTypes(selection: ReportSelection): Record<ReportType, bo
 export const canCalculateNet = (included: Record<ReportType, boolean>) => included.sales && included.gcash && included.expenses;
 
 export function emptyRows(): ReportRows {
-  return { sales: [], gcash: [], expenses: [], debtPayments: [], debtsOpened: [], adjustments: [] };
+  return { sales: [], gcash: [], expenses: [], debtPayments: [], debtsOpened: [], adjustments: [], ledger: [] };
 }
 
 /** Totals for a set of rows. Rows of types that are not included must already be empty. */
@@ -58,6 +62,11 @@ export function computeTotals(rows: ReportRows, included: Record<ReportType, boo
   const gcashOf = (type: string) => sum(rows.gcash.filter((r) => r.type === type), (r) => r.amountCents);
   const expensesCents = sum(rows.expenses, (r) => r.amountCents);
   const revenueCents = salesCents + gcashChargesCents;
+  const ledgerOf = (key: string) => sum(rows.ledger.filter((r) => r.key === key), (r) => r.cents);
+  const excessCents = ledgerOf("excess");
+  const reimbursementsCents = ledgerOf("reimbursements");
+  const salaryPaidCents = ledgerOf("salary");
+  const shortCents = ledgerOf("short");
 
   return {
     salesCents,
@@ -70,7 +79,13 @@ export function computeTotals(rows: ReportRows, included: Record<ReportType, boo
     debtPaymentsCents: sum(rows.debtPayments, (r) => r.amountCents),
     debtsOpenedCents: sum(rows.debtsOpened, (r) => r.originalCents),
     adjustmentsCents: sum(rows.adjustments, (r) => r.amountCents),
-    netIncomeCents: canCalculateNet(included) ? revenueCents - expensesCents : null,
+    excessCents,
+    reimbursementsCents,
+    salaryPaidCents,
+    shortCents,
+    netIncomeCents: canCalculateNet(included)
+      ? revenueCents + excessCents - expensesCents - reimbursementsCents - salaryPaidCents - shortCents
+      : null,
     transactionCount:
       rows.sales.length + rows.gcash.length + rows.expenses.length + rows.debtPayments.length + rows.debtsOpened.length + rows.adjustments.length,
   };
@@ -87,11 +102,12 @@ function rowsForMonth(rows: ReportRows, key: string): ReportRows {
     debtPayments: inMonth(rows.debtPayments),
     debtsOpened: inMonth(rows.debtsOpened),
     adjustments: inMonth(rows.adjustments),
+    ledger: inMonth(rows.ledger),
   };
 }
 
 /** Builds the full report (totals, monthly table, counts) from already-fetched rows. */
-export function buildReport(selection: ReportSelection, rows: ReportRows): Report {
+export function buildReport(selection: ReportSelection, rows: ReportRows, broughtForwardCents = 0): Report {
   const included = includedTypes(selection);
   const monthly: ReportMonth[] = selectionMonthKeys(selection).map((key) => ({
     key,
@@ -107,6 +123,7 @@ export function buildReport(selection: ReportSelection, rows: ReportRows): Repor
     rows,
     totals: computeTotals(rows, included),
     monthly,
+    broughtForwardCents,
     counts: {
       sales: rows.sales.length,
       gcash: rows.gcash.length,

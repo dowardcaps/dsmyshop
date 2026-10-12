@@ -3,6 +3,8 @@ import "server-only";
 import type { Prisma } from "@/generated/prisma/client";
 import { db } from "@/lib/db";
 import { parseDateInput, toDateInputValue } from "@/lib/dates";
+import { getAdjustmentRowsInRanges, getComponentsBefore } from "@/lib/finance/ledger";
+import { netIncomeOf } from "@/lib/finance/components";
 import { buildReport, emptyRows } from "@/lib/reports/calc";
 import { monthKey, selectionRanges } from "@/lib/reports/period";
 import { MAX_REPORT_ROWS_PER_TYPE, type Report, type ReportRows, type ReportSelection } from "@/lib/reports/types";
@@ -146,7 +148,12 @@ export async function getReport(userId: string, selection: ReportSelection): Pro
     notes: adjustment.notes?.trim() ?? "",
   }));
 
-  return buildReport(selection, rows);
+  const adjustmentRanges = selectionRanges(selection);
+  rows.ledger = await getAdjustmentRowsInRanges(userId, adjustmentRanges);
+  const firstDay = adjustmentRanges[0]?.from;
+  const broughtForward = firstDay ? netIncomeOf(await getComponentsBefore(userId, firstDay)) : 0;
+
+  return buildReport(selection, rows, broughtForward);
 }
 
 /** Earliest and latest months (YYYY-MM) that have any record, for the month picker. */
