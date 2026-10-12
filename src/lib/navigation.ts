@@ -1,4 +1,5 @@
 import {
+  Boxes,
   Calculator,
   LayoutDashboard,
   TableProperties,
@@ -19,6 +20,7 @@ export const NAV_ITEMS: readonly NavItem[] = [
   { title: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
   { title: "Transactions", href: "/transactions", icon: Calculator },
   { title: "Records", href: "/records", icon: TableProperties, alsoActiveOn: ["/sales", "/gcash", "/expenses", "/debts"] },
+  { title: "Inventory", href: "/inventory", icon: Boxes },
   { title: "Reports", href: "/reports", icon: FileBarChart },
   { title: "Settings", href: "/settings", icon: Settings },
 ];

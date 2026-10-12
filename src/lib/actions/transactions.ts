@@ -27,6 +27,7 @@ export async function checkoutAction(input: unknown): Promise<ActionResult<Check
     revalidatePath("/sales");
     revalidatePath("/records");
     revalidatePath("/dashboard");
+    revalidatePath("/inventory");
     revalidatePath("/reports");
     return { ok: true, data: result };
   } catch (error) {

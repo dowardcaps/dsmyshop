@@ -66,6 +66,7 @@ model User {
   gcashTransactions  GcashTransaction[]
   excessMoney        ExcessMoney[]
   cashShorts         CashShort[]
+  inventoryItems     InventoryItem[]
   reimbursements     Reimbursement[]
   employees          Employee[]
   salaryPeriods      SalaryPeriod[]
@@ -104,12 +105,38 @@ model ServiceItem {
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
 
-  user     User         @relation(fields: [userId], references: [id], onDelete: Cascade)
-  category SaleCategory @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  user           User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  category       SaleCategory    @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  inventoryItems InventoryItem[]
 
   @@unique([userId, categoryId, name])
   @@index([userId])
   @@index([categoryId])
+}
+
+/// Stock on hand. Linked to a price-list item, the Transactions calculator subtracts the quantity sold
+/// when a sale is saved (except Printing, Xerox and bond paper, which are adjusted by hand).
+model InventoryItem {
+  id            String   @id @default(cuid())
+  userId        String
+  name          String
+  quantity      Int      @default(0)
+  /// At or below this = LOW stock (red).
+  lowLevel      Int      @default(5)
+  /// At or above this = HIGH stock (green). In between = MEDIUM (amber).
+  highLevel     Int      @default(20)
+  notes         String?
+  /// The price-list item whose sales reduce this stock. Cleared if that service is deleted.
+  serviceItemId String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  user        User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  serviceItem ServiceItem? @relation(fields: [serviceItemId], references: [id], onDelete: SetNull)
+
+  @@unique([userId, name])
+  @@unique([serviceItemId])
+  @@index([userId])
 }
 
 model Sale {

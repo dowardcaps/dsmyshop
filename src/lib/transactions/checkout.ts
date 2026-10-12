@@ -1,6 +1,7 @@
 import "server-only";
 
 import { db } from "@/lib/db";
+import { deductStockForSale } from "@/lib/inventory/service";
 import { createSale } from "@/lib/sales/service";
 import { ServiceCatalogError } from "@/lib/transactions/catalog";
 import type { SaleInput } from "@/lib/validation/sale";
@@ -43,6 +44,13 @@ export async function recordCheckout(userId: string, input: CheckoutInput): Prom
     notes: "",
     items,
   });
+
+  // Inventory only tracks stock: a problem here must never undo or hide a sale that was already saved.
+  try {
+    await deductStockForSale(userId, [...quantities].map(([serviceId, quantity]) => ({ serviceId, quantity })));
+  } catch (error) {
+    console.error("Could not update inventory after a sale", error);
+  }
 
   const sale = await db.sale.findUniqueOrThrow({
     where: { id: saleId },
