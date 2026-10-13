@@ -19,7 +19,7 @@ export function InventoryTable({ rows, editHref }: { rows: InventoryRow[]; editH
             <TableHead className="text-right">In stock</TableHead>
             <TableHead>Stock level</TableHead>
             <TableHead className="hidden md:table-cell">Low / High at</TableHead>
-            <TableHead className="hidden lg:table-cell">Sales subtract from it</TableHead>
+            <TableHead className="hidden lg:table-cell">Subtracted when sold</TableHead>
             <TableHead className="text-right">Actions</TableHead>
           </TableRow>
         </TableHeader>
@@ -39,7 +39,20 @@ export function InventoryTable({ rows, editHref }: { rows: InventoryRow[]; editH
                 <TableCell className="hidden whitespace-nowrap text-muted-foreground tabular-nums md:table-cell">
                   {row.lowLevel} / {row.highLevel}
                 </TableCell>
-                <TableCell className="hidden text-muted-foreground lg:table-cell">{row.linkedService ?? "Manual only"}</TableCell>
+                <TableCell className="hidden max-w-72 text-muted-foreground lg:table-cell">
+                  {row.links.length === 0 ? (
+                    "Manual only"
+                  ) : (
+                    <ul className="space-y-0.5 text-xs">
+                      {row.links.map((link) => (
+                        <li key={link.serviceItemId}>
+                          {link.label}
+                          {link.unitsPerSale > 1 ? <span className="tabular-nums"> (uses {link.unitsPerSale})</span> : null}
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </TableCell>
                 <TableCell>
                   <div className="flex justify-end gap-1">
                     <Button asChild variant="ghost" size="icon" aria-label={`Edit ${label}`}>

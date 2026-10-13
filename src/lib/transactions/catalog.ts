@@ -119,19 +119,20 @@ export async function deleteService(userId: string, serviceId: string): Promise<
 export async function resetServicesToDefault(userId: string): Promise<void> {
   await db.$transaction(async (tx) => {
     // Inventory links point at price-list rows, which are recreated here: remember them by name and restore them.
-    const links = await tx.inventoryItem.findMany({
-      where: { userId, serviceItemId: { not: null } },
-      select: { id: true, serviceItem: { select: { name: true, category: { select: { name: true } } } } },
+    const links = await tx.inventoryLink.findMany({
+      where: { inventoryItem: { userId } },
+      select: { inventoryItemId: true, unitsPerSale: true, serviceItem: { select: { name: true, category: { select: { name: true } } } } },
     });
     await tx.serviceItem.deleteMany({ where: { userId } });
     await seedDefaults(tx, userId);
     for (const link of links) {
-      if (!link.serviceItem) continue;
       const service = await tx.serviceItem.findFirst({
         where: { userId, name: link.serviceItem.name, category: { name: link.serviceItem.category.name } },
         select: { id: true },
       });
-      if (service) await tx.inventoryItem.update({ where: { id: link.id }, data: { serviceItemId: service.id } });
+      if (service) {
+        await tx.inventoryLink.create({ data: { inventoryItemId: link.inventoryItemId, serviceItemId: service.id, unitsPerSale: link.unitsPerSale } });
+      }
     }
   });
 }

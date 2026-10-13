@@ -21,7 +21,7 @@ import { hasActiveInventoryFilters, parseInventoryFilters } from "@/lib/validati
 
 export const metadata = { title: "Inventory" };
 
-const NEW_ITEM_DEFAULTS = { name: "", quantity: 0, lowLevel: 5, highLevel: 20, serviceItemId: "", notes: "" };
+const NEW_ITEM_DEFAULTS = { name: "", quantity: 0, lowLevel: 5, highLevel: 20, links: [], notes: "" };
 
 export default async function InventoryPage({ searchParams }: { searchParams: Promise<RawSearchParams> }) {
   const user = await requireUser();

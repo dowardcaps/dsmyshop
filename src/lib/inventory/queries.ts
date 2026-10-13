@@ -2,9 +2,17 @@ import "server-only";
 
 import type { Prisma } from "@/generated/prisma/client";
 import { db } from "@/lib/db";
+import { migrateLegacyLinks } from "@/lib/inventory/service";
 import { isExemptFromAutoDeduct, stockLevel, type StockLevel } from "@/lib/inventory/stock";
 import type { InventoryInput } from "@/lib/validation/inventory";
 import type { InventoryFilters } from "@/lib/validation/inventory-filters";
+
+export interface InventoryLinkRow {
+  serviceItemId: string;
+  /** "Rush ID · P1 - 9pcs 1x1" */
+  label: string;
+  unitsPerSale: number;
+}
 
 export interface InventoryRow {
   id: string;
@@ -14,9 +22,8 @@ export interface InventoryRow {
   highLevel: number;
   level: StockLevel;
   notes: string | null;
-  serviceItemId: string | null;
-  /** "Stationery · Ballpen", or null when stock is adjusted by hand only. */
-  linkedService: string | null;
+  /** The price-list items whose sales subtract from this stock. Empty = adjusted by hand only. */
+  links: InventoryLinkRow[];
 }
 
 export interface InventoryListResult {
@@ -29,9 +36,16 @@ export interface InventoryListResult {
   counts: Record<StockLevel, number> & { all: number };
 }
 
-type ItemWithService = Prisma.InventoryItemGetPayload<{ include: { serviceItem: { select: { name: true; category: { select: { name: true } } } } } }>;
+const include = {
+  links: {
+    orderBy: { createdAt: "asc" },
+    select: { serviceItemId: true, unitsPerSale: true, serviceItem: { select: { name: true, category: { select: { name: true } } } } },
+  },
+} as const satisfies Prisma.InventoryItemInclude;
 
-const toRow = (item: ItemWithService): InventoryRow => ({
+type ItemWithLinks = Prisma.InventoryItemGetPayload<{ include: typeof include }>;
+
+const toRow = (item: ItemWithLinks): InventoryRow => ({
   id: item.id,
   name: item.name,
   quantity: item.quantity,
@@ -39,17 +53,19 @@ const toRow = (item: ItemWithService): InventoryRow => ({
   highLevel: item.highLevel,
   level: stockLevel(item.quantity, item.lowLevel, item.highLevel),
   notes: item.notes,
-  serviceItemId: item.serviceItemId,
-  linkedService: item.serviceItem ? `${item.serviceItem.category.name} · ${item.serviceItem.name}` : null,
+  links: item.links.map((link) => ({
+    serviceItemId: link.serviceItemId,
+    label: `${link.serviceItem.category.name} · ${link.serviceItem.name}`,
+    unitsPerSale: link.unitsPerSale,
+  })),
 });
-
-const include = { serviceItem: { select: { name: true, category: { select: { name: true } } } } } as const;
 
 /**
  * Inventory is small (a shop's stock list), so it is loaded once, then searched, filtered by level and
  * paged here. That keeps the Low / Medium / High rule in one place (`stockLevel`).
  */
 export async function listInventory(userId: string, filters: InventoryFilters): Promise<InventoryListResult> {
+  await migrateLegacyLinks(userId);
   const items = await db.inventoryItem.findMany({
     where: {
       userId,
@@ -75,6 +91,7 @@ export async function listInventory(userId: string, filters: InventoryFilters): 
 }
 
 export async function getInventoryItem(userId: string, id: string): Promise<InventoryRow | null> {
+  await migrateLegacyLinks(userId);
   const item = await db.inventoryItem.findFirst({ where: { id, userId }, include });
   return item ? toRow(item) : null;
 }
@@ -85,7 +102,7 @@ export function inventoryToFormValues(row: InventoryRow): InventoryInput {
     quantity: row.quantity,
     lowLevel: row.lowLevel,
     highLevel: row.highLevel,
-    serviceItemId: row.serviceItemId ?? "",
+    links: row.links.map((link) => ({ serviceItemId: link.serviceItemId, unitsPerSale: link.unitsPerSale })),
     notes: row.notes ?? "",
   };
 }
@@ -96,8 +113,9 @@ export interface LinkableService {
 }
 
 /**
- * Price-list items an inventory item can be linked to: not Printing / Xerox / bond paper (those are never
- * subtracted automatically), and not already linked to another item.
+ * Price-list items an inventory item may subtract on: not Printing / Xerox / bond paper (never subtracted
+ * automatically), and not already used by ANOTHER inventory item (a sale would then subtract twice).
+ * Items already linked to this one stay in the list so the form can show them.
  */
 export async function listLinkableServices(userId: string, currentItemId?: string): Promise<LinkableService[]> {
   const [services, taken] = await Promise.all([
@@ -106,9 +124,12 @@ export async function listLinkableServices(userId: string, currentItemId?: strin
       orderBy: [{ category: { name: "asc" } }, { name: "asc" }],
       select: { id: true, name: true, category: { select: { name: true } } },
     }),
-    db.inventoryItem.findMany({ where: { userId, serviceItemId: { not: null }, ...(currentItemId ? { id: { not: currentItemId } } : {}) }, select: { serviceItemId: true } }),
+    db.inventoryLink.findMany({
+      where: { inventoryItem: { userId }, ...(currentItemId ? { inventoryItemId: { not: currentItemId } } : {}) },
+      select: { serviceItemId: true },
+    }),
   ]);
-  const used = new Set(taken.map((item) => item.serviceItemId));
+  const used = new Set(taken.map((link) => link.serviceItemId));
   return services
     .filter((service) => !used.has(service.id) && !isExemptFromAutoDeduct(service.category.name, service.name))
     .map((service) => ({ id: service.id, label: `${service.category.name} · ${service.name}` }));

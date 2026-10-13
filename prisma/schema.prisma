@@ -107,15 +107,15 @@ model ServiceItem {
 
   user           User            @relation(fields: [userId], references: [id], onDelete: Cascade)
   category       SaleCategory    @relation(fields: [categoryId], references: [id], onDelete: Cascade)
-  inventoryItems InventoryItem[]
+  inventoryLinks InventoryLink[]
 
   @@unique([userId, categoryId, name])
   @@index([userId])
   @@index([categoryId])
 }
 
-/// Stock on hand. Linked to a price-list item, the Transactions calculator subtracts the quantity sold
-/// when a sale is saved (except Printing, Xerox and bond paper, which are adjusted by hand).
+/// Stock on hand. Linked to price-list items (see InventoryLink), the Transactions calculator subtracts what was
+/// sold when a sale is saved (except Printing, Xerox and bond paper, which are adjusted by hand).
 model InventoryItem {
   id            String   @id @default(cuid())
   userId        String
@@ -126,17 +126,33 @@ model InventoryItem {
   /// At or above this = HIGH stock (green). In between = MEDIUM (amber).
   highLevel     Int      @default(20)
   notes         String?
-  /// The price-list item whose sales reduce this stock. Cleared if that service is deleted.
+  /// Legacy single link, replaced by InventoryLink. Copied into InventoryLink automatically, then cleared.
   serviceItemId String?
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 
-  user        User         @relation(fields: [userId], references: [id], onDelete: Cascade)
-  serviceItem ServiceItem? @relation(fields: [serviceItemId], references: [id], onDelete: SetNull)
+  user  User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  links InventoryLink[]
 
   @@unique([userId, name])
-  @@unique([serviceItemId])
   @@index([userId])
+}
+
+/// "Subtract when this is sold": one price-list item that uses up `unitsPerSale` of an inventory item for each
+/// one sold. An item can have many links (e.g. 3R photo paper used by Rush ID P1 and P6); a price-list item feeds
+/// only one inventory item.
+model InventoryLink {
+  id              String   @id @default(cuid())
+  inventoryItemId String
+  serviceItemId   String
+  unitsPerSale    Int      @default(1)
+  createdAt       DateTime @default(now())
+
+  inventoryItem InventoryItem @relation(fields: [inventoryItemId], references: [id], onDelete: Cascade)
+  serviceItem   ServiceItem   @relation(fields: [serviceItemId], references: [id], onDelete: Cascade)
+
+  @@unique([serviceItemId])
+  @@index([inventoryItemId])
 }
 
 model Sale {
