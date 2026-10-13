@@ -1,4 +1,4 @@
-export const TOOL_CATEGORIES = ["Uploads", "Calculators", "Design", "ID", "Documents"] as const;
+export const TOOL_CATEGORIES = ["Uploads", "Design", "ID", "Documents"] as const;
 export type ToolCategory = (typeof TOOL_CATEGORIES)[number];
 
 export interface ToolItem {
@@ -19,13 +19,6 @@ const ALL_TOOLS: readonly ToolItem[] = [
     href: "https://dsuploads.vercel.app/api/admin",
     description: "Upload and manage files, assets, and admin data.",
     category: "Uploads",
-  },
-  {
-    slug: "transcalc",
-    title: "Transaction Calculator",
-    href: "https://dstranscalc.vercel.app/",
-    description: "Quick transaction math and fee calculations.",
-    category: "Calculators",
   },
   {
     slug: "photocollage",
