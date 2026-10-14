@@ -408,7 +408,10 @@ model SalaryAdvance {
 model Reimbursement {
   id                String   @id @default(cuid())
   userId            String
+  /// The date the money was paid back, or the END of the period it covers. Net income and filters use this date.
   reimbursementDate DateTime @db.Date
+  /// Start of the period it covers (null = a single day, same as reimbursementDate).
+  periodStart       DateTime? @db.Date
   /// Who it was paid to and/or what for.
   description       String
   amount            Decimal  @db.Decimal(12, 2)

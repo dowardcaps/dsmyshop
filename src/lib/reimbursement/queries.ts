@@ -9,6 +9,8 @@ import type { ReimbursementFilters } from "@/lib/validation/reimbursement-filter
 export interface ReimbursementRow {
   id: string;
   reimbursementDate: Date;
+  /** Start of the covered period; equals reimbursementDate for a single day. */
+  periodStart: Date;
   description: string;
   amount: number;
   notes: string | null;
@@ -36,6 +38,7 @@ function buildWhere(userId: string, filters: ReimbursementFilters): Prisma.Reimb
 const toRow = (e: Prisma.ReimbursementGetPayload<object>): ReimbursementRow => ({
   id: e.id,
   reimbursementDate: e.reimbursementDate,
+  periodStart: e.periodStart ?? e.reimbursementDate,
   description: e.description,
   amount: e.amount.toNumber(),
   notes: e.notes,
@@ -67,5 +70,5 @@ export async function getReimbursement(userId: string, id: string): Promise<Reim
 }
 
 export function reimbursementToFormValues(row: ReimbursementRow): ReimbursementInput {
-  return { reimbursementDate: toDateInputValue(row.reimbursementDate), description: row.description, amount: row.amount, notes: row.notes ?? "" };
+  return { periodStart: toDateInputValue(row.periodStart), reimbursementDate: toDateInputValue(row.reimbursementDate), description: row.description, amount: row.amount, notes: row.notes ?? "" };
 }

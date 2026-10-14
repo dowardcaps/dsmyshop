@@ -32,8 +32,8 @@ Check: July 2026 = 17,435 + 8,020 − 8,978 − 8,720 − 49 = **7,708**, which 
 - **Debt payments**: in the sheet, payments on the shop's own debt ("bayad sa utang", "hulog sa debt") were typed as
   expenses, so they reduced net income. The Debts tab does not change net income. Record the payment as an expense
   too if it should reduce net income.
-- **Cash Out fee**: the Add transaction form fills in the charge from the sheet's fee table
-  (`src/lib/gcash/fee.ts`). Cash In and Load charges stay manual, as in the sheet. The owner can overtype the fee.
+- **Cash Out and Cash In fee**: the Add transaction form fills in the charge from the sheet's fee table
+  (`src/lib/gcash/fee.ts`). Cash In uses the same table as Cash Out; Load charges stay manual. The owner can overtype the fee.
 
 ## Known quirks in Sales.xlsx (not copied)
 

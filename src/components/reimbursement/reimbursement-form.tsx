@@ -42,12 +42,17 @@ export function ReimbursementForm({ defaultValues, reimbursementId, returnHref }
             <FieldError message={errors.description?.message} />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="reimbursementDate">Date</Label>
+            <Label htmlFor="reimbursementFrom">From</Label>
+            <Input id="reimbursementFrom" type="date" aria-invalid={!!errors.periodStart} {...register("periodStart")} />
+            <FieldError message={errors.periodStart?.message} />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="reimbursementDate">To</Label>
             <Input id="reimbursementDate" type="date" aria-invalid={!!errors.reimbursementDate} {...register("reimbursementDate")} />
             <FieldError message={errors.reimbursementDate?.message} />
           </div>
-          <div className="space-y-2">
-            <Label htmlFor="reimbursementAmount">Amount (₱)</Label>
+          <div className="space-y-2 sm:col-span-2">
+            <Label htmlFor="reimbursementAmount">Amount for this period (₱)</Label>
             <Input
               id="reimbursementAmount"
               type="number"
@@ -57,6 +62,7 @@ export function ReimbursementForm({ defaultValues, reimbursementId, returnHref }
               aria-invalid={!!errors.amount}
               {...register("amount", { valueAsNumber: true })}
             />
+            <p className="text-xs text-muted-foreground">Counted in net income on the To date.</p>
             <FieldError message={errors.amount?.message} />
           </div>
           <div className="space-y-2 sm:col-span-2">

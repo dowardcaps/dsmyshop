@@ -49,6 +49,8 @@ Net income = sales + GCash charges + excess money − expenses − reimbursement
 The **Reports** page does not include excess money or reimbursements yet.
 Needs a migration: `npm run db:migrate -- --name add_reimbursements`.
 
+**Date range:** each reimbursement has a From and To date (`periodStart` and `reimbursementDate`). The amount counts in net income, filters and reports on the **To** date; From is the start of the period it covers (empty = single day). Needs a second migration: `npm run db:migrate -- --name reimbursement_period_start` (adds a nullable `periodStart` date column; old rows are unaffected).
+
 
 ## Short tab
 

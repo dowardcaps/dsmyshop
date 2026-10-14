@@ -33,7 +33,7 @@ function FieldError({ message }: { message?: string }) {
 }
 
 export function GcashForm({ defaultValues, transactionId, returnHref }: GcashFormProps) {
-  const { form, submit, suggestCharge } = useGcashForm({ defaultValues, transactionId, returnHref });
+  const { form, submit, suggestCharge, markChargeTyped } = useGcashForm({ defaultValues, transactionId, returnHref });
   const {
     register,
     formState: { errors, isSubmitting },
@@ -102,10 +102,10 @@ export function GcashForm({ defaultValues, transactionId, returnHref }: GcashFor
               step="0.01"
               aria-invalid={!!errors.charge}
               aria-describedby="charge-help"
-              {...register("charge", { valueAsNumber: true })}
+              {...register("charge", { valueAsNumber: true, onChange: markChargeTyped })}
             />
             <p id="charge-help" className="text-xs text-muted-foreground">
-              Your fee. This is the part counted as income. Cash Out fills it in from your fee table; you can change it.
+              Your fee. This is the part counted as income. Cash Out and Cash In fill it in from your fee table; you can change it.
             </p>
             <FieldError message={errors.charge?.message} />
           </div>

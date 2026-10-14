@@ -1,11 +1,12 @@
 "use client";
 
+import { useRef } from "react";
 import { useRouter } from "next/navigation";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm, useWatch } from "react-hook-form";
 import { toast } from "sonner";
 
-import { cashOutFee } from "@/lib/gcash/fee";
+import { AUTO_FEE_TYPES, gcashFee } from "@/lib/gcash/fee";
 import { createGcashAction, updateGcashAction } from "@/lib/actions/gcash";
 import { gcashInputSchema, type GcashInput } from "@/lib/validation/gcash";
 
@@ -22,13 +23,16 @@ export function useGcashForm({ defaultValues, transactionId, returnHref }: UseGc
   const form = useForm<GcashInput>({ resolver: zodResolver(gcashInputSchema), defaultValues });
   const [amount, charge] = useWatch({ control: form.control, name: ["amount", "charge"] });
 
-  // Reading dirtyFields subscribes this hook to it: once the owner types a charge, it is never overwritten.
-  const chargeEdited = Boolean(form.formState.dirtyFields.charge);
+  // Set only by the owner typing in the charge box (setValue never fires it): once typed, the charge is never overwritten.
+  const chargeTyped = useRef(false);
+  const markChargeTyped = () => {
+    chargeTyped.current = true;
+  };
 
-  /** Cash Out: fill in the fee from the Sales.xlsx fee table, until the owner types their own. */
+  /** Cash Out and Cash In: fill in the fee from the Sales.xlsx fee table, until the owner types their own. */
   const suggestCharge = (type: string, rawAmount: number) => {
-    if (chargeEdited || type !== "CASH_OUT") return;
-    const fee = cashOutFee(rawAmount);
+    if (chargeTyped.current || !AUTO_FEE_TYPES.includes(type)) return;
+    const fee = gcashFee(rawAmount);
     if (fee !== null) form.setValue("charge", fee);
   };
 
@@ -47,6 +51,7 @@ export function useGcashForm({ defaultValues, transactionId, returnHref }: UseGc
     form,
     submit,
     suggestCharge,
+    markChargeTyped,
     /** What the customer pays or receives in total, shown as a hint only. */
     amountHint: Number.isFinite(amount) ? amount : 0,
     chargeHint: Number.isFinite(charge) ? charge : 0,

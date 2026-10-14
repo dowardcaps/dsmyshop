@@ -12,6 +12,7 @@ export class ReimbursementServiceError extends ServiceError {}
 function toData(input: ReimbursementInput) {
   return {
     reimbursementDate: parseDateInput(input.reimbursementDate),
+    periodStart: input.periodStart === input.reimbursementDate ? null : parseDateInput(input.periodStart),
     description: input.description,
     amount: new Prisma.Decimal(input.amount.toFixed(2)),
     notes: input.notes || null,

@@ -67,7 +67,7 @@ export async function ReimbursementPanel({ userId, filters, hrefs, openNew, edit
 
       {openNew ? (
         <RecordDialog title="Add reimbursement" description="Money paid back for a business cost. Subtracted from net income." closeHref={hrefs.closeHref}>
-          <ReimbursementForm returnHref={hrefs.closeHref} defaultValues={{ reimbursementDate: todayInManila(), description: "", amount: Number.NaN, notes: "" }} />
+          <ReimbursementForm returnHref={hrefs.closeHref} defaultValues={{ periodStart: todayInManila(), reimbursementDate: todayInManila(), description: "", amount: Number.NaN, notes: "" }} />
         </RecordDialog>
       ) : null}
 

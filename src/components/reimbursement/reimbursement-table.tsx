@@ -14,7 +14,7 @@ export function ReimbursementTable({ rows, editHref }: { rows: ReimbursementRow[
       <Table>
         <TableHeader>
           <TableRow className="hover:bg-transparent">
-            <TableHead>Date</TableHead>
+            <TableHead>Date / period</TableHead>
             <TableHead>Paid to / for what</TableHead>
             <TableHead className="text-right">Amount</TableHead>
             <TableHead>Notes</TableHead>
@@ -23,10 +23,13 @@ export function ReimbursementTable({ rows, editHref }: { rows: ReimbursementRow[
         </TableHeader>
         <TableBody>
           {rows.map((row) => {
-            const label = `reimbursement ${row.description} of ${formatPeso(row.amount)} on ${formatDate(row.reimbursementDate)}`;
+            const sameDay = row.periodStart.getTime() === row.reimbursementDate.getTime();
+            const dateText = sameDay ? formatDate(row.reimbursementDate) : `${formatDate(row.periodStart)} – ${formatDate(row.reimbursementDate)}`;
+            const period = sameDay ? `on ${dateText}` : `for ${dateText}`;
+            const label = `reimbursement ${row.description} of ${formatPeso(row.amount)} ${period}`;
             return (
               <TableRow key={row.id}>
-                <TableCell className="whitespace-nowrap">{formatDate(row.reimbursementDate)}</TableCell>
+                <TableCell className="whitespace-nowrap">{dateText}</TableCell>
                 <TableCell className="max-w-64 truncate font-medium">{row.description}</TableCell>
                 <TableCell className="text-right font-medium tabular-nums">{formatPeso(row.amount)}</TableCell>
                 <TableCell className="max-w-72 truncate text-muted-foreground">{row.notes ?? "-"}</TableCell>
