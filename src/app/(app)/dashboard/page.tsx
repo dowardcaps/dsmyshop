@@ -1,11 +1,10 @@
 import Link from "next/link";
 import { LayoutDashboard, Plus } from "lucide-react";
 
-import { BreakdownCard } from "@/components/dashboard/breakdown-card";
+import { MoneyOverview } from "@/components/dashboard/money-overview";
 import { DashboardCharts } from "@/components/dashboard/dashboard-charts";
 import { PeriodFilter } from "@/components/dashboard/period-filter";
 import { RecentTransactions } from "@/components/dashboard/recent-transactions";
-import { SummaryCards } from "@/components/dashboard/summary-cards";
 import { PageHeader } from "@/components/layout/page-header";
 import { EmptyState } from "@/components/shared/empty-state";
 import { Button } from "@/components/ui/button";
@@ -54,11 +53,10 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
     <div className="space-y-6">
       <PageHeader
         title="Dashboard"
-        description={`Financial overview for ${label}.`}
+        description={`How the shop did in ${label}.`}
         actions={<PeriodFilter period={period} years={yearOptions(data.earliestYear, period.year)} />}
       />
-      <SummaryCards data={data} />
-      <BreakdownCard data={data} />
+      <MoneyOverview data={data} />
       <DashboardCharts monthly={data.monthly} salesByCategory={data.salesByCategory} year={period.year} periodText={label} />
       <RecentTransactions rows={data.recent} periodText={label} />
     </div>

@@ -41,3 +41,9 @@ Check: July 2026 = 17,435 + 8,020 − 8,978 − 8,720 − 49 = **7,708**, which 
 - Mar–Jun 2026: some daily subtotals were adjusted by hand (e.g. `=SUM(C36,G36)-I6`).
 - Sep 2026: item rows add up to ₱5 more than TOTAL SALES.
 - Oct 2026: TOTAL SALES is entered as sales − expenses; the final TOTAL NET INCOME is still right.
+
+## How the Dashboard shows it
+The Dashboard uses plain words, with the same numbers underneath (`src/lib/dashboard/overview.ts`, `components/dashboard/money-overview.tsx`):
+- **Money in** = Sales + GCash fees + Excess money. **Money out** = Expenses + Reimbursements + Salaries paid + Short. **Profit** = in − out (the sheet's NET INCOME).
+- **Running total** = profit of earlier months + this period (the sheet's TOTAL NET INCOME).
+- Debts and GCash cash movements are shown apart because they are not income.
