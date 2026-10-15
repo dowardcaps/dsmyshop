@@ -37,6 +37,12 @@ enum GcashProvider {
   OTHER
 }
 
+enum ShopDayStatus {
+  OPEN
+  HALF_DAY
+  CLOSED
+}
+
 enum DebtStatus {
   UNPAID
   PARTIALLY_PAID
@@ -67,6 +73,7 @@ model User {
   excessMoney        ExcessMoney[]
   cashShorts         CashShort[]
   inventoryItems     InventoryItem[]
+  shopDays           ShopDay[]
   reimbursements     Reimbursement[]
   employees          Employee[]
   salaryPeriods      SalaryPeriod[]
@@ -422,4 +429,20 @@ model Reimbursement {
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId, reimbursementDate])
+}
+
+/// Whether the shop was open, open for half a day, or closed on a calendar day. A day with no row is "not set".
+model ShopDay {
+  id        String         @id @default(cuid())
+  userId    String
+  dayDate   DateTime       @db.Date
+  status    ShopDayStatus
+  /// Optional reason, e.g. "Holiday" or "Power outage".
+  note      String?
+  createdAt DateTime       @default(now())
+  updatedAt DateTime       @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, dayDate])
 }
