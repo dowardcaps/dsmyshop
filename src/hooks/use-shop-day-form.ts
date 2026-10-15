@@ -42,7 +42,7 @@ export function useShopDayForm({
     const { fromDate, toDate } = form.getValues();
     const result = await clearShopDaysAction({ fromDate, toDate });
     if (!result.ok) return void toast.error(result.error);
-    done("Cleared. Those days are back to not set.");
+    done("Cleared. Those days are back to their default.");
   }
 
   return { form, submit, clear };

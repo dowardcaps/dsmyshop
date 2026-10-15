@@ -3,13 +3,13 @@ import Link from "next/link";
 import type { DailyIncome } from "@/lib/finance/ledger";
 import { formatPeso } from "@/lib/format";
 import { SHOP_DAY_LABELS, SHOP_DAY_STYLES } from "@/lib/calendar/constants";
-import type { ShopDayRow } from "@/lib/calendar/queries";
+import type { ResolvedDay } from "@/lib/calendar/defaults";
 import { WEEKDAYS, buildMonthGrid } from "@/lib/calendar/grid";
 import { cn } from "@/lib/utils";
 
 interface CalendarGridProps {
   month: string;
-  days: Map<string, ShopDayRow>;
+  days: Map<string, ResolvedDay>;
   /** Sales + GCash charges + excess money per day. */
   income: Map<string, DailyIncome>;
   today: string;
@@ -43,7 +43,7 @@ export function CalendarGrid({
         {weeks.flat().map((cell) => {
           const row = cell.inMonth ? days.get(cell.date) : undefined;
           const earned = cell.inMonth ? income.get(cell.date) : undefined;
-          const label = `${cell.date}: ${row ? SHOP_DAY_LABELS[row.status] : "not set"}${row?.note ? `, ${row.note}` : ""}${earned ? `, earned ${formatPeso(earned.totalCents / 100)}` : ""}`;
+          const label = `${cell.date}: ${row ? SHOP_DAY_LABELS[row.status] : "not set"}${row?.isDefault ? " (Sunday default)" : ""}${row?.note ? `, ${row.note}` : ""}${earned ? `, earned ${formatPeso(earned.totalCents / 100)}` : ""}`;
           if (!cell.inMonth)
             return (
               <div
@@ -60,6 +60,7 @@ export function CalendarGrid({
               aria-label={label}
               data-date={cell.date}
               data-status={row?.status ?? "NONE"}
+              data-default={row?.isDefault ? "true" : undefined}
               className={cn(
                 "flex min-h-16 flex-col gap-0.5 [&>[data-testid=day-income]]:mt-auto border-l-4 bg-card p-1.5 text-left outline-none transition-colors hover:brightness-95 focus-visible:z-10 focus-visible:ring-[3px] focus-visible:ring-ring sm:min-h-24 sm:p-2",
                 row
@@ -83,9 +84,9 @@ export function CalendarGrid({
                   {SHOP_DAY_LABELS[row.status]}
                 </span>
               ) : null}
-              {row?.note ? (
+              {row?.note || row?.isDefault ? (
                 <span className="line-clamp-2 hidden text-[11px] leading-tight opacity-80 sm:block">
-                  {row.note}
+                  {row.note ?? "Sunday"}
                 </span>
               ) : null}
               {earned ? (

@@ -2,6 +2,7 @@ import { PageHeader } from "@/components/layout/page-header";
 import { CalendarGrid } from "@/components/calendar/calendar-grid";
 import { CalendarLegend } from "@/components/calendar/calendar-legend";
 import { DayEarnings } from "@/components/calendar/day-earnings";
+import { resolveMonth } from "@/lib/calendar/defaults";
 import { DayForm } from "@/components/calendar/day-form";
 import { MonthNav } from "@/components/calendar/month-nav";
 import { RecordDialog } from "@/components/records/record-dialog";
@@ -40,7 +41,7 @@ export default async function CalendarPage({
   const currentMonth = today.slice(0, 7);
   const month = parseMonthParam(firstParam(params.month));
   const day = parseDayParam(firstParam(params.day));
-  const [days, income] = await Promise.all([
+  const [saved, income] = await Promise.all([
     listShopDays(user.id, month),
     getDailyIncome(user.id, monthStart(month), monthEnd(month)),
   ]);
@@ -49,6 +50,7 @@ export default async function CalendarPage({
     0,
   );
 
+  const days = resolveMonth(month, saved);
   const counts = Object.fromEntries(
     SHOP_DAY_STATUSES.map((s) => [s, 0]),
   ) as Record<ShopDayStatusValue, number>;
@@ -59,6 +61,7 @@ export default async function CalendarPage({
     month === currentMonth ? "/calendar" : `/calendar?month=${month}`;
   const dayHref = (date: string) => `/calendar?month=${month}&day=${date}`;
   const existing = day ? days.get(day) : undefined;
+  const hasSavedStatus = day ? saved.has(day) : false;
   const dayIncome = day ? income.get(day) : undefined;
 
   return (
@@ -101,7 +104,7 @@ export default async function CalendarPage({
           <DayForm
             key={day}
             returnHref={closeHref}
-            hasStatus={!!existing}
+            hasStatus={hasSavedStatus}
             defaultValues={{
               fromDate: day,
               toDate: day,

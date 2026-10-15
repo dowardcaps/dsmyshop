@@ -31,3 +31,6 @@ export const SHOP_DAY_STYLES: Record<
 
 /** Longest range that can be set in one go (about two months). */
 export const MAX_RANGE_DAYS = 62;
+
+/** Weekdays that count as closed unless the owner sets that day otherwise (0 = Sunday). */
+export const DEFAULT_CLOSED_WEEKDAYS: readonly number[] = [0];

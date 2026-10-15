@@ -122,7 +122,7 @@ export function DayForm({
               onClick={clear}
               disabled={isSubmitting}
             >
-              Clear status
+              Reset to default
             </Button>
           ) : null}
         </div>
