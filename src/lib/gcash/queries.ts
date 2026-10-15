@@ -3,7 +3,10 @@ import "server-only";
 import type { Prisma } from "@/generated/prisma/client";
 import { db } from "@/lib/db";
 import { parseDateInput, toDateInputValue } from "@/lib/dates";
-import type { GcashProviderValue, GcashTransactionTypeValue } from "@/lib/gcash/constants";
+import type {
+  GcashProviderValue,
+  GcashTransactionTypeValue,
+} from "@/lib/gcash/constants";
 import type { GcashInput } from "@/lib/validation/gcash";
 import type { GcashFilters } from "@/lib/validation/gcash-filters";
 
@@ -28,7 +31,10 @@ export interface GcashListResult {
   pageCount: number;
 }
 
-function buildWhere(userId: string, filters: GcashFilters): Prisma.GcashTransactionWhereInput {
+function buildWhere(
+  userId: string,
+  filters: GcashFilters,
+): Prisma.GcashTransactionWhereInput {
   const { q, from, to, type, provider } = filters;
   return {
     userId,
@@ -56,12 +62,18 @@ const toRow = (t: Prisma.GcashTransactionGetPayload<object>): GcashRow => ({
   notes: t.notes,
 });
 
-export async function listGcashTransactions(userId: string, filters: GcashFilters): Promise<GcashListResult> {
+export async function listGcashTransactions(
+  userId: string,
+  filters: GcashFilters,
+): Promise<GcashListResult> {
   const where = buildWhere(userId, filters);
 
   const [total, aggregate] = await Promise.all([
     db.gcashTransaction.count({ where }),
-    db.gcashTransaction.aggregate({ where, _sum: { amount: true, charge: true } }),
+    db.gcashTransaction.aggregate({
+      where,
+      _sum: { amount: true, charge: true },
+    }),
   ]);
 
   const pageCount = Math.max(1, Math.ceil(total / filters.pageSize));
@@ -84,8 +96,13 @@ export async function listGcashTransactions(userId: string, filters: GcashFilter
   };
 }
 
-export async function getGcashTransaction(userId: string, id: string): Promise<GcashRow | null> {
-  const transaction = await db.gcashTransaction.findFirst({ where: { id, userId } });
+export async function getGcashTransaction(
+  userId: string,
+  id: string,
+): Promise<GcashRow | null> {
+  const transaction = await db.gcashTransaction.findFirst({
+    where: { id, userId },
+  });
   return transaction ? toRow(transaction) : null;
 }
 

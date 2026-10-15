@@ -74,6 +74,7 @@ model User {
   cashShorts         CashShort[]
   inventoryItems     InventoryItem[]
   shopDays           ShopDay[]
+  gcashBalanceChecks GcashBalanceCheck[]
   reimbursements     Reimbursement[]
   employees          Employee[]
   salaryPeriods      SalaryPeriod[]
@@ -445,4 +446,17 @@ model ShopDay {
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([userId, dayDate])
+}
+
+/// A "the GCash app shows this much" checkpoint typed in by the owner. The current balance is the latest checkpoint
+/// plus the effect of every GCash transaction recorded after it (Cash Out adds, Cash In and Load subtract).
+model GcashBalanceCheck {
+  id        String   @id @default(cuid())
+  userId    String
+  balance   Decimal  @db.Decimal(12, 2)
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, createdAt])
 }

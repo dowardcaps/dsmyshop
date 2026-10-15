@@ -22,19 +22,37 @@ function toData(input: GcashInput) {
   };
 }
 
-export async function createGcashTransaction(userId: string, input: GcashInput): Promise<string> {
-  const created = await db.gcashTransaction.create({ data: { userId, ...toData(input) }, select: { id: true } });
+export async function createGcashTransaction(
+  userId: string,
+  input: GcashInput,
+): Promise<string> {
+  const created = await db.gcashTransaction.create({
+    data: { userId, ...toData(input) },
+    select: { id: true },
+  });
   return created.id;
 }
 
-export async function updateGcashTransaction(userId: string, id: string, input: GcashInput): Promise<string> {
+export async function updateGcashTransaction(
+  userId: string,
+  id: string,
+  input: GcashInput,
+): Promise<string> {
   // updateMany so the userId check and the write are one atomic statement.
-  const { count } = await db.gcashTransaction.updateMany({ where: { id, userId }, data: toData(input) });
+  const { count } = await db.gcashTransaction.updateMany({
+    where: { id, userId },
+    data: toData(input),
+  });
   if (count === 0) throw new GcashServiceError("Transaction not found.");
   return id;
 }
 
-export async function deleteGcashTransaction(userId: string, id: string): Promise<void> {
-  const { count } = await db.gcashTransaction.deleteMany({ where: { id, userId } });
+export async function deleteGcashTransaction(
+  userId: string,
+  id: string,
+): Promise<void> {
+  const { count } = await db.gcashTransaction.deleteMany({
+    where: { id, userId },
+  });
   if (count === 0) throw new GcashServiceError("Transaction not found.");
 }

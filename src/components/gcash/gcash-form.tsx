@@ -32,8 +32,16 @@ function FieldError({ message }: { message?: string }) {
   ) : null;
 }
 
-export function GcashForm({ defaultValues, transactionId, returnHref }: GcashFormProps) {
-  const { form, submit, suggestCharge, markChargeTyped } = useGcashForm({ defaultValues, transactionId, returnHref });
+export function GcashForm({
+  defaultValues,
+  transactionId,
+  returnHref,
+}: GcashFormProps) {
+  const { form, submit, suggestCharge, markChargeTyped } = useGcashForm({
+    defaultValues,
+    transactionId,
+    returnHref,
+  });
   const {
     register,
     formState: { errors, isSubmitting },
@@ -45,14 +53,22 @@ export function GcashForm({ defaultValues, transactionId, returnHref }: GcashFor
         <CardContent className="grid gap-4 sm:grid-cols-2">
           <div className="space-y-2">
             <Label htmlFor="transactionDate">Date</Label>
-            <Input id="transactionDate" type="date" aria-invalid={!!errors.transactionDate} {...register("transactionDate")} />
+            <Input
+              id="transactionDate"
+              type="date"
+              aria-invalid={!!errors.transactionDate}
+              {...register("transactionDate")}
+            />
             <FieldError message={errors.transactionDate?.message} />
           </div>
           <div className="space-y-2">
             <Label htmlFor="transactionType">Type</Label>
             <Select
               id="transactionType"
-              {...register("transactionType", { onChange: (event) => suggestCharge(event.target.value, form.getValues("amount")) })}
+              {...register("transactionType", {
+                onChange: (event) =>
+                  suggestCharge(event.target.value, form.getValues("amount")),
+              })}
             >
               {GCASH_TRANSACTION_TYPES.map((type) => (
                 <option key={type} value={type}>
@@ -84,7 +100,11 @@ export function GcashForm({ defaultValues, transactionId, returnHref }: GcashFor
               aria-describedby="amount-help"
               {...register("amount", {
                 valueAsNumber: true,
-                onChange: (event) => suggestCharge(form.getValues("transactionType"), Number(event.target.value)),
+                onChange: (event) =>
+                  suggestCharge(
+                    form.getValues("transactionType"),
+                    Number(event.target.value),
+                  ),
               })}
             />
             <p id="amount-help" className="text-xs text-muted-foreground">
@@ -102,16 +122,25 @@ export function GcashForm({ defaultValues, transactionId, returnHref }: GcashFor
               step="0.01"
               aria-invalid={!!errors.charge}
               aria-describedby="charge-help"
-              {...register("charge", { valueAsNumber: true, onChange: markChargeTyped })}
+              {...register("charge", {
+                valueAsNumber: true,
+                onChange: markChargeTyped,
+              })}
             />
             <p id="charge-help" className="text-xs text-muted-foreground">
-              Your fee. This is the part counted as income. Cash Out and Cash In fill it in from your fee table; you can change it.
+              Your fee. This is the part counted as income. Cash Out and Cash In
+              fill it in from your fee table; you can change it.
             </p>
             <FieldError message={errors.charge?.message} />
           </div>
           <div className="space-y-2 sm:col-span-2">
             <Label htmlFor="notes">Notes (optional)</Label>
-            <Textarea id="notes" rows={2} aria-invalid={!!errors.notes} {...register("notes")} />
+            <Textarea
+              id="notes"
+              rows={2}
+              aria-invalid={!!errors.notes}
+              {...register("notes")}
+            />
             <FieldError message={errors.notes?.message} />
           </div>
         </CardContent>
