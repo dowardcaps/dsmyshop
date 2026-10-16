@@ -46,3 +46,6 @@ apply to rows currently shown, so searching first narrows what you change.
 - `src/lib/actions/transactions.ts` server actions
 - `src/hooks/use-transaction-cart.ts`, `use-checkout.ts`, `use-service-form.ts`
 - `src/components/transactions/*`
+
+## Category filter
+Next to the search box there is a **category dropdown** ("All categories" plus every category in the price list). It combines with the search text, resets to page 1, and is remembered per transaction tab (saved with the cart). Items already added to the order stay in it while you switch categories. **Clear filters** resets both the search and the category; Reset order and saving a sale clear them too. Logic: `categoriesOf` / `filterServices` / `setCategory` in `src/lib/transactions/cart.ts`.

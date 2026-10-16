@@ -20,6 +20,8 @@ export interface CartTab {
   /** serviceId -> quantity (only quantities above zero are stored). */
   cart: Record<string, number>;
   searchTerm: string;
+  /** Category filter: a category name, or "" for all categories. */
+  category: string;
   page: number;
 }
 
@@ -32,7 +34,16 @@ export const INITIAL_TAB_ID = "tab-initial";
 
 export function createInitialState(): CartState {
   return {
-    tabs: [{ id: INITIAL_TAB_ID, name: "Transaction 1", cart: {}, searchTerm: "", page: 1 }],
+    tabs: [
+      {
+        id: INITIAL_TAB_ID,
+        name: "Transaction 1",
+        cart: {},
+        searchTerm: "",
+        category: "",
+        page: 1,
+      },
+    ],
     activeId: INITIAL_TAB_ID,
   };
 }
@@ -63,33 +74,59 @@ export function sanitizeState(raw: unknown): CartState {
     const cart: Record<string, number> = {};
     if (tab.cart && typeof tab.cart === "object") {
       for (const [serviceId, qty] of Object.entries(tab.cart)) {
-        if (typeof qty === "number" && Number.isInteger(qty) && qty > 0) cart[serviceId] = Math.min(qty, MAX_QUANTITY);
+        if (typeof qty === "number" && Number.isInteger(qty) && qty > 0)
+          cart[serviceId] = Math.min(qty, MAX_QUANTITY);
       }
     }
     tabs.push({
       id: tab.id,
-      name: typeof tab.name === "string" && tab.name ? tab.name : `Transaction ${nextTabNumber(tabs.map((t) => t.name))}`,
+      name:
+        typeof tab.name === "string" && tab.name
+          ? tab.name
+          : `Transaction ${nextTabNumber(tabs.map((t) => t.name))}`,
       cart,
       searchTerm: typeof tab.searchTerm === "string" ? tab.searchTerm : "",
-      page: typeof tab.page === "number" && tab.page >= 1 ? Math.floor(tab.page) : 1,
+      category: typeof tab.category === "string" ? tab.category : "",
+      page:
+        typeof tab.page === "number" && tab.page >= 1
+          ? Math.floor(tab.page)
+          : 1,
     });
   }
   if (tabs.length === 0) return createInitialState();
-  const activeId = tabs.some((t) => t.id === value.activeId) ? (value.activeId as string) : tabs[0].id;
+  const activeId = tabs.some((t) => t.id === value.activeId)
+    ? (value.activeId as string)
+    : tabs[0].id;
   return { tabs, activeId };
 }
 
-function updateActive(state: CartState, patch: (tab: CartTab) => CartTab): CartState {
-  return { ...state, tabs: state.tabs.map((tab) => (tab.id === state.activeId ? patch(tab) : tab)) };
+function updateActive(
+  state: CartState,
+  patch: (tab: CartTab) => CartTab,
+): CartState {
+  return {
+    ...state,
+    tabs: state.tabs.map((tab) =>
+      tab.id === state.activeId ? patch(tab) : tab,
+    ),
+  };
 }
 
 export function addTab(state: CartState, id: string): CartState {
   const name = `Transaction ${nextTabNumber(state.tabs.map((t) => t.name))}`;
-  return { tabs: [...state.tabs, { id, name, cart: {}, searchTerm: "", page: 1 }], activeId: id };
+  return {
+    tabs: [
+      ...state.tabs,
+      { id, name, cart: {}, searchTerm: "", category: "", page: 1 },
+    ],
+    activeId: id,
+  };
 }
 
 export function selectTab(state: CartState, id: string): CartState {
-  return state.tabs.some((t) => t.id === id) && id !== state.activeId ? { ...state, activeId: id } : state;
+  return state.tabs.some((t) => t.id === id) && id !== state.activeId
+    ? { ...state, activeId: id }
+    : state;
 }
 
 /** The last remaining tab cannot be closed. */
@@ -98,12 +135,21 @@ export function removeTab(state: CartState, id: string): CartState {
   const index = state.tabs.findIndex((t) => t.id === id);
   if (index === -1) return state;
   const tabs = state.tabs.filter((t) => t.id !== id);
-  const activeId = state.activeId === id ? tabs[Math.min(index, tabs.length - 1)].id : state.activeId;
+  const activeId =
+    state.activeId === id
+      ? tabs[Math.min(index, tabs.length - 1)].id
+      : state.activeId;
   return { tabs, activeId };
 }
 
-export function setQuantity(state: CartState, serviceId: string, quantity: number): CartState {
-  const qty = Number.isFinite(quantity) ? Math.min(Math.max(Math.floor(quantity), 0), MAX_QUANTITY) : 0;
+export function setQuantity(
+  state: CartState,
+  serviceId: string,
+  quantity: number,
+): CartState {
+  const qty = Number.isFinite(quantity)
+    ? Math.min(Math.max(Math.floor(quantity), 0), MAX_QUANTITY)
+    : 0;
   return updateActive(state, (tab) => {
     const cart = { ...tab.cart };
     if (qty <= 0) delete cart[serviceId];
@@ -112,7 +158,11 @@ export function setQuantity(state: CartState, serviceId: string, quantity: numbe
   });
 }
 
-export function changeQuantity(state: CartState, serviceId: string, delta: number): CartState {
+export function changeQuantity(
+  state: CartState,
+  serviceId: string,
+  delta: number,
+): CartState {
   const active = state.tabs.find((t) => t.id === state.activeId);
   return setQuantity(state, serviceId, (active?.cart[serviceId] ?? 0) + delta);
 }
@@ -121,20 +171,52 @@ export function setSearchTerm(state: CartState, term: string): CartState {
   return updateActive(state, (tab) => ({ ...tab, searchTerm: term, page: 1 }));
 }
 
+export function setCategory(state: CartState, category: string): CartState {
+  return updateActive(state, (tab) => ({ ...tab, category, page: 1 }));
+}
+
 export function setPage(state: CartState, page: number): CartState {
-  return updateActive(state, (tab) => ({ ...tab, page: Math.max(1, Math.floor(page)) }));
+  return updateActive(state, (tab) => ({
+    ...tab,
+    page: Math.max(1, Math.floor(page)),
+  }));
 }
 
-/** Empties the active cart and its search box (used by Reset and after a sale is saved). */
+/** Empties the active cart and its search box and category filter (used by Reset and after a sale is saved). */
 export function clearActiveCart(state: CartState): CartState {
-  return updateActive(state, (tab) => ({ ...tab, cart: {}, searchTerm: "", page: 1 }));
+  return updateActive(state, (tab) => ({
+    ...tab,
+    cart: {},
+    searchTerm: "",
+    category: "",
+    page: 1,
+  }));
 }
 
-export function filterServices(services: readonly PosService[], term: string): PosService[] {
+/** The distinct category names of the services, in alphabetical order. */
+export function categoriesOf(services: readonly PosService[]): string[] {
+  return [...new Set(services.map((s) => s.categoryName))].sort((a, b) =>
+    a.localeCompare(b),
+  );
+}
+
+/** Services matching the search text and, when one is chosen, belonging to that category. */
+export function filterServices(
+  services: readonly PosService[],
+  term: string,
+  category = "",
+): PosService[] {
   const needle = term.trim().toLowerCase();
+  const inCategory = category
+    ? services.filter((s) => s.categoryName === category)
+    : services;
   const matches = needle
-    ? services.filter((s) => s.name.toLowerCase().includes(needle) || s.categoryName.toLowerCase().includes(needle))
-    : [...services];
+    ? inCategory.filter(
+        (s) =>
+          s.name.toLowerCase().includes(needle) ||
+          s.categoryName.toLowerCase().includes(needle),
+      )
+    : [...inCategory];
   return matches.sort((a, b) => a.categoryName.localeCompare(b.categoryName));
 }
 
@@ -164,7 +246,10 @@ export interface CartSummary {
   items: { serviceId: string; quantity: number }[];
 }
 
-export function summarizeCart(services: readonly PosService[], cart: Record<string, number>): CartSummary {
+export function summarizeCart(
+  services: readonly PosService[],
+  cart: Record<string, number>,
+): CartSummary {
   const byCategory = new Map<string, SummaryLine[]>();
   const items: CartSummary["items"] = [];
   let itemCount = 0;
@@ -193,7 +278,9 @@ export function summarizeCart(services: readonly PosService[], cart: Record<stri
 
 /** The multi-line "[Printing] ..." text, same layout as the original Copy Summary. */
 export function buildSummaryText(groups: readonly SummaryGroup[]): string {
-  return groups.map((g) => `[${g.category}]\n${g.lines.map((l) => l.text).join("\n")}`).join("\n\n");
+  return groups
+    .map((g) => `[${g.category}]\n${g.lines.map((l) => l.text).join("\n")}`)
+    .join("\n\n");
 }
 
 /** One "Details <tab> Amount" row that pastes into Excel as two columns (details stay in one cell). */

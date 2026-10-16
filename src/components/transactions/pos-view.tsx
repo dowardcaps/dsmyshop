@@ -18,19 +18,29 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
+import { Select } from "@/components/ui/select";
 import { useCheckout } from "@/hooks/use-checkout";
 import { useTransactionCart } from "@/hooks/use-transaction-cart";
 import type { PosService } from "@/lib/transactions/cart";
 
 export function PosView({ services }: { services: PosService[] }) {
   const cart = useTransactionCart(services);
-  const checkout = useCheckout({ items: cart.summary.items, onSaved: cart.clearCart });
+  const checkout = useCheckout({
+    items: cart.summary.items,
+    onSaved: cart.clearCart,
+  });
   const [payOpen, setPayOpen] = useState(false);
   const [resetOpen, setResetOpen] = useState(false);
 
   return (
     <div className="space-y-4">
-      <TransactionTabs tabs={cart.tabs} activeId={cart.active.id} onSelect={cart.selectTab} onAdd={cart.addTab} onRemove={cart.removeTab} />
+      <TransactionTabs
+        tabs={cart.tabs}
+        activeId={cart.active.id}
+        onSelect={cart.selectTab}
+        onAdd={cart.addTab}
+        onRemove={cart.removeTab}
+      />
 
       <div className="flex flex-wrap items-center gap-2">
         <div className="relative min-w-56 flex-1">
@@ -44,10 +54,36 @@ export function PosView({ services }: { services: PosService[] }) {
             className="pl-9"
           />
         </div>
-        <Button type="button" variant="outline" onClick={() => cart.setSearchTerm("")} disabled={!cart.active.searchTerm}>
-          Clear search
+        <Select
+          value={cart.category}
+          onChange={(event) => cart.setCategory(event.target.value)}
+          aria-label="Filter by category"
+          className="w-auto min-w-44 sm:w-52"
+        >
+          <option value="">All categories</option>
+          {cart.categories.map((name) => (
+            <option key={name} value={name}>
+              {name}
+            </option>
+          ))}
+        </Select>
+        <Button
+          type="button"
+          variant="outline"
+          onClick={() => {
+            cart.setSearchTerm("");
+            cart.setCategory("");
+          }}
+          disabled={!cart.active.searchTerm && !cart.category}
+        >
+          Clear filters
         </Button>
-        <Button type="button" variant="destructive" onClick={() => setResetOpen(true)} disabled={cart.summary.items.length === 0}>
+        <Button
+          type="button"
+          variant="destructive"
+          onClick={() => setResetOpen(true)}
+          disabled={cart.summary.items.length === 0}
+        >
           Reset order
         </Button>
       </div>
@@ -65,17 +101,30 @@ export function PosView({ services }: { services: PosService[] }) {
         />
         {/* On wide screens the panel is pinned inside this box, so it is always exactly as tall as the table. */}
         <div className="lg:relative">
-          <SummaryPanel summary={cart.summary} checkout={checkout} onPay={() => setPayOpen(true)} />
+          <SummaryPanel
+            summary={cart.summary}
+            checkout={checkout}
+            onPay={() => setPayOpen(true)}
+          />
         </div>
       </div>
 
-      <PaymentDialog open={payOpen} onOpenChange={setPayOpen} totalCents={cart.summary.totalCents} saving={checkout.saving} onConfirm={checkout.save} />
+      <PaymentDialog
+        open={payOpen}
+        onOpenChange={setPayOpen}
+        totalCents={cart.summary.totalCents}
+        saving={checkout.saving}
+        onConfirm={checkout.save}
+      />
 
       <Dialog open={resetOpen} onOpenChange={setResetOpen}>
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Clear this order?</DialogTitle>
-            <DialogDescription>All quantities in {cart.active.name} go back to zero. Nothing is saved to Sales.</DialogDescription>
+            <DialogDescription>
+              All quantities in {cart.active.name} go back to zero. Nothing is
+              saved to Sales.
+            </DialogDescription>
           </DialogHeader>
           <DialogFooter>
             <DialogClose asChild>
