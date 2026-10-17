@@ -13,8 +13,11 @@ export interface GcashBalanceSummary {
   balanceCents: number;
   checkpointCents: number;
   checkpointAt: Date | null;
-  /** Transactions recorded since the checkpoint. */
+  /** GCash transactions recorded since the checkpoint. */
   transactionsSince: number;
+  /** Sales paid with GCash since the checkpoint, and their total. */
+  gcashSalesSince: number;
+  gcashSalesCents: number;
 }
 
 export async function getGcashBalance(
@@ -31,6 +34,8 @@ export async function getGcashBalance(
       checkpointCents: 0,
       checkpointAt: null,
       transactionsSince: 0,
+      gcashSalesSince: 0,
+      gcashSalesCents: 0,
     };
 
   const groups = await db.gcashTransaction.groupBy({
@@ -39,6 +44,18 @@ export async function getGcashBalance(
     _sum: { amount: true },
     _count: { _all: true },
   });
+  const sales = await db.sale.aggregate({
+    where: {
+      userId,
+      paymentMethod: "GCASH",
+      createdAt: { gt: checkpoint.createdAt },
+    },
+    _sum: { totalAmount: true },
+    _count: { _all: true },
+  });
+  const gcashSalesCents = sales._sum.totalAmount
+    ? decimalToCents(sales._sum.totalAmount)
+    : 0;
   const since = groups.map((g) => ({
     type: g.transactionType as GcashTransactionTypeValue,
     amountCents: g._sum.amount ? decimalToCents(g._sum.amount) : 0,
@@ -46,10 +63,12 @@ export async function getGcashBalance(
   const checkpointCents = decimalToCents(checkpoint.balance);
   return {
     hasCheckpoint: true,
-    balanceCents: currentBalanceCents(checkpointCents, since),
+    balanceCents: currentBalanceCents(checkpointCents, since, gcashSalesCents),
     checkpointCents,
     checkpointAt: checkpoint.createdAt,
     transactionsSince: groups.reduce((n, g) => n + g._count._all, 0),
+    gcashSalesSince: sales._count._all,
+    gcashSalesCents,
   };
 }
 

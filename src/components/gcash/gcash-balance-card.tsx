@@ -64,8 +64,12 @@ export function GcashBalanceCard({
             <p className="text-xs text-muted-foreground">
               Set to {formatPeso(balance.checkpointCents / 100)} on{" "}
               {balance.checkpointAt ? when(balance.checkpointAt) : ""}, then{" "}
-              {balance.transactionsSince} transaction
-              {balance.transactionsSince === 1 ? "" : "s"} since.
+              {balance.transactionsSince} GCash transaction
+              {balance.transactionsSince === 1 ? "" : "s"}
+              {balance.gcashSalesSince > 0
+                ? ` and ${balance.gcashSalesSince} sale${balance.gcashSalesSince === 1 ? "" : "s"} paid by GCash (+${formatPeso(balance.gcashSalesCents / 100)})`
+                : ""}{" "}
+              since.
               {negative
                 ? " Negative means a transaction is missing or wrong."
                 : ""}

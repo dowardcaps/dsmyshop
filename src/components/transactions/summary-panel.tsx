@@ -14,7 +14,11 @@ import type { Checkout } from "@/hooks/use-checkout";
 import { copyToClipboard } from "@/lib/clipboard";
 import { formatPeso } from "@/lib/format";
 import { PAYMENT_METHODS, PAYMENT_METHOD_LABELS } from "@/lib/sales/constants";
-import { buildSummaryText, toExcelRow, type CartSummary } from "@/lib/transactions/cart";
+import {
+  buildSummaryText,
+  toExcelRow,
+  type CartSummary,
+} from "@/lib/transactions/cart";
 
 interface SummaryPanelProps {
   summary: CartSummary;
@@ -28,7 +32,9 @@ export function SummaryPanel({ summary, checkout, onPay }: SummaryPanelProps) {
 
   async function copySummary() {
     if (empty) return;
-    const ok = await copyToClipboard(toExcelRow(buildSummaryText(summary.groups), summary.totalCents));
+    const ok = await copyToClipboard(
+      toExcelRow(buildSummaryText(summary.groups), summary.totalCents),
+    );
     if (!ok) {
       toast.error("Copy was blocked by the browser.");
       return;
@@ -40,8 +46,17 @@ export function SummaryPanel({ summary, checkout, onPay }: SummaryPanelProps) {
   return (
     <Card className="gap-0 overflow-hidden py-0 lg:absolute lg:inset-0">
       <div className="flex shrink-0 items-center justify-between border-b px-5 py-3">
-        <h2 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">Summary</h2>
-        <Button type="button" variant="outline" size="sm" onClick={copySummary} disabled={empty} title="Copy as an Excel row">
+        <h2 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
+          Summary
+        </h2>
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          onClick={copySummary}
+          disabled={empty}
+          title="Copy as an Excel row"
+        >
           {copied ? <Check /> : <ClipboardCopy />}
           {copied ? "Copied" : "Copy"}
         </Button>
@@ -55,10 +70,17 @@ export function SummaryPanel({ summary, checkout, onPay }: SummaryPanelProps) {
         aria-label="Order items"
         aria-live="polite"
       >
-        {empty ? <p className="text-sm italic text-muted-foreground">No items added yet…</p> : null}
+        {empty ? (
+          <p className="text-sm italic text-muted-foreground">
+            No items added yet…
+          </p>
+        ) : null}
         {summary.groups.map((group) => (
           <div key={group.category} className="mb-3 last:mb-0">
-            <p className="mb-1 text-sm font-semibold" style={{ color: categoryColor(group.category) }}>
+            <p
+              className="mb-1 text-sm font-semibold"
+              style={{ color: categoryColor(group.category) }}
+            >
               {group.category}
             </p>
             <ul className="space-y-0.5 text-[13px] leading-snug text-muted-foreground">
@@ -73,17 +95,38 @@ export function SummaryPanel({ summary, checkout, onPay }: SummaryPanelProps) {
       <div className="grid shrink-0 gap-x-3 gap-y-2 border-t px-5 py-3 sm:grid-cols-2 lg:grid-cols-1 xl:grid-cols-[auto_minmax(0,1fr)]">
         <div className="space-y-1">
           <Label htmlFor="saleDate">Date</Label>
-          <Input id="saleDate" type="date" value={checkout.transactionDate} onChange={(e) => checkout.setTransactionDate(e.target.value)} />
+          <Input
+            id="saleDate"
+            type="date"
+            value={checkout.transactionDate}
+            onChange={(e) => checkout.setTransactionDate(e.target.value)}
+          />
         </div>
         <div className="space-y-1">
           <Label htmlFor="salePayment">Payment</Label>
-          <Select id="salePayment" value={checkout.paymentMethod} onChange={(e) => checkout.setPaymentMethod(e.target.value as typeof checkout.paymentMethod)}>
+          <Select
+            id="salePayment"
+            value={checkout.paymentMethod}
+            onChange={(e) =>
+              checkout.setPaymentMethod(
+                e.target.value as typeof checkout.paymentMethod,
+              )
+            }
+          >
             {PAYMENT_METHODS.map((method) => (
               <option key={method} value={method}>
                 {PAYMENT_METHOD_LABELS[method]}
               </option>
             ))}
           </Select>
+          {checkout.paymentMethod === "GCASH" ? (
+            <p
+              className="text-xs text-muted-foreground"
+              data-testid="gcash-pay-hint"
+            >
+              The total is added to your GCash balance.
+            </p>
+          ) : null}
         </div>
         <div className="space-y-1 sm:col-span-2 lg:col-span-1 xl:col-span-2">
           <Label htmlFor="saleCustomer">Customer (optional)</Label>
@@ -103,13 +146,24 @@ export function SummaryPanel({ summary, checkout, onPay }: SummaryPanelProps) {
             <p className="text-xs text-muted-foreground">
               {summary.itemCount} item{summary.itemCount === 1 ? "" : "s"}
             </p>
-            <p className="text-2xl font-semibold tabular-nums">{formatPeso(summary.totalCents / 100)}</p>
+            <p className="text-2xl font-semibold tabular-nums">
+              {formatPeso(summary.totalCents / 100)}
+            </p>
           </div>
-          <Button type="button" onClick={onPay} disabled={empty || checkout.saving}>
+          <Button
+            type="button"
+            onClick={onPay}
+            disabled={empty || checkout.saving}
+          >
             <Wallet /> Pay
           </Button>
         </div>
-        <Button type="button" variant="outline" onClick={() => void checkout.save()} disabled={empty || checkout.saving}>
+        <Button
+          type="button"
+          variant="outline"
+          onClick={() => void checkout.save()}
+          disabled={empty || checkout.saving}
+        >
           {checkout.saving ? <Loader2 className="animate-spin" /> : <Save />}
           Save to Sales
         </Button>
