@@ -11,7 +11,7 @@ import type { SaleFilters } from "@/lib/validation/sale-filters";
 /** Validated filters -> the plain URL-param values the filter bar edits. */
 const shared = (f: { q?: string; from?: string; to?: string }): FilterValues => ({ q: f.q ?? "", from: f.from ?? "", to: f.to ?? "" });
 
-export const saleFilterValues = (f: SaleFilters): FilterValues => ({ ...shared(f), category: f.categoryId ?? "", payment: f.paymentMethod ?? "" });
+export const saleFilterValues = (f: SaleFilters): FilterValues => ({ ...shared(f), category: f.categoryId ?? "", payment: f.paymentMethod ?? "", status: f.status ?? "" });
 export const gcashFilterValues = (f: GcashFilters): FilterValues => ({ ...shared(f), type: f.type ?? "", provider: f.provider ?? "" });
 export const expenseFilterValues = (f: ExpenseFilters): FilterValues => ({ ...shared(f), category: f.categoryId ?? "" });
 export const excessFilterValues = (f: ExcessFilters): FilterValues => shared(f);

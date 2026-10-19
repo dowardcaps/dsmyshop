@@ -15,3 +15,6 @@
 - Names are unique per owner, case-insensitive.
 
 Server actions live in `lib/actions/settings.ts`, validation in `lib/validation/settings.ts`.
+
+## Hiding the side menu (desktop)
+The sidebar has a **Hide menu** button in its top corner. When hidden, the page uses the full screen width and a slim bar with a **Show menu** button appears on top. The choice is remembered in a cookie (`ds-sidebar`), so it stays the same on every page and after a refresh. On phones the menu is still the hamburger button. Code: `src/components/layout/{sidebar-state,sidebar-panel,app-frame,app-main}.tsx`, `src/lib/sidebar.ts`.

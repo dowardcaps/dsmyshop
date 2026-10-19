@@ -171,6 +171,11 @@ model Sale {
   customerName      String?
   paymentMethod     PaymentMethod @default(CASH)
   notes             String?
+  /// false = the customer has not paid yet. Unpaid sales are saved but not counted anywhere
+  /// (dashboard, calendar, reports, net income, GCash balance) until they are marked paid.
+  isPaid            Boolean       @default(true)
+  /// When it became paid. Null on rows saved before this field existed (their createdAt is used).
+  paidAt            DateTime?
   /// Always recalculated on the server from the sale items.
   totalAmount       Decimal       @default(0) @db.Decimal(12, 2)
   /// Identifier used to detect duplicates when importing from Excel.
@@ -185,6 +190,7 @@ model Sale {
   @@unique([userId, importKey])
   @@index([userId, transactionDate])
   @@index([paymentMethod])
+  @@index([userId, isPaid])
 }
 
 model SaleItem {

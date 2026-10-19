@@ -1,4 +1,4 @@
-import { PAYMENT_METHODS, SALES_PAGE_SIZE, type PaymentMethodValue } from "@/lib/sales/constants";
+import { PAYMENT_METHODS, PAYMENT_STATUSES, SALES_PAGE_SIZE, type PaymentMethodValue, type PaymentStatusValue } from "@/lib/sales/constants";
 import {
   firstParam,
   parseDateParam,
@@ -13,6 +13,7 @@ export interface SaleFilters {
   to?: string;
   categoryId?: string;
   paymentMethod?: PaymentMethodValue;
+  status?: PaymentStatusValue;
   page: number;
   pageSize: number;
 }
@@ -25,6 +26,7 @@ export function parseSaleFilters(params: RawSearchParams): SaleFilters {
     to: parseDateParam(params.to),
     categoryId: firstParam(params.category),
     paymentMethod: parseEnumParam(params.payment, PAYMENT_METHODS),
+    status: parseEnumParam(params.status, PAYMENT_STATUSES),
     page: parsePageParam(params.page),
     pageSize: SALES_PAGE_SIZE,
   };
@@ -38,6 +40,7 @@ export function saleFiltersToQuery(filters: SaleFilters, page?: number): string 
   if (filters.to) search.set("to", filters.to);
   if (filters.categoryId) search.set("category", filters.categoryId);
   if (filters.paymentMethod) search.set("payment", filters.paymentMethod);
+  if (filters.status) search.set("status", filters.status);
   const target = page ?? filters.page;
   if (target > 1) search.set("page", String(target));
   const query = search.toString();
@@ -45,4 +48,4 @@ export function saleFiltersToQuery(filters: SaleFilters, page?: number): string 
 }
 
 export const hasActiveFilters = (filters: SaleFilters): boolean =>
-  Boolean(filters.q || filters.from || filters.to || filters.categoryId || filters.paymentMethod);
+  Boolean(filters.q || filters.from || filters.to || filters.categoryId || filters.paymentMethod || filters.status);

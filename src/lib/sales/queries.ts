@@ -3,7 +3,7 @@ import "server-only";
 import type { Prisma } from "@/generated/prisma/client";
 import { db } from "@/lib/db";
 import { parseDateInput, toDateInputValue } from "@/lib/dates";
-import type { PaymentMethodValue } from "@/lib/sales/constants";
+import type { PaymentMethodValue, PaymentStatusValue } from "@/lib/sales/constants";
 import type { SaleInput } from "@/lib/validation/sale";
 import type { SaleFilters } from "@/lib/validation/sale-filters";
 
@@ -18,6 +18,7 @@ export interface SaleListRow {
   transactionDate: Date;
   customerName: string | null;
   paymentMethod: PaymentMethodValue;
+  paymentStatus: PaymentStatusValue;
   totalAmount: number;
   itemCount: number;
   categories: string[];
@@ -26,7 +27,11 @@ export interface SaleListRow {
 export interface SaleListResult {
   rows: SaleListRow[];
   total: number;
+  /** Total of the PAID sales that match the filters (what counts as sales). */
   totalAmount: number;
+  /** Sales that match the filters but are not paid yet, and what they add up to. */
+  unpaidCount: number;
+  unpaidAmount: number;
   page: number;
   pageCount: number;
 }
@@ -37,6 +42,7 @@ export interface SaleDetail {
   transactionDate: Date;
   customerName: string | null;
   paymentMethod: PaymentMethodValue;
+  paymentStatus: PaymentStatusValue;
   notes: string | null;
   totalAmount: number;
   items: {
@@ -59,7 +65,7 @@ export async function listSaleCategories(userId: string): Promise<SaleCategoryOp
 }
 
 function buildWhere(userId: string, filters: SaleFilters): Prisma.SaleWhereInput {
-  const { q, from, to, categoryId, paymentMethod } = filters;
+  const { q, from, to, categoryId, paymentMethod, status } = filters;
   return {
     userId,
     ...(from || to
@@ -71,6 +77,7 @@ function buildWhere(userId: string, filters: SaleFilters): Prisma.SaleWhereInput
         }
       : {}),
     ...(paymentMethod ? { paymentMethod } : {}),
+    ...(status ? { isPaid: status === "PAID" } : {}),
     ...(categoryId ? { items: { some: { categoryId } } } : {}),
     ...(q
       ? {
@@ -89,9 +96,10 @@ export async function listSales(userId: string, filters: SaleFilters): Promise<S
   const where = buildWhere(userId, filters);
   const { pageSize } = filters;
 
-  const [total, aggregate] = await Promise.all([
+  const [total, paid, unpaid] = await Promise.all([
     db.sale.count({ where }),
-    db.sale.aggregate({ where, _sum: { totalAmount: true } }),
+    db.sale.aggregate({ where: { ...where, isPaid: true }, _sum: { totalAmount: true } }),
+    db.sale.aggregate({ where: { ...where, isPaid: false }, _sum: { totalAmount: true }, _count: { _all: true } }),
   ]);
 
   const pageCount = Math.max(1, Math.ceil(total / pageSize));
@@ -112,12 +120,15 @@ export async function listSales(userId: string, filters: SaleFilters): Promise<S
       transactionDate: sale.transactionDate,
       customerName: sale.customerName,
       paymentMethod: sale.paymentMethod,
+      paymentStatus: sale.isPaid ? "PAID" : "UNPAID",
       totalAmount: sale.totalAmount.toNumber(),
       itemCount: sale.items.length,
       categories: [...new Set(sale.items.map((item) => item.category.name))],
     })),
     total,
-    totalAmount: aggregate._sum.totalAmount?.toNumber() ?? 0,
+    totalAmount: paid._sum.totalAmount?.toNumber() ?? 0,
+    unpaidCount: unpaid._count._all,
+    unpaidAmount: unpaid._sum.totalAmount?.toNumber() ?? 0,
     page,
     pageCount,
   };
@@ -138,6 +149,7 @@ export async function getSale(userId: string, saleId: string): Promise<SaleDetai
     transactionDate: sale.transactionDate,
     customerName: sale.customerName,
     paymentMethod: sale.paymentMethod,
+    paymentStatus: sale.isPaid ? "PAID" : "UNPAID",
     notes: sale.notes,
     totalAmount: sale.totalAmount.toNumber(),
     items: sale.items.map((item) => ({
@@ -158,6 +170,7 @@ export function saleToFormValues(sale: SaleDetail): SaleInput {
     transactionDate: toDateInputValue(sale.transactionDate),
     customerName: sale.customerName ?? "",
     paymentMethod: sale.paymentMethod,
+    paymentStatus: sale.paymentStatus,
     notes: sale.notes ?? "",
     items: sale.items.map(({ categoryId, description, quantity, unitPrice }) => ({
       categoryId,

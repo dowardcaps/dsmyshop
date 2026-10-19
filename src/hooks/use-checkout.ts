@@ -7,7 +7,7 @@ import { toast } from "sonner";
 import { checkoutAction } from "@/lib/actions/transactions";
 import { todayInManila } from "@/lib/dates";
 import { formatPeso } from "@/lib/format";
-import type { PaymentMethodValue } from "@/lib/sales/constants";
+import type { PaymentMethodValue, PaymentStatusValue } from "@/lib/sales/constants";
 
 interface UseCheckoutOptions {
   items: { serviceId: string; quantity: number }[];
@@ -19,6 +19,8 @@ interface UseCheckoutOptions {
 export function useCheckout({ items, onSaved }: UseCheckoutOptions) {
   const router = useRouter();
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethodValue>("CASH");
+  // Paid unless told otherwise; goes back to Paid after every save.
+  const [paymentStatus, setPaymentStatus] = useState<PaymentStatusValue>("PAID");
   const [customerName, setCustomerName] = useState("");
   // null = "today", worked out when saving so a page left open past midnight still dates correctly.
   const [dateOverride, setDateOverride] = useState<string | null>(null);
@@ -41,17 +43,22 @@ export function useCheckout({ items, onSaved }: UseCheckoutOptions) {
         transactionDate: dateOverride ?? todayInManila(),
         customerName,
         paymentMethod,
+        paymentStatus,
         items,
       });
       if (!result.ok) {
         toast.error(result.error);
         return false;
       }
-      toast.success(`Saved ${result.data.transactionNumber} · ${formatPeso(result.data.totalAmount)}`, {
-        description: "It now shows on the Sales page.",
-        action: { label: "View sales", onClick: () => router.push("/records?tab=sales") },
+      const unpaid = paymentStatus === "UNPAID";
+      toast.success(`Saved ${result.data.transactionNumber} · ${formatPeso(result.data.totalAmount)}${unpaid ? " (unpaid)" : ""}`, {
+        description: unpaid
+          ? "Not counted in your sales until you mark it as paid."
+          : "It now shows on the Sales page.",
+        action: { label: "View sales", onClick: () => router.push(unpaid ? "/records?tab=sales&status=UNPAID" : "/records?tab=sales") },
       });
       setCustomerName("");
+      setPaymentStatus("PAID");
       setDateOverride(null);
       onSaved();
       return true;
@@ -67,6 +74,8 @@ export function useCheckout({ items, onSaved }: UseCheckoutOptions) {
   return {
     paymentMethod,
     setPaymentMethod,
+    paymentStatus,
+    setPaymentStatus,
     customerName,
     setCustomerName,
     transactionDate,

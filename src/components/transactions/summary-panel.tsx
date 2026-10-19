@@ -13,7 +13,8 @@ import { Select } from "@/components/ui/select";
 import type { Checkout } from "@/hooks/use-checkout";
 import { copyToClipboard } from "@/lib/clipboard";
 import { formatPeso } from "@/lib/format";
-import { PAYMENT_METHODS, PAYMENT_METHOD_LABELS } from "@/lib/sales/constants";
+import { PAYMENT_METHODS, PAYMENT_METHOD_LABELS, PAYMENT_STATUSES, PAYMENT_STATUS_LABELS } from "@/lib/sales/constants";
+import { cn } from "@/lib/utils";
 import {
   buildSummaryText,
   toExcelRow,
@@ -29,6 +30,7 @@ interface SummaryPanelProps {
 export function SummaryPanel({ summary, checkout, onPay }: SummaryPanelProps) {
   const [copied, setCopied] = useState(false);
   const empty = summary.items.length === 0;
+  const unpaid = checkout.paymentStatus === "UNPAID";
 
   async function copySummary() {
     if (empty) return;
@@ -119,12 +121,44 @@ export function SummaryPanel({ summary, checkout, onPay }: SummaryPanelProps) {
               </option>
             ))}
           </Select>
-          {checkout.paymentMethod === "GCASH" ? (
+          {checkout.paymentMethod === "GCASH" && !unpaid ? (
             <p
               className="text-xs text-muted-foreground"
               data-testid="gcash-pay-hint"
             >
               The total is added to your GCash balance.
+            </p>
+          ) : null}
+        </div>
+        <div className="space-y-1 sm:col-span-2 lg:col-span-1 xl:col-span-2">
+          <Label id="saleStatusLabel">Status</Label>
+          <div role="group" aria-labelledby="saleStatusLabel" className="grid grid-cols-2 gap-1 rounded-lg border bg-muted/40 p-1">
+            {PAYMENT_STATUSES.map((status) => {
+              const active = checkout.paymentStatus === status;
+              return (
+                <button
+                  key={status}
+                  type="button"
+                  aria-pressed={active}
+                  data-testid={`status-${status.toLowerCase()}`}
+                  onClick={() => checkout.setPaymentStatus(status)}
+                  className={cn(
+                    "rounded-md px-3 py-1.5 text-sm font-medium transition-colors",
+                    active
+                      ? status === "PAID"
+                        ? "bg-emerald-600 text-white shadow-sm"
+                        : "bg-amber-500 text-white shadow-sm"
+                      : "text-muted-foreground hover:bg-background",
+                  )}
+                >
+                  {PAYMENT_STATUS_LABELS[status]}
+                </button>
+              );
+            })}
+          </div>
+          {unpaid ? (
+            <p className="text-xs text-amber-700 dark:text-amber-400" data-testid="unpaid-hint">
+              Unpaid: saved, but not added to your sales until you mark it as paid.
             </p>
           ) : null}
         </div>
@@ -150,22 +184,24 @@ export function SummaryPanel({ summary, checkout, onPay }: SummaryPanelProps) {
               {formatPeso(summary.totalCents / 100)}
             </p>
           </div>
-          <Button
-            type="button"
-            onClick={onPay}
-            disabled={empty || checkout.saving}
-          >
-            <Wallet /> Pay
-          </Button>
+          {unpaid ? null : (
+            <Button
+              type="button"
+              onClick={onPay}
+              disabled={empty || checkout.saving}
+            >
+              <Wallet /> Pay
+            </Button>
+          )}
         </div>
         <Button
           type="button"
-          variant="outline"
+          variant={unpaid ? "default" : "outline"}
           onClick={() => void checkout.save()}
           disabled={empty || checkout.saving}
         >
           {checkout.saving ? <Loader2 className="animate-spin" /> : <Save />}
-          Save to Sales
+          {unpaid ? "Save as unpaid" : "Save to Sales"}
         </Button>
       </div>
     </Card>

@@ -48,7 +48,12 @@ export async function getGcashBalance(
     where: {
       userId,
       paymentMethod: "GCASH",
-      createdAt: { gt: checkpoint.createdAt },
+      isPaid: true,
+      // When it was paid; older rows have no paidAt, so their creation time is used.
+      OR: [
+        { paidAt: { gt: checkpoint.createdAt } },
+        { paidAt: null, createdAt: { gt: checkpoint.createdAt } },
+      ],
     },
     _sum: { totalAmount: true },
     _count: { _all: true },

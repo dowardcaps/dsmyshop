@@ -103,7 +103,7 @@ export async function getDashboardData(userId: string, period: DashboardPeriod):
     monthlyTotals,
   ] = await Promise.all([
     db.sale.aggregate({
-      where: { userId, transactionDate: inPeriod },
+      where: { userId, isPaid: true, transactionDate: inPeriod },
       _sum: { totalAmount: true },
       _count: true,
     }),
@@ -155,10 +155,10 @@ export async function getDashboardData(userId: string, period: DashboardPeriod):
       FROM "SaleItem" i
       JOIN "Sale" s ON s."id" = i."saleId"
       JOIN "SaleCategory" c ON c."id" = i."categoryId"
-      WHERE s."userId" = ${userId} AND s."transactionDate" BETWEEN ${from}::date AND ${to}::date
+      WHERE s."userId" = ${userId} AND s."isPaid" = true AND s."transactionDate" BETWEEN ${from}::date AND ${to}::date
       GROUP BY c."name"`,
     db.sale.findMany({
-      where: { userId, transactionDate: inPeriod },
+      where: { userId, isPaid: true, transactionDate: inPeriod },
       orderBy: [{ transactionDate: "desc" }, { createdAt: "desc" }],
       take: RECENT_LIMIT,
       select: {

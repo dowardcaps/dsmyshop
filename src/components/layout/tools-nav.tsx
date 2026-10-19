@@ -44,24 +44,43 @@ export function ToolsNav({ onNavigate }: ToolsNavProps) {
       >
         <Wrench className="size-4" />
         <span className="flex-1 text-left">Tools</span>
-        <ChevronRight className={cn("size-4 transition-transform duration-200", open && "rotate-90")} />
+        <ChevronRight
+          className={cn(
+            "size-4 transition-transform duration-200",
+            open && "rotate-90",
+          )}
+        />
       </button>
 
       <div
         id="tools-nav-list"
-        className={cn("grid overflow-hidden transition-all duration-300 ease-in-out", open ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0")}
+        className={cn(
+          "grid overflow-hidden transition-all duration-300 ease-in-out",
+          open ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0",
+        )}
         inert={!open}
       >
         <div className="min-h-0">
           <div className="ml-5 mt-1 flex flex-col gap-0.5 border-l pl-3">
-            <Link href="/tools" onClick={onNavigate} aria-current={pathname === "/tools" ? "page" : undefined} className={childClass(pathname === "/tools")}>
+            <Link
+              href="/tools"
+              onClick={onNavigate}
+              aria-current={pathname === "/tools" ? "page" : undefined}
+              className={childClass(pathname === "/tools")}
+            >
               All tools
             </Link>
             {TOOL_ITEMS.map((tool) => {
               const href = `/tools/${tool.slug}`;
               const active = pathname === href;
               return (
-                <Link key={tool.slug} href={href} onClick={onNavigate} aria-current={active ? "page" : undefined} className={childClass(active)}>
+                <Link
+                  key={tool.slug}
+                  href={href}
+                  onClick={onNavigate}
+                  aria-current={active ? "page" : undefined}
+                  className={childClass(active)}
+                >
                   {tool.title}
                 </Link>
               );

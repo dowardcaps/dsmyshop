@@ -50,6 +50,16 @@ export async function SalesPanel({ userId, filters, categories, hrefs, openNew, 
             {result.total} {result.total === 1 ? "sale" : "sales"} ·{" "}
             <span className="font-medium text-foreground">{formatPeso(result.totalAmount)}</span> total
             {filtered ? " (filtered)" : ""}
+            {result.unpaidCount > 0 ? (
+              <span data-testid="unpaid-summary">
+                {" "}
+                ·{" "}
+                <span className="font-medium text-amber-600 dark:text-amber-500">
+                  {formatPeso(result.unpaidAmount)} unpaid
+                </span>{" "}
+                ({result.unpaidCount} {result.unpaidCount === 1 ? "sale" : "sales"}, not counted)
+              </span>
+            ) : null}
           </p>
           <SalesTable rows={result.rows} editHref={hrefs.editHref} />
           <Pagination page={result.page} pageCount={result.pageCount} total={result.total} pageSize={filters.pageSize} hrefForPage={hrefs.pageHref} />
@@ -65,6 +75,7 @@ export async function SalesPanel({ userId, filters, categories, hrefs, openNew, 
               transactionDate: todayInManila(),
               customerName: "",
               paymentMethod: "CASH",
+              paymentStatus: "PAID",
               notes: "",
               items: [{ categoryId: categories[0].id, description: "", quantity: 1, unitPrice: Number.NaN }],
             }}

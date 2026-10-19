@@ -9,7 +9,11 @@ interface PlaceholderPageProps {
   stage: string;
 }
 
-export function PlaceholderPage({ title, description, stage }: PlaceholderPageProps) {
+export function PlaceholderPage({
+  title,
+  description,
+  stage,
+}: PlaceholderPageProps) {
   return (
     <div className="space-y-6">
       <PageHeader title={title} description={description} />
@@ -20,7 +24,8 @@ export function PlaceholderPage({ title, description, stage }: PlaceholderPagePr
           </div>
           <h2 className="text-base font-semibold">Coming soon</h2>
           <p className="max-w-sm text-sm text-muted-foreground">
-            This page will be built in {stage}. The layout and navigation are ready.
+            This page will be built in {stage}. The layout and navigation are
+            ready.
           </p>
         </CardContent>
       </Card>

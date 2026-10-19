@@ -17,7 +17,7 @@ export type SharedFilterKey = (typeof SHARED_FILTER_KEYS)[number];
 
 /** The extra URL params each table understands. */
 export const TAB_FILTER_KEYS: Record<RecordTab, readonly string[]> = {
-  sales: ["category", "payment"],
+  sales: ["category", "payment", "status"],
   gcash: ["type", "provider"],
   expenses: ["category"],
   debts: ["status"],

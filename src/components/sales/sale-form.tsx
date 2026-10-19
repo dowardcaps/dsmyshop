@@ -11,7 +11,7 @@ import { Select } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { useSaleForm } from "@/hooks/use-sale-form";
 import { formatPeso } from "@/lib/format";
-import { PAYMENT_METHODS, PAYMENT_METHOD_LABELS } from "@/lib/sales/constants";
+import { PAYMENT_METHODS, PAYMENT_METHOD_LABELS, PAYMENT_STATUSES, PAYMENT_STATUS_LABELS } from "@/lib/sales/constants";
 import type { SaleInput } from "@/lib/validation/sale";
 
 interface SaleFormProps {
@@ -61,6 +61,17 @@ export function SaleForm({ categories, defaultValues, saleId, returnHref }: Sale
                 </option>
               ))}
             </Select>
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="paymentStatus">Status</Label>
+            <Select id="paymentStatus" {...register("paymentStatus")}>
+              {PAYMENT_STATUSES.map((status) => (
+                <option key={status} value={status}>
+                  {PAYMENT_STATUS_LABELS[status]}
+                </option>
+              ))}
+            </Select>
+            <p className="text-xs text-muted-foreground">Unpaid sales are not counted in your sales until marked as paid.</p>
           </div>
           <div className="space-y-2">
             <Label htmlFor="customerName">Customer (optional)</Label>

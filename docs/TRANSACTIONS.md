@@ -49,3 +49,12 @@ apply to rows currently shown, so searching first narrows what you change.
 
 ## Category filter
 Next to the search box there is a **category dropdown** ("All categories" plus every category in the price list). It combines with the search text, resets to page 1, and is remembered per transaction tab (saved with the cart). Items already added to the order stay in it while you switch categories. **Clear filters** resets both the search and the category; Reset order and saving a sale clear them too. Logic: `categoriesOf` / `filterServices` / `setCategory` in `src/lib/transactions/cart.ts`.
+
+## Paid / Unpaid
+Under Payment there is a **Paid | Unpaid** switch. It is **Paid** by default and goes back to Paid after every save.
+- **Paid**: works as before (Pay / Save to Sales).
+- **Unpaid** (customer took the service but has not paid): the button becomes **Save as unpaid**. The sale is saved with its transaction number but is **not counted anywhere**: dashboard, calendar daily earnings, reports, net income and the GCash balance all ignore it.
+- Find unpaid sales in **Records > Sales** (Status column, "Status" filter, and an amber "₱X unpaid (N sales, not counted)" note). The green check button (or **Mark as paid** on the sale page) turns it into a normal paid sale. Editing a sale also has a Status field, so a paid sale can be set back to unpaid.
+- A sale marked paid counts on its **own transaction date** (not the day it was paid). If that is an earlier month, that month's totals change; edit the sale's date first if you want it counted today.
+- For the GCash balance, a sale paid by GCash is added when it becomes paid (and only if that is after the last balance you set).
+- Data: `Sale.isPaid` (default true) and `Sale.paidAt`. Migration: `npm run db:migrate -- --name add_sale_paid_status`. Existing sales stay paid.

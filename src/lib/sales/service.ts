@@ -51,6 +51,12 @@ function buildItems(items: SaleInput["items"]) {
 const isUniqueViolation = (error: unknown): boolean =>
   error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2002";
 
+/** Paid/unpaid columns for an update. A sale that stays paid keeps the moment it was first paid. */
+function paidFields(existing: { isPaid: boolean; paidAt: Date | null }, paid: boolean) {
+  if (!paid) return { isPaid: false, paidAt: null };
+  return existing.isPaid ? {} : { isPaid: true, paidAt: new Date() };
+}
+
 export async function createSale(userId: string, input: SaleInput): Promise<string> {
   for (let attempt = 1; ; attempt++) {
     try {
@@ -63,6 +69,8 @@ export async function createSale(userId: string, input: SaleInput): Promise<stri
             transactionDate: parseDateInput(input.transactionDate),
             customerName: input.customerName || null,
             paymentMethod: input.paymentMethod,
+            isPaid: input.paymentStatus === "PAID",
+            paidAt: input.paymentStatus === "PAID" ? new Date() : null,
             notes: input.notes || null,
             totalAmount: new Prisma.Decimal(centsToDecimalString(saleTotalCents(input.items))),
             items: { create: buildItems(input.items) },
@@ -81,7 +89,7 @@ export async function createSale(userId: string, input: SaleInput): Promise<stri
 
 export async function updateSale(userId: string, saleId: string, input: SaleInput): Promise<string> {
   return db.$transaction(async (tx) => {
-    const existing = await tx.sale.findFirst({ where: { id: saleId, userId }, select: { id: true } });
+    const existing = await tx.sale.findFirst({ where: { id: saleId, userId }, select: { id: true, isPaid: true, paidAt: true } });
     if (!existing) throw new SaleServiceError("Sale not found.");
     await assertCategoriesBelongToUser(tx, userId, input.items);
 
@@ -92,6 +100,7 @@ export async function updateSale(userId: string, saleId: string, input: SaleInpu
         transactionDate: parseDateInput(input.transactionDate),
         customerName: input.customerName || null,
         paymentMethod: input.paymentMethod,
+        ...paidFields(existing, input.paymentStatus === "PAID"),
         notes: input.notes || null,
         totalAmount: new Prisma.Decimal(centsToDecimalString(saleTotalCents(input.items))),
         items: { create: buildItems(input.items) },
@@ -104,4 +113,13 @@ export async function updateSale(userId: string, saleId: string, input: SaleInpu
 export async function deleteSale(userId: string, saleId: string): Promise<void> {
   const { count } = await db.sale.deleteMany({ where: { id: saleId, userId } });
   if (count === 0) throw new SaleServiceError("Sale not found.");
+}
+
+/** Marks a sale paid (it starts counting) or unpaid (it stops counting). Nothing else changes. */
+export async function setSalePaid(userId: string, saleId: string, paid: boolean): Promise<void> {
+  const existing = await db.sale.findFirst({ where: { id: saleId, userId }, select: { id: true, isPaid: true, paidAt: true } });
+  if (!existing) throw new SaleServiceError("Sale not found.");
+  const data = paidFields(existing, paid);
+  if (Object.keys(data).length === 0) return;
+  await db.sale.update({ where: { id: saleId }, data });
 }

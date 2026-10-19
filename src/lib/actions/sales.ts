@@ -5,7 +5,7 @@ import { revalidatePath } from "next/cache";
 import { actionFailure } from "@/lib/actions/helpers";
 import type { ActionResult } from "@/lib/actions/types";
 import { requireUser } from "@/lib/auth/require-user";
-import { createSale, deleteSale, updateSale } from "@/lib/sales/service";
+import { createSale, deleteSale, setSalePaid, updateSale } from "@/lib/sales/service";
 import { saleInputSchema } from "@/lib/validation/sale";
 
 function refresh() {
@@ -51,5 +51,18 @@ export async function deleteSaleAction(saleId: string): Promise<ActionResult> {
     return { ok: true, data: undefined };
   } catch (error) {
     return actionFailure(error, "Could not delete the sale. Please try again.");
+  }
+}
+
+export async function setSalePaidAction(saleId: string, paid: boolean): Promise<ActionResult> {
+  const user = await requireUser();
+  try {
+    await setSalePaid(user.id, saleId, paid);
+    refresh();
+    revalidatePath(`/sales/${saleId}`);
+    revalidatePath("/calendar");
+    return { ok: true, data: undefined };
+  } catch (error) {
+    return actionFailure(error, "Could not update the sale. Please try again.");
   }
 }

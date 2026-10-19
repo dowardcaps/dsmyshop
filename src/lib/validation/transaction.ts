@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-import { MAX_ITEMS_PER_SALE, PAYMENT_METHODS } from "@/lib/sales/constants";
+import { MAX_ITEMS_PER_SALE, PAYMENT_METHODS, PAYMENT_STATUSES } from "@/lib/sales/constants";
 import { MAX_BULK_SERVICES } from "@/lib/transactions/bulk";
 import { MAX_QUANTITY } from "@/lib/transactions/constants";
 import { dateString, hasMaxTwoDecimals, MAX_MONEY, moneyAmount } from "@/lib/validation/shared";
@@ -21,6 +21,7 @@ export const checkoutInputSchema = z.object({
   transactionDate: dateString,
   customerName: z.string().trim().max(120, "Max 120 characters"),
   paymentMethod: z.enum(PAYMENT_METHODS),
+  paymentStatus: z.enum(PAYMENT_STATUSES),
   items: z
     .array(checkoutItemSchema)
     .min(1, "The cart is empty")

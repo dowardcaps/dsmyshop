@@ -19,7 +19,7 @@ import { GCASH_PROVIDERS, GCASH_PROVIDER_LABELS, GCASH_TRANSACTION_TYPES, GCASH_
 import { applyFilters, recordsHrefFor, restoreQuery, type FilterValues } from "@/lib/records/filter-state";
 import type { RecordTab } from "@/lib/records/tabs";
 import { SALARY_STATUSES, SALARY_STATUS_LABELS } from "@/lib/salary/constants";
-import { PAYMENT_METHODS, PAYMENT_METHOD_LABELS } from "@/lib/sales/constants";
+import { PAYMENT_METHODS, PAYMENT_METHOD_LABELS, PAYMENT_STATUSES, PAYMENT_STATUS_LABELS } from "@/lib/sales/constants";
 
 interface Option {
   value: string;
@@ -50,6 +50,7 @@ function selectsFor(tab: RecordTab, categories: Option[]): { key: string; label:
       return [
         { key: "category", label: "Category", allLabel: "All", options: categories },
         { key: "payment", label: "Payment", allLabel: "All", options: PAYMENT_METHODS.map((m) => ({ value: m, label: PAYMENT_METHOD_LABELS[m] })) },
+        { key: "status", label: "Status", allLabel: "All", options: PAYMENT_STATUSES.map((s) => ({ value: s, label: PAYMENT_STATUS_LABELS[s] })) },
       ];
     case "gcash":
       return [

@@ -3,6 +3,8 @@ import { notFound } from "next/navigation";
 import { ArrowLeft, Pencil } from "lucide-react";
 
 import { PageHeader } from "@/components/layout/page-header";
+import { MarkPaidButton } from "@/components/sales/mark-paid-button";
+import { PaidBadge } from "@/components/sales/paid-badge";
 import { SaleItemsTable } from "@/components/sales/sale-items-table";
 import { ConfirmDeleteButton } from "@/components/shared/confirm-delete-button";
 import { Button } from "@/components/ui/button";
@@ -26,6 +28,7 @@ export default async function SaleDetailPage({ params }: { params: Promise<{ id:
     ["Customer", sale.customerName ?? "Walk-in"],
     ["Payment method", PAYMENT_METHOD_LABELS[sale.paymentMethod]],
   ];
+  const unpaid = sale.paymentStatus === "UNPAID";
 
   return (
     <div className="space-y-6">
@@ -39,6 +42,7 @@ export default async function SaleDetailPage({ params }: { params: Promise<{ id:
         description="Sale details"
         actions={
           <>
+            {sale.paymentStatus === "UNPAID" ? <MarkPaidButton saleId={sale.id} label={sale.transactionNumber} withText /> : null}
             <Button asChild variant="outline">
               <Link href={`/records?tab=sales&edit=${sale.id}`}>
                 <Pencil /> Edit
@@ -64,6 +68,17 @@ export default async function SaleDetailPage({ params }: { params: Promise<{ id:
               <p className="mt-1 font-medium">{value}</p>
             </div>
           ))}
+          <div>
+            <p className="text-xs uppercase tracking-wide text-muted-foreground">Status</p>
+            <div className="mt-1">
+              <PaidBadge status={sale.paymentStatus} />
+            </div>
+          </div>
+          {unpaid ? (
+            <p className="text-sm text-muted-foreground sm:col-span-3">
+              The customer has not paid yet, so this sale is not counted in your sales, dashboard or reports.
+            </p>
+          ) : null}
           {sale.notes ? (
             <div className="sm:col-span-3">
               <p className="text-xs uppercase tracking-wide text-muted-foreground">Notes</p>

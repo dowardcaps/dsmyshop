@@ -11,12 +11,12 @@ import {
 } from "@/lib/finance/components";
 
 /**
- * Every record that moves net income, as (kind, date, amount) rows for one user.
+ * Every record that moves net income (unpaid sales are left out), as (kind, date, amount) rows for one user.
  * Salary paid out = each cash advance on its date + the rest of a pay date on the day it was marked paid.
  */
 function ledgerRows(userId: string): Prisma.Sql {
   return Prisma.sql`
-    SELECT 'sales' AS k, "transactionDate" AS d, "totalAmount" AS a FROM "Sale" WHERE "userId" = ${userId}
+    SELECT 'sales' AS k, "transactionDate" AS d, "totalAmount" AS a FROM "Sale" WHERE "userId" = ${userId} AND "isPaid" = true
     UNION ALL SELECT 'charges', "transactionDate", "charge" FROM "GcashTransaction" WHERE "userId" = ${userId}
     UNION ALL SELECT 'expenses', "expenseDate", "amount" FROM "Expense" WHERE "userId" = ${userId}
     UNION ALL SELECT 'excess', "excessDate", "amount" FROM "ExcessMoney" WHERE "userId" = ${userId}

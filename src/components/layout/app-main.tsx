@@ -3,13 +3,17 @@
 import * as React from "react";
 import { usePathname } from "next/navigation";
 
+import { useSidebar } from "@/components/layout/sidebar-state";
+import { cn } from "@/lib/utils";
+
 /**
  * The page area under the header.
- * - Normal pages scroll inside it, centered in a max-width column.
+ * - Normal pages scroll inside it, centered in a max-width column (full width while the sidebar is hidden).
  * - /tools/<name> pages are full-bleed so the embedded tool fills the whole area.
  */
 export function AppMain({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
+  const { collapsed } = useSidebar();
   const fullBleed = /^\/tools\/[^/]+/.test(pathname);
   const scrollRef = React.useRef<HTMLElement>(null);
 
@@ -20,15 +24,26 @@ export function AppMain({ children }: { children: React.ReactNode }) {
 
   if (fullBleed) {
     return (
-      <main ref={scrollRef} className="relative flex min-h-0 flex-1 flex-col overflow-hidden">
+      <main
+        ref={scrollRef}
+        className="relative flex min-h-0 flex-1 flex-col overflow-hidden"
+      >
         {children}
       </main>
     );
   }
 
   return (
-    <main ref={scrollRef} className="min-h-0 flex-1 overflow-y-auto px-4 py-6 sm:px-6">
-      <div className="mx-auto w-full max-w-6xl">{children}</div>
+    <main
+      ref={scrollRef}
+      className="min-h-0 flex-1 overflow-y-auto px-4 py-6 sm:px-6"
+    >
+      {/* With the menu hidden the page uses the whole width. */}
+      <div
+        className={cn("mx-auto w-full", collapsed ? "max-w-none" : "max-w-6xl")}
+      >
+        {children}
+      </div>
     </main>
   );
 }

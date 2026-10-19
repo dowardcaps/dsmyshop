@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-import { MAX_ITEMS_PER_SALE, PAYMENT_METHODS } from "@/lib/sales/constants";
+import { MAX_ITEMS_PER_SALE, PAYMENT_METHODS, PAYMENT_STATUSES } from "@/lib/sales/constants";
 import { dateString, moneyAmount } from "@/lib/validation/shared";
 
 export const saleItemSchema = z.object({
@@ -18,6 +18,7 @@ export const saleInputSchema = z.object({
   transactionDate: dateString,
   customerName: z.string().trim().max(120, "Max 120 characters"),
   paymentMethod: z.enum(PAYMENT_METHODS),
+  paymentStatus: z.enum(PAYMENT_STATUSES),
   notes: z.string().trim().max(1000, "Max 1000 characters"),
   items: z
     .array(saleItemSchema)

@@ -1,6 +1,8 @@
 import Link from "next/link";
 import { Pencil } from "lucide-react";
 
+import { MarkPaidButton } from "@/components/sales/mark-paid-button";
+import { PaidBadge } from "@/components/sales/paid-badge";
 import { ConfirmDeleteButton } from "@/components/shared/confirm-delete-button";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -8,6 +10,7 @@ import { deleteSaleAction } from "@/lib/actions/sales";
 import { formatDate, formatPeso } from "@/lib/format";
 import { PAYMENT_METHOD_LABELS } from "@/lib/sales/constants";
 import type { SaleListRow } from "@/lib/sales/queries";
+import { cn } from "@/lib/utils";
 
 export function SalesTable({ rows, editHref }: { rows: SaleListRow[]; editHref: (id: string) => string }) {
   return (
@@ -20,6 +23,7 @@ export function SalesTable({ rows, editHref }: { rows: SaleListRow[]; editHref: 
             <TableHead>Customer</TableHead>
             <TableHead>Items</TableHead>
             <TableHead>Payment</TableHead>
+            <TableHead>Status</TableHead>
             <TableHead className="text-right">Total</TableHead>
             <TableHead className="text-right">Actions</TableHead>
           </TableRow>
@@ -38,9 +42,15 @@ export function SalesTable({ rows, editHref }: { rows: SaleListRow[]; editHref: 
                 {sale.itemCount} · {sale.categories.join(", ")}
               </TableCell>
               <TableCell>{PAYMENT_METHOD_LABELS[sale.paymentMethod]}</TableCell>
-              <TableCell className="text-right font-medium tabular-nums">{formatPeso(sale.totalAmount)}</TableCell>
+              <TableCell>
+                <PaidBadge status={sale.paymentStatus} />
+              </TableCell>
+              <TableCell className={cn("text-right font-medium tabular-nums", sale.paymentStatus === "UNPAID" && "text-muted-foreground")}>
+                {formatPeso(sale.totalAmount)}
+              </TableCell>
               <TableCell>
                 <div className="flex justify-end gap-1">
+                  {sale.paymentStatus === "UNPAID" ? <MarkPaidButton saleId={sale.id} label={sale.transactionNumber} /> : null}
                   <Button asChild variant="ghost" size="icon" aria-label={`Edit ${sale.transactionNumber}`}>
                     <Link href={editHref(sale.id)} scroll={false}>
                       <Pencil className="size-4" />

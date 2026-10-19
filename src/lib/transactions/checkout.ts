@@ -41,6 +41,7 @@ export async function recordCheckout(userId: string, input: CheckoutInput): Prom
     transactionDate: input.transactionDate,
     customerName: input.customerName,
     paymentMethod: input.paymentMethod,
+    paymentStatus: input.paymentStatus,
     notes: "",
     items,
   });

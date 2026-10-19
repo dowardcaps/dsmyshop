@@ -49,7 +49,7 @@ export async function getReport(userId: string, selection: ReportSelection): Pro
   const [sales, gcash, expenses, payments, debts, adjustments] = await Promise.all([
     has("sales")
       ? db.sale.findMany({
-          where: { userId, ...where("transactionDate") },
+          where: { userId, isPaid: true, ...where("transactionDate") },
           orderBy: [{ transactionDate: "asc" }, { transactionNumber: "asc" }],
           take,
           select: {
