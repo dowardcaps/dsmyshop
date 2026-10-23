@@ -5,6 +5,7 @@ import { DayEarnings } from "@/components/calendar/day-earnings";
 import { resolveMonth } from "@/lib/calendar/defaults";
 import { DayForm } from "@/components/calendar/day-form";
 import { MonthNav } from "@/components/calendar/month-nav";
+import { SalesTrendChart } from "@/components/calendar/sales-trend-chart";
 import { RecordDialog } from "@/components/records/record-dialog";
 import { requireUser } from "@/lib/auth/require-user";
 import {
@@ -15,10 +16,13 @@ import {
   dayLabel,
   daysInMonth,
   monthEnd,
+  monthLabel,
   monthStart,
   parseDayParam,
   parseMonthParam,
+  shiftMonth,
 } from "@/lib/calendar/grid";
+import { buildTrend, summarize } from "@/lib/calendar/trend";
 import { getDailyIncome } from "@/lib/finance/ledger";
 import { formatPeso } from "@/lib/format";
 import { listShopDays } from "@/lib/calendar/queries";
@@ -41,10 +45,17 @@ export default async function CalendarPage({
   const currentMonth = today.slice(0, 7);
   const month = parseMonthParam(firstParam(params.month));
   const day = parseDayParam(firstParam(params.day));
-  const [saved, income] = await Promise.all([
+  const previousMonth = shiftMonth(month, -1);
+  const [saved, income, previousIncome] = await Promise.all([
     listShopDays(user.id, month),
     getDailyIncome(user.id, monthStart(month), monthEnd(month)),
+    getDailyIncome(user.id, monthStart(previousMonth), monthEnd(previousMonth)),
   ]);
+  const trendPoints = buildTrend(month, income, today);
+  const trendSummaries = {
+    sales: summarize(trendPoints, "sales", previousIncome, previousMonth),
+    earnings: summarize(trendPoints, "earnings", previousIncome, previousMonth),
+  };
   const monthTotal = [...income.values()].reduce(
     (sum, d) => sum + d.totalCents,
     0,
@@ -88,6 +99,12 @@ export default async function CalendarPage({
         income={income}
         today={today}
         dayHref={dayHref}
+      />
+      <SalesTrendChart
+        monthText={monthLabel(month)}
+        previousMonthText={monthLabel(previousMonth)}
+        points={trendPoints}
+        summaries={trendSummaries}
       />
       <p className="text-sm text-muted-foreground">
         Click a day to set it. Green is open, yellow is a half day, red is
