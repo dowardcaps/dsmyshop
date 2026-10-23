@@ -21,8 +21,8 @@ Each day shows what came in that day: **sales + GCash charges + excess money** (
 Nothing is saved for default Sundays: `resolveMonth` (`lib/calendar/defaults.ts`) fills them in when the month is shown, so it works for every past and future month with no migration. Setting a Sunday to Open or Half day saves a row that overrides the default. Change which weekdays are closed by editing `DEFAULT_CLOSED_WEEKDAYS` in `lib/calendar/constants.ts` (0 = Sunday).
 
 ## Daily trend graph
-Under the calendar there is a **Daily trend** line graph for the month shown: one point per day from the 1st up to today (a whole month for past months, nothing for future months). Days with no sales show as 0, so a slow or closed day is a dip.
+Under the calendar there is a **Daily trend** bar graph for the month shown: one bar per day from the 1st up to today (a whole month for past months, nothing for future months). Days with no sales show as 0, so a slow or closed day is a dip.
 - **Sales / All earnings** switch: sales only, or sales + GCash charges + excess money (the same number as in the calendar boxes). Unpaid sales are never counted.
-- The orange dashed line is the **7-day average** (each day averaged with the 6 days before it). If it climbs, sales are going up; if it falls, they are going down.
+- The orange dashed line over the bars is the **7-day average** (each day averaged with the 6 days before it). If it climbs, sales are going up; if it falls, they are going down.
 - Above the graph: total so far, average per day, best day, and **Up / Down / About the same vs last month**, compared over the *same number of days* (so mid-month is not unfairly compared with a whole month). Changes under 2% count as "about the same".
 - Code: `src/lib/calendar/trend.ts` (pure logic), `src/components/calendar/sales-trend-chart.tsx`, wired in `src/app/(app)/calendar/page.tsx`. No database change.

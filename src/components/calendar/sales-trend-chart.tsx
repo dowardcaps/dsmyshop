@@ -3,9 +3,10 @@
 import { useState } from "react";
 import { ArrowDownRight, ArrowRight, ArrowUpRight } from "lucide-react";
 import {
+  Bar,
   CartesianGrid,
+  ComposedChart,
   Line,
-  LineChart,
   ResponsiveContainer,
   Tooltip,
   XAxis,
@@ -201,10 +202,10 @@ export function SalesTrendChart({
             <div
               className="h-64 w-full"
               role="img"
-              aria-label={`Line graph of daily ${active.label.toLowerCase()} in ${monthText}`}
+              aria-label={`Bar graph of daily ${active.label.toLowerCase()} in ${monthText}`}
             >
               <ResponsiveContainer width="100%" height="100%">
-                <LineChart
+                <ComposedChart
                   data={data}
                   margin={{ top: 8, right: 8, bottom: 0, left: 0 }}
                 >
@@ -226,6 +227,7 @@ export function SalesTrendChart({
                   />
                   <Tooltip
                     contentStyle={tooltipStyle}
+                    cursor={{ fill: "var(--muted)" }}
                     labelFormatter={(_, items) =>
                       items?.[0]?.payload?.date
                         ? shortDate(items[0].payload.date)
@@ -236,14 +238,12 @@ export function SalesTrendChart({
                       name,
                     ]}
                   />
-                  <Line
-                    type="monotone"
+                  <Bar
                     dataKey="value"
                     name={active.label}
-                    stroke={LINE}
-                    strokeWidth={2}
-                    dot={{ r: 2.5 }}
-                    activeDot={{ r: 4 }}
+                    fill={LINE}
+                    radius={[3, 3, 0, 0]}
+                    maxBarSize={28}
                     isAnimationActive={false}
                   />
                   <Line
@@ -256,7 +256,7 @@ export function SalesTrendChart({
                     dot={false}
                     isAnimationActive={false}
                   />
-                </LineChart>
+                </ComposedChart>
               </ResponsiveContainer>
             </div>
           </>
