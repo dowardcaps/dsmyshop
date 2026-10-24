@@ -1,4 +1,4 @@
-export const TOOL_CATEGORIES = ["Uploads", "Design", "ID", "Documents"] as const;
+export const TOOL_CATEGORIES = ["Uploads", "Design", "ID", "Documents", "Calculators"] as const;
 export type ToolCategory = (typeof TOOL_CATEGORIES)[number];
 
 export interface ToolItem {
@@ -40,6 +40,13 @@ const ALL_TOOLS: readonly ToolItem[] = [
     href: "https://dsresumetemp.vercel.app/",
     description: "Browse and fill professional resume templates.",
     category: "Documents",
+  },
+  {
+    slug: "unitconverter",
+    title: "Unit Converter",
+    href: "https://dsunitconverter.vercel.app/",
+    description: "Convert between units of length, weight, area and more.",
+    category: "Calculators",
   },
   {
     slug: "bgremover",
