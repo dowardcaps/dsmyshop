@@ -62,3 +62,6 @@ Migration: `npm run db:migrate -- --name add_cash_short`.
 
 See `docs/NET_INCOME.md`. Salary paid out, short and reimbursements are subtracted; excess money is added; the
 balance of earlier months is brought forward.
+
+## Layout: full screen with a side menu
+The Records page now fills the whole area next to the app's side menu (no centered column). The record types (Sales, GCash, Expenses, Debts, Excess money, Short, Reimbursements, Salary) are a **vertical side menu with icons** on the left of the page; on phones it becomes a scrolling row on top. The table area scrolls by itself, and the filter box is compact (fields in one wrapping row, quick dates and Apply on the next). Each type still opens with the filters the browser remembers. Code: `src/components/records/records-tabs.tsx`, `src/app/(app)/records/page.tsx`, full-bleed rule in `src/components/layout/app-main.tsx`.

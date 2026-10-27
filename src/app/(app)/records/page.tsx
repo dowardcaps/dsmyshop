@@ -17,7 +17,16 @@ import { requireUser } from "@/lib/auth/require-user";
 import { listExpenseCategories } from "@/lib/expenses/queries";
 import { createRecordHrefs } from "@/lib/records/href";
 import { parseRecordTab, type RecordTab } from "@/lib/records/tabs";
-import { debtFilterValues, excessFilterValues, shortFilterValues, expenseFilterValues, reimbursementFilterValues, salaryFilterValues, gcashFilterValues, saleFilterValues } from "@/lib/records/values";
+import {
+  debtFilterValues,
+  excessFilterValues,
+  shortFilterValues,
+  expenseFilterValues,
+  reimbursementFilterValues,
+  salaryFilterValues,
+  gcashFilterValues,
+  saleFilterValues,
+} from "@/lib/records/values";
 import { ensureSalaryPeriods } from "@/lib/salary/service";
 import { listAdvanceOptions } from "@/lib/salary/queries";
 import { listSaleCategories } from "@/lib/sales/queries";
@@ -45,7 +54,11 @@ const ADD_LABEL: Record<RecordTab, string> = {
   salary: "Add cash advance",
 };
 
-export default async function RecordsPage({ searchParams }: { searchParams: Promise<RawSearchParams> }) {
+export default async function RecordsPage({
+  searchParams,
+}: {
+  searchParams: Promise<RawSearchParams>;
+}) {
   const user = await requireUser();
   const params = await searchParams;
   const tab = parseRecordTab(params.tab);
@@ -77,54 +90,186 @@ export default async function RecordsPage({ searchParams }: { searchParams: Prom
     const filters = parseSaleFilters(params);
     const categories = await listSaleCategories(user.id);
     const values = saleFilterValues(filters);
-    bar = <RecordsFilterBar key={JSON.stringify(values)} tab={tab} values={values} categories={categories.map((c) => ({ value: c.id, label: c.name }))} />;
-    panel = <SalesPanel userId={user.id} filters={filters} categories={categories} hrefs={hrefs} openNew={openNew} editId={editId} />;
+    bar = (
+      <RecordsFilterBar
+        key={JSON.stringify(values)}
+        tab={tab}
+        values={values}
+        categories={categories.map((c) => ({ value: c.id, label: c.name }))}
+      />
+    );
+    panel = (
+      <SalesPanel
+        userId={user.id}
+        filters={filters}
+        categories={categories}
+        hrefs={hrefs}
+        openNew={openNew}
+        editId={editId}
+      />
+    );
   } else if (tab === "gcash") {
     const filters = parseGcashFilters(params);
     const values = gcashFilterValues(filters);
-    bar = <RecordsFilterBar key={JSON.stringify(values)} tab={tab} values={values} categories={[]} />;
-    panel = <GcashPanel userId={user.id} filters={filters} hrefs={hrefs} openNew={openNew} editId={editId} />;
+    bar = (
+      <RecordsFilterBar
+        key={JSON.stringify(values)}
+        tab={tab}
+        values={values}
+        categories={[]}
+      />
+    );
+    panel = (
+      <GcashPanel
+        userId={user.id}
+        filters={filters}
+        hrefs={hrefs}
+        openNew={openNew}
+        editId={editId}
+      />
+    );
   } else if (tab === "expenses") {
     const filters = parseExpenseFilters(params);
     const categories = await listExpenseCategories(user.id);
     const values = expenseFilterValues(filters);
-    bar = <RecordsFilterBar key={JSON.stringify(values)} tab={tab} values={values} categories={categories.map((c) => ({ value: c.id, label: c.name }))} />;
-    panel = <ExpensesPanel userId={user.id} filters={filters} categories={categories} hrefs={hrefs} openNew={openNew} editId={editId} />;
+    bar = (
+      <RecordsFilterBar
+        key={JSON.stringify(values)}
+        tab={tab}
+        values={values}
+        categories={categories.map((c) => ({ value: c.id, label: c.name }))}
+      />
+    );
+    panel = (
+      <ExpensesPanel
+        userId={user.id}
+        filters={filters}
+        categories={categories}
+        hrefs={hrefs}
+        openNew={openNew}
+        editId={editId}
+      />
+    );
   } else if (tab === "salary") {
     await ensureSalaryPeriods(user.id);
     const filters = parseSalaryFilters(params);
     const { employees } = await listAdvanceOptions(user.id);
     const values = salaryFilterValues(filters);
-    bar = <RecordsFilterBar key={JSON.stringify(values)} tab={tab} values={values} categories={employees.map((e) => ({ value: e.id, label: e.name }))} />;
-    panel = <SalaryPanel userId={user.id} filters={filters} hrefs={hrefs} openNew={openNew} editId={editId} />;
+    bar = (
+      <RecordsFilterBar
+        key={JSON.stringify(values)}
+        tab={tab}
+        values={values}
+        categories={employees.map((e) => ({ value: e.id, label: e.name }))}
+      />
+    );
+    panel = (
+      <SalaryPanel
+        userId={user.id}
+        filters={filters}
+        hrefs={hrefs}
+        openNew={openNew}
+        editId={editId}
+      />
+    );
   } else if (tab === "reimbursement") {
     const filters = parseReimbursementFilters(params);
     const values = reimbursementFilterValues(filters);
-    bar = <RecordsFilterBar key={JSON.stringify(values)} tab={tab} values={values} categories={[]} />;
-    panel = <ReimbursementPanel userId={user.id} filters={filters} hrefs={hrefs} openNew={openNew} editId={editId} />;
+    bar = (
+      <RecordsFilterBar
+        key={JSON.stringify(values)}
+        tab={tab}
+        values={values}
+        categories={[]}
+      />
+    );
+    panel = (
+      <ReimbursementPanel
+        userId={user.id}
+        filters={filters}
+        hrefs={hrefs}
+        openNew={openNew}
+        editId={editId}
+      />
+    );
   } else if (tab === "short") {
     const filters = parseShortFilters(params);
     const values = shortFilterValues(filters);
-    bar = <RecordsFilterBar key={JSON.stringify(values)} tab={tab} values={values} categories={[]} />;
-    panel = <ShortPanel userId={user.id} filters={filters} hrefs={hrefs} openNew={openNew} editId={editId} />;
+    bar = (
+      <RecordsFilterBar
+        key={JSON.stringify(values)}
+        tab={tab}
+        values={values}
+        categories={[]}
+      />
+    );
+    panel = (
+      <ShortPanel
+        userId={user.id}
+        filters={filters}
+        hrefs={hrefs}
+        openNew={openNew}
+        editId={editId}
+      />
+    );
   } else if (tab === "excess") {
     const filters = parseExcessFilters(params);
     const values = excessFilterValues(filters);
-    bar = <RecordsFilterBar key={JSON.stringify(values)} tab={tab} values={values} categories={[]} />;
-    panel = <ExcessPanel userId={user.id} filters={filters} hrefs={hrefs} openNew={openNew} editId={editId} />;
+    bar = (
+      <RecordsFilterBar
+        key={JSON.stringify(values)}
+        tab={tab}
+        values={values}
+        categories={[]}
+      />
+    );
+    panel = (
+      <ExcessPanel
+        userId={user.id}
+        filters={filters}
+        hrefs={hrefs}
+        openNew={openNew}
+        editId={editId}
+      />
+    );
   } else {
     const filters = parseDebtFilters(params);
     const values = debtFilterValues(filters);
-    bar = <RecordsFilterBar key={JSON.stringify(values)} tab={tab} values={values} categories={[]} />;
-    panel = <DebtsPanel userId={user.id} filters={filters} hrefs={hrefs} openNew={openNew} editId={editId} />;
+    bar = (
+      <RecordsFilterBar
+        key={JSON.stringify(values)}
+        tab={tab}
+        values={values}
+        categories={[]}
+      />
+    );
+    panel = (
+      <DebtsPanel
+        userId={user.id}
+        filters={filters}
+        hrefs={hrefs}
+        openNew={openNew}
+        editId={editId}
+      />
+    );
   }
 
   return (
-    <div className="space-y-6">
-      <PageHeader title="Records" description="Sales, GCash, expenses, debts, excess money, short, reimbursements and salary. One set of filters for all of them." actions={actions} />
-      {bar}
+    <div
+      className="flex min-h-0 flex-1 flex-col overflow-y-auto lg:flex-row lg:overflow-hidden"
+      data-testid="records-shell"
+    >
       <RecordsTabs active={tab} />
-      {panel}
+      {/* The table area uses all the room that is left and scrolls on its own. */}
+      <div className="min-w-0 flex-1 space-y-5 p-4 sm:p-6 lg:min-h-0 lg:overflow-y-auto">
+        <PageHeader
+          title="Records"
+          description="Sales, GCash, expenses, debts, excess money, short, reimbursements and salary. One set of filters for all of them."
+          actions={actions}
+        />
+        {bar}
+        {panel}
+      </div>
     </div>
   );
 }
