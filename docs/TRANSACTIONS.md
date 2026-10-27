@@ -1,4 +1,4 @@
-# Transactions page (calculator)
+# POS (Transactions) page (calculator)
 
 Route: `/transactions` (price list: `/transactions/services`).
 
@@ -58,3 +58,10 @@ Under Payment there is a **Paid | Unpaid** switch. It is **Paid** by default and
 - A sale marked paid counts on its **own transaction date** (not the day it was paid). If that is an earlier month, that month's totals change; edit the sale's date first if you want it counted today.
 - For the GCash balance, a sale paid by GCash is added when it becomes paid (and only if that is after the last balance you set).
 - Data: `Sale.isPaid` (default true) and `Sale.paidAt`. Migration: `npm run db:migrate -- --name add_sale_paid_status`. Existing sales stay paid.
+
+## POS: full screen with one shared Summary
+The side-menu item is now called **POS** (the address is still `/transactions`). The POS and **Manage services** pages share one full-screen frame (`src/app/(app)/transactions/layout.tsx` + `src/components/transactions/pos-shell.tsx`):
+- The page fills the whole area next to the side menu, with larger rows, buttons and text. It scrolls on its own, so the Summary never moves.
+- The **Summary** of the open order is pinned on the right on both pages, so you can edit prices and still see, pay or save the order. It is the same order and the same Payment / Status / Customer fields on both pages.
+- The order state lives in the frame (`usePos()` in `pos-context.tsx`), not in a page, so going between the two pages never loses it.
+- On phones the Summary sits under the page.

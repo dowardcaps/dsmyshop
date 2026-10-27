@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { requireUser } from "@/lib/auth/require-user";
 import { ensureServiceCatalog, listServices } from "@/lib/transactions/catalog";
 
-export const metadata = { title: "Transactions | DS Finance" };
+export const metadata = { title: "POS | DS Finance" };
 
 export default async function TransactionsPage() {
   const user = await requireUser();
@@ -31,9 +31,9 @@ export default async function TransactionsPage() {
   );
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-5">
       <PageHeader
-        title="Transactions"
+        title="POS"
         description="Add items, then Save to Sales. The summary is written for you and the sale appears on the Sales page."
         actions={actions}
       />
@@ -49,14 +49,7 @@ export default async function TransactionsPage() {
           }
         />
       ) : (
-        <PosView
-          services={services.map((service) => ({
-            id: service.id,
-            name: service.name,
-            price: service.price,
-            categoryName: service.categoryName,
-          }))}
-        />
+        <PosView />
       )}
     </div>
   );

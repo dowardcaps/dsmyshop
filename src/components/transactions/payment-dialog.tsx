@@ -4,7 +4,14 @@ import { useState } from "react";
 import { Loader2 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toCents } from "@/lib/cents";
@@ -23,7 +30,12 @@ interface PaymentDialogProps {
   onConfirm: () => Promise<boolean>;
 }
 
-function PaymentForm({ onOpenChange, totalCents, saving, onConfirm }: Omit<PaymentDialogProps, "open">) {
+function PaymentForm({
+  onOpenChange,
+  totalCents,
+  saving,
+  onConfirm,
+}: Omit<PaymentDialogProps, "open">) {
   const [cash, setCash] = useState("");
   const cashCents = cash === "" ? 0 : toCents(Number(cash));
   const enough = cash !== "" && cashCents >= totalCents;
@@ -44,12 +56,17 @@ function PaymentForm({ onOpenChange, totalCents, saving, onConfirm }: Omit<Payme
     >
       <DialogHeader>
         <DialogTitle>Complete transaction</DialogTitle>
-        <DialogDescription>Enter the cash received. The sale is saved to Sales when you press Save.</DialogDescription>
+        <DialogDescription>
+          Enter the cash received. The sale is saved to Sales when you press
+          Save.
+        </DialogDescription>
       </DialogHeader>
 
       <div className="flex items-center justify-between border-b pb-3">
         <span className="text-muted-foreground">Total amount</span>
-        <strong className="text-xl tabular-nums">{formatPeso(totalCents / 100)}</strong>
+        <strong className="text-xl tabular-nums">
+          {formatPeso(totalCents / 100)}
+        </strong>
       </div>
 
       <div className="space-y-2">
@@ -68,26 +85,58 @@ function PaymentForm({ onOpenChange, totalCents, saving, onConfirm }: Omit<Payme
           className="tabular-nums"
         />
         <div className="flex flex-wrap gap-2">
-          <Button type="button" variant="outline" size="sm" onClick={() => setCash(String(totalCents / 100))}>
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={() => setCash(String(totalCents / 100))}
+          >
             Exact
           </Button>
           {QUICK_CASH.map((amount) => (
-            <Button key={amount} type="button" variant="outline" size="sm" onClick={() => setCash(String(amount))}>
+            <Button
+              key={amount}
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={() => setCash(String(amount))}
+            >
               ₱{amount}
             </Button>
           ))}
         </div>
       </div>
 
-      <div className={cn("rounded-lg border p-4 text-center", short ? "border-destructive/50" : "border-emerald-600/40")}>
-        <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">{short ? "Still short" : "Change"}</p>
-        <p className={cn("mt-1 text-3xl font-semibold tabular-nums", short ? "text-destructive" : "text-emerald-600")}>
-          {formatPeso((short ? totalCents - cashCents : changeCents(cashCents, totalCents)) / 100)}
+      <div
+        className={cn(
+          "rounded-lg border p-4 text-center",
+          short ? "border-destructive/50" : "border-emerald-600/40",
+        )}
+      >
+        <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+          {short ? "Still short" : "Change"}
+        </p>
+        <p
+          className={cn(
+            "mt-1 text-3xl font-semibold tabular-nums",
+            short ? "text-destructive" : "text-emerald-600",
+          )}
+        >
+          {formatPeso(
+            (short
+              ? totalCents - cashCents
+              : changeCents(cashCents, totalCents)) / 100,
+          )}
         </p>
       </div>
 
       <DialogFooter>
-        <Button type="button" variant="ghost" onClick={() => onOpenChange(false)} disabled={saving}>
+        <Button
+          type="button"
+          variant="ghost"
+          onClick={() => onOpenChange(false)}
+          disabled={saving}
+        >
           Back
         </Button>
         <Button type="submit" disabled={!enough || saving}>

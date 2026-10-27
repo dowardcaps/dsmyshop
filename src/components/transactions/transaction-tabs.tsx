@@ -15,19 +15,34 @@ interface TransactionTabsProps {
 }
 
 /** One tab per customer being served at the same time. */
-export function TransactionTabs({ tabs, activeId, onSelect, onAdd, onRemove }: TransactionTabsProps) {
+export function TransactionTabs({
+  tabs,
+  activeId,
+  onSelect,
+  onAdd,
+  onRemove,
+}: TransactionTabsProps) {
   return (
     <div className="flex items-center gap-2 rounded-lg border bg-muted/40 p-2">
-      <div role="tablist" aria-label="Open transactions" className="flex min-w-0 flex-1 gap-2 overflow-x-auto pb-1">
+      <div
+        role="tablist"
+        aria-label="Open transactions"
+        className="flex min-w-0 flex-1 gap-2 overflow-x-auto pb-1"
+      >
         {tabs.map((tab) => {
           const active = tab.id === activeId;
-          const count = Object.values(tab.cart).reduce((sum, qty) => sum + qty, 0);
+          const count = Object.values(tab.cart).reduce(
+            (sum, qty) => sum + qty,
+            0,
+          );
           return (
             <div
               key={tab.id}
               className={cn(
                 "flex shrink-0 items-center rounded-md border text-sm font-medium",
-                active ? "border-primary bg-primary text-primary-foreground" : "bg-background hover:bg-accent",
+                active
+                  ? "border-primary bg-primary text-primary-foreground"
+                  : "bg-background hover:bg-accent",
               )}
             >
               <button
@@ -35,10 +50,12 @@ export function TransactionTabs({ tabs, activeId, onSelect, onAdd, onRemove }: T
                 role="tab"
                 aria-selected={active}
                 onClick={() => onSelect(tab.id)}
-                className="cursor-pointer rounded-md px-3 py-1.5 outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
+                className="cursor-pointer rounded-md px-4 py-2 text-base outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
               >
                 {tab.name}
-                {count > 0 ? <span className="ml-1.5 text-xs opacity-80">({count})</span> : null}
+                {count > 0 ? (
+                  <span className="ml-1.5 text-xs opacity-80">({count})</span>
+                ) : null}
               </button>
               {tabs.length > 1 ? (
                 <button
@@ -54,7 +71,7 @@ export function TransactionTabs({ tabs, activeId, onSelect, onAdd, onRemove }: T
           );
         })}
       </div>
-      <Button type="button" size="sm" onClick={onAdd}>
+      <Button type="button" className="h-10" onClick={onAdd}>
         <Plus /> <span className="hidden sm:inline">New transaction</span>
         <span className="sm:hidden">New</span>
       </Button>

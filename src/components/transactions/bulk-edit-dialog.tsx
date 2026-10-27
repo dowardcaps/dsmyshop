@@ -3,7 +3,14 @@
 import { Loader2 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select } from "@/components/ui/select";
@@ -22,7 +29,12 @@ interface BulkEditDialogProps {
   onSaved: () => void;
 }
 
-function BulkEditForm({ targets, categories, onOpenChange, onSaved }: Omit<BulkEditDialogProps, "open">) {
+function BulkEditForm({
+  targets,
+  categories,
+  onOpenChange,
+  onSaved,
+}: Omit<BulkEditDialogProps, "open">) {
   const edit = useBulkEdit({
     targets,
     onDone: () => {
@@ -47,13 +59,20 @@ function BulkEditForm({ targets, categories, onOpenChange, onSaved }: Omit<BulkE
         <DialogTitle>
           Edit {count} selected {count === 1 ? "service" : "services"}
         </DialogTitle>
-        <DialogDescription>Fill in only what you want to change. Everything else stays as it is, and past sales are never affected.</DialogDescription>
+        <DialogDescription>
+          Fill in only what you want to change. Everything else stays as it is,
+          and past sales are never affected.
+        </DialogDescription>
       </DialogHeader>
 
       <div className="grid gap-3 sm:grid-cols-[1fr_8rem]">
         <div className="space-y-2">
           <Label htmlFor="bulkPriceAction">Price</Label>
-          <Select id="bulkPriceAction" value={edit.priceAction} onChange={(e) => edit.setPriceAction(e.target.value as PriceAction)}>
+          <Select
+            id="bulkPriceAction"
+            value={edit.priceAction}
+            onChange={(e) => edit.setPriceAction(e.target.value as PriceAction)}
+          >
             {PRICE_ACTIONS.map((action) => (
               <option key={action.value} value={action.value}>
                 {action.label}
@@ -62,7 +81,9 @@ function BulkEditForm({ targets, categories, onOpenChange, onSaved }: Omit<BulkE
           </Select>
         </div>
         <div className="space-y-2">
-          <Label htmlFor="bulkPriceValue">{edit.wantsPrice ? `Amount (${unit})` : "Amount"}</Label>
+          <Label htmlFor="bulkPriceValue">
+            {edit.wantsPrice ? `Amount (${unit})` : "Amount"}
+          </Label>
           <Input
             id="bulkPriceValue"
             type="number"
@@ -79,7 +100,11 @@ function BulkEditForm({ targets, categories, onOpenChange, onSaved }: Omit<BulkE
 
       <div className="space-y-2">
         <Label htmlFor="bulkCategory">Move to category</Label>
-        <Select id="bulkCategory" value={edit.categoryId} onChange={(e) => edit.setCategoryId(e.target.value)}>
+        <Select
+          id="bulkCategory"
+          value={edit.categoryId}
+          onChange={(e) => edit.setCategoryId(e.target.value)}
+        >
           <option value="">Don&apos;t change</option>
           {categories.map((category) => (
             <option key={category.id} value={category.id}>
@@ -91,29 +116,56 @@ function BulkEditForm({ targets, categories, onOpenChange, onSaved }: Omit<BulkE
 
       {edit.wantsPrice ? (
         <div className="rounded-lg border">
-          <p className="border-b px-3 py-2 text-xs font-medium uppercase tracking-wide text-muted-foreground">Price preview</p>
+          <p className="border-b px-3 py-2 text-xs font-medium uppercase tracking-wide text-muted-foreground">
+            Price preview
+          </p>
           <ul className="divide-y text-sm">
             {shown.map((row) => (
-              <li key={row.id} className="flex items-center justify-between gap-3 px-3 py-1.5">
+              <li
+                key={row.id}
+                className="flex items-center justify-between gap-3 px-3 py-1.5"
+              >
                 <span className="min-w-0 truncate">{row.name}</span>
                 <span className="shrink-0 tabular-nums">
-                  <span className="text-muted-foreground">{formatPeso(row.price)}</span> →{" "}
-                  {row.newPrice === null ? <span className="font-medium text-destructive">not allowed</span> : <span className="font-medium">{formatPeso(row.newPrice)}</span>}
+                  <span className="text-muted-foreground">
+                    {formatPeso(row.price)}
+                  </span>{" "}
+                  →{" "}
+                  {row.newPrice === null ? (
+                    <span className="font-medium text-destructive">
+                      not allowed
+                    </span>
+                  ) : (
+                    <span className="font-medium">
+                      {formatPeso(row.newPrice)}
+                    </span>
+                  )}
                 </span>
               </li>
             ))}
           </ul>
-          {count > PREVIEW_ROWS ? <p className="border-t px-3 py-1.5 text-xs text-muted-foreground">…and {count - PREVIEW_ROWS} more</p> : null}
+          {count > PREVIEW_ROWS ? (
+            <p className="border-t px-3 py-1.5 text-xs text-muted-foreground">
+              …and {count - PREVIEW_ROWS} more
+            </p>
+          ) : null}
         </div>
       ) : null}
       {edit.invalidCount > 0 ? (
         <p role="alert" className="text-sm text-destructive">
-          {edit.invalidCount} {edit.invalidCount === 1 ? "service would" : "services would"} end up below ₱0.01. Adjust the amount.
+          {edit.invalidCount}{" "}
+          {edit.invalidCount === 1 ? "service would" : "services would"} end up
+          below ₱0.01. Adjust the amount.
         </p>
       ) : null}
 
       <DialogFooter>
-        <Button type="button" variant="ghost" onClick={() => onOpenChange(false)} disabled={edit.saving}>
+        <Button
+          type="button"
+          variant="ghost"
+          onClick={() => onOpenChange(false)}
+          disabled={edit.saving}
+        >
           Cancel
         </Button>
         <Button type="submit" disabled={!edit.canSave}>
@@ -125,7 +177,11 @@ function BulkEditForm({ targets, categories, onOpenChange, onSaved }: Omit<BulkE
   );
 }
 
-export function BulkEditDialog({ open, onOpenChange, ...rest }: BulkEditDialogProps) {
+export function BulkEditDialog({
+  open,
+  onOpenChange,
+  ...rest
+}: BulkEditDialogProps) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>

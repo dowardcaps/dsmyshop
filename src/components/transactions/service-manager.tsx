@@ -2,7 +2,14 @@
 
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { ListChecks, Loader2, Pencil, Plus, RotateCcw, Search } from "lucide-react";
+import {
+  ListChecks,
+  Loader2,
+  Pencil,
+  Plus,
+  RotateCcw,
+  Search,
+} from "lucide-react";
 import { toast } from "sonner";
 
 import { BulkActionBar } from "@/components/transactions/bulk-action-bar";
@@ -24,10 +31,21 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { usePagination } from "@/hooks/use-pagination";
 import { useServiceSelection } from "@/hooks/use-service-selection";
-import { bulkDeleteServicesAction, deleteServiceAction, resetServicesAction } from "@/lib/actions/transactions";
+import {
+  bulkDeleteServicesAction,
+  deleteServiceAction,
+  resetServicesAction,
+} from "@/lib/actions/transactions";
 import { formatPeso } from "@/lib/format";
 import { cn } from "@/lib/utils";
 
@@ -58,14 +76,27 @@ export function ServiceManager({ services, categories }: ServiceManagerProps) {
   const visible = useMemo(() => {
     const needle = query.trim().toLowerCase();
     if (!needle) return services;
-    return services.filter((s) => s.name.toLowerCase().includes(needle) || s.categoryName.toLowerCase().includes(needle));
+    return services.filter(
+      (s) =>
+        s.name.toLowerCase().includes(needle) ||
+        s.categoryName.toLowerCase().includes(needle),
+    );
   }, [services, query]);
 
   const pager = usePagination(visible, { resetKey: query });
-  const matchingIds = useMemo(() => visible.map((service) => service.id), [visible]);
-  const pageIds = useMemo(() => pager.rows.map((service) => service.id), [pager.rows]);
+  const matchingIds = useMemo(
+    () => visible.map((service) => service.id),
+    [visible],
+  );
+  const pageIds = useMemo(
+    () => pager.rows.map((service) => service.id),
+    [pager.rows],
+  );
   const selection = useServiceSelection(matchingIds, pageIds);
-  const selectedServices = useMemo(() => visible.filter((service) => selection.isChecked(service.id)), [visible, selection]);
+  const selectedServices = useMemo(
+    () => visible.filter((service) => selection.isChecked(service.id)),
+    [visible, selection],
+  );
 
   async function resetAll() {
     setResetting(true);
@@ -83,13 +114,17 @@ export function ServiceManager({ services, categories }: ServiceManagerProps) {
 
   async function bulkDelete() {
     setBulkDeleting(true);
-    const result = await bulkDeleteServicesAction({ ids: selection.selectedIds });
+    const result = await bulkDeleteServicesAction({
+      ids: selection.selectedIds,
+    });
     setBulkDeleting(false);
     if (!result.ok) {
       toast.error(result.error);
       return;
     }
-    toast.success(`Deleted ${result.data.count} ${result.data.count === 1 ? "service" : "services"}.`);
+    toast.success(
+      `Deleted ${result.data.count} ${result.data.count === 1 ? "service" : "services"}.`,
+    );
     selection.clear();
     setBulkDeleteOpen(false);
     router.refresh();
@@ -112,10 +147,19 @@ export function ServiceManager({ services, categories }: ServiceManagerProps) {
             className="pl-9"
           />
         </div>
-        <Button type="button" variant={bulk ? "secondary" : "outline"} aria-pressed={bulk} onClick={() => selection.setBulkMode(!bulk)}>
+        <Button
+          type="button"
+          variant={bulk ? "secondary" : "outline"}
+          aria-pressed={bulk}
+          onClick={() => selection.setBulkMode(!bulk)}
+        >
           <ListChecks /> {bulk ? "Done selecting" : "Bulk edit"}
         </Button>
-        <Button type="button" variant="outline" onClick={() => setResetOpen(true)}>
+        <Button
+          type="button"
+          variant="outline"
+          onClick={() => setResetOpen(true)}
+        >
           <RotateCcw /> Reset to defaults
         </Button>
         <Button type="button" onClick={() => setAdding(true)}>
@@ -123,19 +167,32 @@ export function ServiceManager({ services, categories }: ServiceManagerProps) {
         </Button>
       </div>
 
-      {bulk && selection.allOnPageSelected && visible.length > pager.rows.length ? (
-        <p className="rounded-lg border bg-accent/40 px-3 py-2 text-sm" role="status">
+      {bulk &&
+      selection.allOnPageSelected &&
+      visible.length > pager.rows.length ? (
+        <p
+          className="rounded-lg border bg-accent/40 px-3 py-2 text-sm"
+          role="status"
+        >
           {selection.allMatchingSelected ? (
             <>
               All {visible.length} matching services are selected.{" "}
-              <button type="button" className="cursor-pointer font-medium text-primary underline-offset-4 hover:underline" onClick={selection.clear}>
+              <button
+                type="button"
+                className="cursor-pointer font-medium text-primary underline-offset-4 hover:underline"
+                onClick={selection.clear}
+              >
                 Clear selection
               </button>
             </>
           ) : (
             <>
               All {pager.rows.length} services on this page are selected.{" "}
-              <button type="button" className="cursor-pointer font-medium text-primary underline-offset-4 hover:underline" onClick={selection.selectAllMatching}>
+              <button
+                type="button"
+                className="cursor-pointer font-medium text-primary underline-offset-4 hover:underline"
+                onClick={selection.selectAllMatching}
+              >
                 Select all {visible.length} matching
               </button>
             </>
@@ -152,7 +209,10 @@ export function ServiceManager({ services, categories }: ServiceManagerProps) {
                   <Checkbox
                     aria-label="Select all services on this page"
                     checked={selection.allOnPageSelected}
-                    indeterminate={selection.pageSelectedCount > 0 && !selection.allOnPageSelected}
+                    indeterminate={
+                      selection.pageSelectedCount > 0 &&
+                      !selection.allOnPageSelected
+                    }
                     onChange={selection.togglePage}
                     disabled={pager.rows.length === 0}
                   />
@@ -161,13 +221,18 @@ export function ServiceManager({ services, categories }: ServiceManagerProps) {
               <TableHead>Service / item</TableHead>
               <TableHead>Category</TableHead>
               <TableHead className="text-right">Price</TableHead>
-              {bulk ? null : <TableHead className="w-28 text-right">Actions</TableHead>}
+              {bulk ? null : (
+                <TableHead className="w-28 text-right">Actions</TableHead>
+              )}
             </TableRow>
           </TableHeader>
           <TableBody>
             {visible.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={columns} className="py-12 text-center text-muted-foreground">
+                <TableCell
+                  colSpan={columns}
+                  className="py-12 text-center text-muted-foreground"
+                >
                   No services found.
                 </TableCell>
               </TableRow>
@@ -175,26 +240,42 @@ export function ServiceManager({ services, categories }: ServiceManagerProps) {
               pager.rows.map((service) => {
                 const checked = selection.isChecked(service.id);
                 return (
-                  <TableRow key={service.id} className={cn(checked && "bg-accent/50")} data-state={checked ? "selected" : undefined}>
+                  <TableRow
+                    key={service.id}
+                    className={cn(checked && "bg-accent/50")}
+                    data-state={checked ? "selected" : undefined}
+                  >
                     {bulk ? (
                       <TableCell>
                         <Checkbox
                           aria-label={`Select ${service.name} (${service.categoryName})`}
                           checked={checked}
                           onChange={() => undefined}
-                          onClick={(event) => selection.toggle(service.id, event.shiftKey)}
+                          onClick={(event) =>
+                            selection.toggle(service.id, event.shiftKey)
+                          }
                         />
                       </TableCell>
                     ) : null}
-                    <TableCell className="font-medium">{service.name}</TableCell>
+                    <TableCell className="font-medium">
+                      {service.name}
+                    </TableCell>
                     <TableCell>
                       <CategoryBadge name={service.categoryName} />
                     </TableCell>
-                    <TableCell className="text-right tabular-nums">{formatPeso(service.price)}</TableCell>
+                    <TableCell className="text-right tabular-nums">
+                      {formatPeso(service.price)}
+                    </TableCell>
                     {bulk ? null : (
                       <TableCell>
                         <div className="flex justify-end gap-1">
-                          <Button type="button" variant="ghost" size="icon" onClick={() => setEditing(service)} aria-label={`Edit ${service.name}`}>
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => setEditing(service)}
+                            aria-label={`Edit ${service.name}`}
+                          >
                             <Pencil className="size-4" />
                           </Button>
                           <ConfirmDeleteButton
@@ -214,7 +295,14 @@ export function ServiceManager({ services, categories }: ServiceManagerProps) {
             )}
           </TableBody>
         </Table>
-        <ClientPagination page={pager.page} pageCount={pager.pageCount} total={pager.total} pageSize={pager.pageSize} onPageChange={pager.setPage} className="border-t px-4 py-3" />
+        <ClientPagination
+          page={pager.page}
+          pageCount={pager.pageCount}
+          total={pager.total}
+          pageSize={pager.pageSize}
+          onPageChange={pager.setPage}
+          className="border-t px-4 py-3"
+        />
       </Card>
       <p className="text-xs text-muted-foreground">
         {bulk
@@ -232,7 +320,11 @@ export function ServiceManager({ services, categories }: ServiceManagerProps) {
         />
       ) : null}
 
-      <ServiceFormDialog open={adding} onOpenChange={setAdding} categories={categories} />
+      <ServiceFormDialog
+        open={adding}
+        onOpenChange={setAdding}
+        categories={categories}
+      />
       <ServiceFormDialog
         open={editing !== null}
         onOpenChange={(open) => !open && setEditing(null)}
@@ -243,7 +335,11 @@ export function ServiceManager({ services, categories }: ServiceManagerProps) {
       <BulkEditDialog
         open={bulkEditOpen}
         onOpenChange={setBulkEditOpen}
-        targets={selectedServices.map((s) => ({ id: s.id, name: s.name, price: s.price }))}
+        targets={selectedServices.map((s) => ({
+          id: s.id,
+          name: s.name,
+          price: s.price,
+        }))}
         categories={categories}
         onSaved={() => {
           selection.clear();
@@ -255,9 +351,13 @@ export function ServiceManager({ services, categories }: ServiceManagerProps) {
         <DialogContent>
           <DialogHeader>
             <DialogTitle>
-              Delete {selection.selectedIds.length} {selection.selectedIds.length === 1 ? "service" : "services"}?
+              Delete {selection.selectedIds.length}{" "}
+              {selection.selectedIds.length === 1 ? "service" : "services"}?
             </DialogTitle>
-            <DialogDescription>They will be removed from the calculator. Past sales are not affected. This cannot be undone.</DialogDescription>
+            <DialogDescription>
+              They will be removed from the calculator. Past sales are not
+              affected. This cannot be undone.
+            </DialogDescription>
           </DialogHeader>
           <DialogFooter>
             <DialogClose asChild>
@@ -265,7 +365,11 @@ export function ServiceManager({ services, categories }: ServiceManagerProps) {
                 Cancel
               </Button>
             </DialogClose>
-            <Button variant="destructive" onClick={bulkDelete} disabled={bulkDeleting}>
+            <Button
+              variant="destructive"
+              onClick={bulkDelete}
+              disabled={bulkDeleting}
+            >
               {bulkDeleting ? <Loader2 className="animate-spin" /> : null}
               Delete {selection.selectedIds.length}
             </Button>
@@ -278,7 +382,9 @@ export function ServiceManager({ services, categories }: ServiceManagerProps) {
           <DialogHeader>
             <DialogTitle>Reset to the default list?</DialogTitle>
             <DialogDescription>
-              Every service, including the ones you added and any price you changed, is replaced by the original list. Past sales are not affected.
+              Every service, including the ones you added and any price you
+              changed, is replaced by the original list. Past sales are not
+              affected.
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
@@ -287,7 +393,11 @@ export function ServiceManager({ services, categories }: ServiceManagerProps) {
                 Cancel
               </Button>
             </DialogClose>
-            <Button variant="destructive" onClick={resetAll} disabled={resetting}>
+            <Button
+              variant="destructive"
+              onClick={resetAll}
+              disabled={resetting}
+            >
               {resetting ? <Loader2 className="animate-spin" /> : null}
               Reset list
             </Button>

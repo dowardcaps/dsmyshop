@@ -13,17 +13,20 @@ export const metadata = { title: "Services | DS Finance" };
 export default async function ServicesPage() {
   const user = await requireUser();
   await ensureServiceCatalog(user.id);
-  const [services, categories] = await Promise.all([listServices(user.id), listSaleCategories(user.id)]);
+  const [services, categories] = await Promise.all([
+    listServices(user.id),
+    listSaleCategories(user.id),
+  ]);
 
   return (
     <div className="space-y-6">
       <PageHeader
         title="Services & prices"
-        description="The price list used by the Transactions calculator."
+        description="The price list used by the POS. Your open order stays in the Summary on the right."
         actions={
           <Button asChild variant="outline">
             <Link href="/transactions">
-              <ArrowLeft /> Back to Transactions
+              <ArrowLeft /> Back to POS
             </Link>
           </Button>
         }

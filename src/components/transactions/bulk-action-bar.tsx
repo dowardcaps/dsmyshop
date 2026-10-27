@@ -13,7 +13,13 @@ interface BulkActionBarProps {
 }
 
 /** Appears at the bottom of the list while at least one row is checked. */
-export function BulkActionBar({ count, hiddenCount, onEdit, onDelete, onClear }: BulkActionBarProps) {
+export function BulkActionBar({
+  count,
+  hiddenCount,
+  onEdit,
+  onDelete,
+  onClear,
+}: BulkActionBarProps) {
   return (
     <div
       role="toolbar"
@@ -22,12 +28,24 @@ export function BulkActionBar({ count, hiddenCount, onEdit, onDelete, onClear }:
     >
       <p className="mr-auto text-sm" aria-live="polite">
         <span className="font-semibold">{count} selected</span>
-        {hiddenCount > 0 ? <span className="text-muted-foreground"> (+{hiddenCount} hidden by search, not included)</span> : null}
+        {hiddenCount > 0 ? (
+          <span className="text-muted-foreground">
+            {" "}
+            (+{hiddenCount} hidden by search, not included)
+          </span>
+        ) : null}
       </p>
       <Button type="button" size="sm" onClick={onEdit} disabled={count === 0}>
         <Pencil /> Edit selected
       </Button>
-      <Button type="button" size="sm" variant="outline" className="text-destructive hover:text-destructive" onClick={onDelete} disabled={count === 0}>
+      <Button
+        type="button"
+        size="sm"
+        variant="outline"
+        className="text-destructive hover:text-destructive"
+        onClick={onDelete}
+        disabled={count === 0}
+      >
         <Trash2 /> Delete
       </Button>
       <Button type="button" size="sm" variant="ghost" onClick={onClear}>

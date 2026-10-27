@@ -7,7 +7,14 @@ import { CategoryBadge } from "@/components/transactions/category-badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { formatPeso } from "@/lib/format";
 import type { PosService } from "@/lib/transactions/cart";
 import { TABLE_PAGE_SIZE } from "@/lib/pagination";
@@ -25,9 +32,18 @@ interface ServiceTableProps {
   onPage: (page: number) => void;
 }
 
-export function ServiceTable({ services, quantityOf, onChange, onSet, page, pageCount, total, onPage }: ServiceTableProps) {
+export function ServiceTable({
+  services,
+  quantityOf,
+  onChange,
+  onSet,
+  page,
+  pageCount,
+  total,
+  onPage,
+}: ServiceTableProps) {
   return (
-    <Card className="gap-0 overflow-hidden py-0 lg:min-h-[35rem]">
+    <Card className="gap-0 overflow-hidden py-0">
       <Table>
         <TableHeader>
           <TableRow>
@@ -40,7 +56,10 @@ export function ServiceTable({ services, quantityOf, onChange, onSet, page, page
         <TableBody>
           {services.length === 0 ? (
             <TableRow>
-              <TableCell colSpan={4} className="py-12 text-center text-muted-foreground">
+              <TableCell
+                colSpan={4}
+                className="py-12 text-center text-muted-foreground"
+              >
                 No services match your search.
               </TableCell>
             </TableRow>
@@ -48,8 +67,11 @@ export function ServiceTable({ services, quantityOf, onChange, onSet, page, page
             services.map((service) => {
               const qty = quantityOf(service.id);
               return (
-                <TableRow key={service.id} className={cn(qty > 0 && "bg-accent/40")}>
-                  <TableCell className="whitespace-normal font-medium">
+                <TableRow
+                  key={service.id}
+                  className={cn("h-16", qty > 0 && "bg-accent/40")}
+                >
+                  <TableCell className="whitespace-normal text-base font-medium">
                     {service.name}
                     {/* The Category column is hidden on phones, so the badge moves under the name. */}
                     <span className="mt-1 block sm:hidden">
@@ -59,19 +81,21 @@ export function ServiceTable({ services, quantityOf, onChange, onSet, page, page
                   <TableCell className="hidden sm:table-cell">
                     <CategoryBadge name={service.categoryName} />
                   </TableCell>
-                  <TableCell className="text-right tabular-nums">{formatPeso(service.price)}</TableCell>
+                  <TableCell className="text-right text-base font-medium tabular-nums">
+                    {formatPeso(service.price)}
+                  </TableCell>
                   <TableCell>
                     <div className="flex items-center justify-center gap-1.5">
                       <Button
                         type="button"
                         variant="outline"
                         size="icon"
-                        className="size-8"
+                        className="size-10"
                         onClick={() => onChange(service.id, -1)}
                         disabled={qty === 0}
                         aria-label={`Decrease ${service.name}`}
                       >
-                        <Minus className="size-4" />
+                        <Minus className="size-5" />
                       </Button>
                       <Input
                         type="number"
@@ -79,19 +103,24 @@ export function ServiceTable({ services, quantityOf, onChange, onSet, page, page
                         min={0}
                         max={MAX_QUANTITY}
                         value={qty}
-                        onChange={(event) => onSet(service.id, Number.parseInt(event.target.value, 10) || 0)}
+                        onChange={(event) =>
+                          onSet(
+                            service.id,
+                            Number.parseInt(event.target.value, 10) || 0,
+                          )
+                        }
                         aria-label={`Quantity of ${service.name}`}
-                        className="h-8 w-14 px-1 text-center tabular-nums"
+                        className="h-10 w-16 px-1 text-center text-base tabular-nums"
                       />
                       <Button
                         type="button"
                         variant="outline"
                         size="icon"
-                        className="size-8"
+                        className="size-10"
                         onClick={() => onChange(service.id, 1)}
                         aria-label={`Increase ${service.name}`}
                       >
-                        <Plus className="size-4" />
+                        <Plus className="size-5" />
                       </Button>
                     </div>
                   </TableCell>
@@ -102,7 +131,14 @@ export function ServiceTable({ services, quantityOf, onChange, onSet, page, page
         </TableBody>
       </Table>
 
-      <ClientPagination page={page} pageCount={pageCount} total={total} pageSize={TABLE_PAGE_SIZE} onPageChange={onPage} className="mt-auto border-t px-4 py-3" />
+      <ClientPagination
+        page={page}
+        pageCount={pageCount}
+        total={total}
+        pageSize={TABLE_PAGE_SIZE}
+        onPageChange={onPage}
+        className="mt-auto border-t px-4 py-3"
+      />
     </Card>
   );
 }

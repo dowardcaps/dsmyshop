@@ -3,7 +3,14 @@
 import { Loader2 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select } from "@/components/ui/select";
@@ -18,12 +25,20 @@ interface ServiceFormDialogProps {
   service?: { id: string } & ServiceInput;
 }
 
-function ServiceForm({ categories, service, onOpenChange }: Omit<ServiceFormDialogProps, "open">) {
+function ServiceForm({
+  categories,
+  service,
+  onOpenChange,
+}: Omit<ServiceFormDialogProps, "open">) {
   const { form, submit } = useServiceForm({
     serviceId: service?.id,
     onDone: () => onOpenChange(false),
     defaultValues: service
-      ? { name: service.name, categoryId: service.categoryId, price: service.price }
+      ? {
+          name: service.name,
+          categoryId: service.categoryId,
+          price: service.price,
+        }
       : { name: "", categoryId: categories[0]?.id ?? "", price: Number.NaN },
   });
   const {
@@ -35,25 +50,46 @@ function ServiceForm({ categories, service, onOpenChange }: Omit<ServiceFormDial
     <form onSubmit={submit} noValidate className="grid gap-4">
       <DialogHeader>
         <DialogTitle>{service ? "Edit service" : "Add service"}</DialogTitle>
-        <DialogDescription>Changing a price only affects new sales. Past sales keep the price they were saved with.</DialogDescription>
+        <DialogDescription>
+          Changing a price only affects new sales. Past sales keep the price
+          they were saved with.
+        </DialogDescription>
       </DialogHeader>
 
       <div className="space-y-2">
         <Label htmlFor="serviceName">Name</Label>
-        <Input id="serviceName" autoComplete="off" autoFocus aria-invalid={!!errors.name} {...register("name")} />
-        {errors.name ? <p role="alert" className="text-xs text-destructive">{errors.name.message}</p> : null}
+        <Input
+          id="serviceName"
+          autoComplete="off"
+          autoFocus
+          aria-invalid={!!errors.name}
+          {...register("name")}
+        />
+        {errors.name ? (
+          <p role="alert" className="text-xs text-destructive">
+            {errors.name.message}
+          </p>
+        ) : null}
       </div>
       <div className="grid gap-4 sm:grid-cols-2">
         <div className="space-y-2">
           <Label htmlFor="serviceCategory">Category</Label>
-          <Select id="serviceCategory" aria-invalid={!!errors.categoryId} {...register("categoryId")}>
+          <Select
+            id="serviceCategory"
+            aria-invalid={!!errors.categoryId}
+            {...register("categoryId")}
+          >
             {categories.map((category) => (
               <option key={category.id} value={category.id}>
                 {category.name}
               </option>
             ))}
           </Select>
-          {errors.categoryId ? <p role="alert" className="text-xs text-destructive">{errors.categoryId.message}</p> : null}
+          {errors.categoryId ? (
+            <p role="alert" className="text-xs text-destructive">
+              {errors.categoryId.message}
+            </p>
+          ) : null}
         </div>
         <div className="space-y-2">
           <Label htmlFor="servicePrice">Price (₱)</Label>
@@ -66,12 +102,20 @@ function ServiceForm({ categories, service, onOpenChange }: Omit<ServiceFormDial
             aria-invalid={!!errors.price}
             {...register("price", { valueAsNumber: true })}
           />
-          {errors.price ? <p role="alert" className="text-xs text-destructive">{errors.price.message}</p> : null}
+          {errors.price ? (
+            <p role="alert" className="text-xs text-destructive">
+              {errors.price.message}
+            </p>
+          ) : null}
         </div>
       </div>
 
       <DialogFooter>
-        <Button type="button" variant="ghost" onClick={() => onOpenChange(false)}>
+        <Button
+          type="button"
+          variant="ghost"
+          onClick={() => onOpenChange(false)}
+        >
           Cancel
         </Button>
         <Button type="submit" disabled={isSubmitting}>
@@ -83,7 +127,11 @@ function ServiceForm({ categories, service, onOpenChange }: Omit<ServiceFormDial
   );
 }
 
-export function ServiceFormDialog({ open, onOpenChange, ...rest }: ServiceFormDialogProps) {
+export function ServiceFormDialog({
+  open,
+  onOpenChange,
+  ...rest
+}: ServiceFormDialogProps) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>

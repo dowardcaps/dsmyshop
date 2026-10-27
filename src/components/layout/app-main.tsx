@@ -9,12 +9,13 @@ import { cn } from "@/lib/utils";
 /**
  * The page area under the header.
  * - Normal pages scroll inside it, centered in a max-width column (full width while the sidebar is hidden).
- * - /tools/<name> pages are full-bleed so the embedded tool fills the whole area.
+ * - /tools/<name> and the POS pages (/transactions...) are full-bleed: the page fills the whole area and manages its own scrolling.
  */
 export function AppMain({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const { collapsed } = useSidebar();
-  const fullBleed = /^\/tools\/[^/]+/.test(pathname);
+  const fullBleed =
+    /^\/tools\/[^/]+/.test(pathname) || /^\/transactions(\/|$)/.test(pathname);
   const scrollRef = React.useRef<HTMLElement>(null);
 
   // The page scrolls inside <main>, so go back to the top after navigating.

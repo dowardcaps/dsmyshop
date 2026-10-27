@@ -6,14 +6,18 @@ import { toast } from "sonner";
 
 import { categoryColor } from "@/components/transactions/category-badge";
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select } from "@/components/ui/select";
 import type { Checkout } from "@/hooks/use-checkout";
 import { copyToClipboard } from "@/lib/clipboard";
 import { formatPeso } from "@/lib/format";
-import { PAYMENT_METHODS, PAYMENT_METHOD_LABELS, PAYMENT_STATUSES, PAYMENT_STATUS_LABELS } from "@/lib/sales/constants";
+import {
+  PAYMENT_METHODS,
+  PAYMENT_METHOD_LABELS,
+  PAYMENT_STATUSES,
+  PAYMENT_STATUS_LABELS,
+} from "@/lib/sales/constants";
 import { cn } from "@/lib/utils";
 import {
   buildSummaryText,
@@ -24,10 +28,17 @@ import {
 interface SummaryPanelProps {
   summary: CartSummary;
   checkout: Checkout;
+  /** Name of the open transaction tab, shown in the header. */
+  tabName: string;
   onPay: () => void;
 }
 
-export function SummaryPanel({ summary, checkout, onPay }: SummaryPanelProps) {
+export function SummaryPanel({
+  summary,
+  checkout,
+  tabName,
+  onPay,
+}: SummaryPanelProps) {
   const [copied, setCopied] = useState(false);
   const empty = summary.items.length === 0;
   const unpaid = checkout.paymentStatus === "UNPAID";
@@ -46,10 +57,13 @@ export function SummaryPanel({ summary, checkout, onPay }: SummaryPanelProps) {
   }
 
   return (
-    <Card className="gap-0 overflow-hidden py-0 lg:absolute lg:inset-0">
+    <div className="flex h-full min-h-0 flex-col">
       <div className="flex shrink-0 items-center justify-between border-b px-5 py-3">
-        <h2 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
-          Summary
+        <h2 className="min-w-0 truncate text-sm font-semibold uppercase tracking-wide text-muted-foreground">
+          Summary{" "}
+          <span className="font-normal normal-case tracking-normal">
+            · {tabName}
+          </span>
         </h2>
         <Button
           type="button"
@@ -85,7 +99,7 @@ export function SummaryPanel({ summary, checkout, onPay }: SummaryPanelProps) {
             >
               {group.category}
             </p>
-            <ul className="space-y-0.5 text-[13px] leading-snug text-muted-foreground">
+            <ul className="space-y-0.5 text-sm leading-snug text-muted-foreground">
               {group.lines.map((line) => (
                 <li key={line.serviceId}>{line.text}</li>
               ))}
@@ -132,7 +146,11 @@ export function SummaryPanel({ summary, checkout, onPay }: SummaryPanelProps) {
         </div>
         <div className="space-y-1 sm:col-span-2 lg:col-span-1 xl:col-span-2">
           <Label id="saleStatusLabel">Status</Label>
-          <div role="group" aria-labelledby="saleStatusLabel" className="grid grid-cols-2 gap-1 rounded-lg border bg-muted/40 p-1">
+          <div
+            role="group"
+            aria-labelledby="saleStatusLabel"
+            className="grid grid-cols-2 gap-1 rounded-lg border bg-muted/40 p-1"
+          >
             {PAYMENT_STATUSES.map((status) => {
               const active = checkout.paymentStatus === status;
               return (
@@ -157,8 +175,12 @@ export function SummaryPanel({ summary, checkout, onPay }: SummaryPanelProps) {
             })}
           </div>
           {unpaid ? (
-            <p className="text-xs text-amber-700 dark:text-amber-400" data-testid="unpaid-hint">
-              Unpaid: saved, but not added to your sales until you mark it as paid.
+            <p
+              className="text-xs text-amber-700 dark:text-amber-400"
+              data-testid="unpaid-hint"
+            >
+              Unpaid: saved, but not added to your sales until you mark it as
+              paid.
             </p>
           ) : null}
         </div>
@@ -180,7 +202,7 @@ export function SummaryPanel({ summary, checkout, onPay }: SummaryPanelProps) {
             <p className="text-xs text-muted-foreground">
               {summary.itemCount} item{summary.itemCount === 1 ? "" : "s"}
             </p>
-            <p className="text-2xl font-semibold tabular-nums">
+            <p className="text-3xl font-semibold tabular-nums">
               {formatPeso(summary.totalCents / 100)}
             </p>
           </div>
@@ -204,6 +226,6 @@ export function SummaryPanel({ summary, checkout, onPay }: SummaryPanelProps) {
           {unpaid ? "Save as unpaid" : "Save to Sales"}
         </Button>
       </div>
-    </Card>
+    </div>
   );
 }
