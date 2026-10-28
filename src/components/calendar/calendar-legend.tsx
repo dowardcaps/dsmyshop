@@ -9,14 +9,19 @@ import { cn } from "@/lib/utils";
 interface CalendarLegendProps {
   counts: Record<ShopDayStatusValue, number>;
   notSet: number;
+  className?: string;
 }
 
 /** The color key, with how many days of the month fall in each. */
-export function CalendarLegend({ counts, notSet }: CalendarLegendProps) {
+export function CalendarLegend({
+  counts,
+  notSet,
+  className,
+}: CalendarLegendProps) {
   return (
     <section
       aria-label="Month summary"
-      className="grid grid-cols-2 gap-3 sm:grid-cols-4"
+      className={cn("grid grid-cols-2 gap-3 sm:grid-cols-4", className)}
     >
       {SHOP_DAY_STATUSES.map((status) => (
         <div

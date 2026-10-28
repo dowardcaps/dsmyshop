@@ -81,35 +81,45 @@ export default async function CalendarPage({
         title="Calendar"
         description="Mark each day as open, half day or closed, so everyone knows when the shop was open."
       />
-      <MonthNav month={month} currentMonth={currentMonth} />
-      <CalendarLegend counts={counts} notSet={notSet} />
-      <p className="text-sm" data-testid="cal-month-total">
-        Earned this month:{" "}
-        <span className="font-semibold tabular-nums">
-          {formatPeso(monthTotal / 100)}
-        </span>
-        <span className="text-muted-foreground">
-          {" "}
-          (sales + GCash charges + excess money)
-        </span>
-      </p>
-      <CalendarGrid
-        month={month}
-        days={days}
-        income={income}
-        today={today}
-        dayHref={dayHref}
-      />
-      <SalesTrendChart
-        monthText={monthLabel(month)}
-        previousMonthText={monthLabel(previousMonth)}
-        points={trendPoints}
-        summaries={trendSummaries}
-      />
-      <p className="text-sm text-muted-foreground">
-        Click a day to set it. Green is open, yellow is a half day, red is
-        closed.
-      </p>
+      <div className="grid items-start gap-6 xl:grid-cols-[minmax(0,1fr)_minmax(24rem,30rem)]">
+        <div className="space-y-4">
+          <MonthNav month={month} currentMonth={currentMonth} />
+          <CalendarGrid
+            month={month}
+            days={days}
+            income={income}
+            today={today}
+            dayHref={dayHref}
+          />
+          <p className="text-sm text-muted-foreground">
+            Click a day to set it. Green is open, yellow is a half day, red is
+            closed.
+          </p>
+        </div>
+        <aside className="space-y-4" aria-label="Month overview">
+          <CalendarLegend
+            counts={counts}
+            notSet={notSet}
+            className="sm:grid-cols-4 xl:grid-cols-2"
+          />
+          <p className="text-sm" data-testid="cal-month-total">
+            Earned this month:{" "}
+            <span className="font-semibold tabular-nums">
+              {formatPeso(monthTotal / 100)}
+            </span>
+            <span className="text-muted-foreground">
+              {" "}
+              (sales + GCash charges + excess money)
+            </span>
+          </p>
+          <SalesTrendChart
+            monthText={monthLabel(month)}
+            previousMonthText={monthLabel(previousMonth)}
+            points={trendPoints}
+            summaries={trendSummaries}
+          />
+        </aside>
+      </div>
 
       {day ? (
         <RecordDialog

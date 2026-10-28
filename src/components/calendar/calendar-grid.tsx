@@ -48,7 +48,7 @@ export function CalendarGrid({
             return (
               <div
                 key={cell.date}
-                className="min-h-16 bg-muted/30 sm:min-h-24"
+                className="min-h-16 bg-muted/30 sm:min-h-24 xl:min-h-28 2xl:min-h-32"
                 aria-hidden
               />
             );
@@ -62,7 +62,7 @@ export function CalendarGrid({
               data-status={row?.status ?? "NONE"}
               data-default={row?.isDefault ? "true" : undefined}
               className={cn(
-                "flex min-h-16 flex-col gap-0.5 [&>[data-testid=day-income]]:mt-auto border-l-4 bg-card p-1.5 text-left outline-none transition-colors hover:brightness-95 focus-visible:z-10 focus-visible:ring-[3px] focus-visible:ring-ring sm:min-h-24 sm:p-2",
+                "flex min-h-16 flex-col gap-0.5 [&>[data-testid=day-income]]:mt-auto border-l-4 bg-card p-1.5 text-left outline-none transition-colors hover:brightness-95 focus-visible:z-10 focus-visible:ring-[3px] focus-visible:ring-ring sm:min-h-24 sm:p-2 xl:min-h-28 2xl:min-h-32",
                 row
                   ? SHOP_DAY_STYLES[row.status].cell
                   : "border-transparent hover:bg-accent",

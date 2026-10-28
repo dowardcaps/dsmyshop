@@ -14,8 +14,8 @@ import { cn } from "@/lib/utils";
 export function AppMain({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const { collapsed } = useSidebar();
-  // The dashboard always uses the whole width; other pages do when the menu is hidden.
-  const wide = collapsed || /^\/dashboard(\/|$)/.test(pathname);
+  // The dashboard and calendar always use the whole width; other pages do when the menu is hidden.
+  const wide = collapsed || /^\/(dashboard|calendar)(\/|$)/.test(pathname);
   const fullBleed =
     /^\/tools\/[^/]+/.test(pathname) ||
     /^\/(transactions|records)(\/|$)/.test(pathname);
