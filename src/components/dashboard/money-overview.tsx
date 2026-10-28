@@ -1,5 +1,12 @@
 import Link from "next/link";
-import { ChevronRight } from "lucide-react";
+import {
+  ArrowDownLeft,
+  ArrowUpRight,
+  ChevronRight,
+  PiggyBank,
+  TrendingUp,
+  type LucideIcon,
+} from "lucide-react";
 
 import {
   Card,
@@ -26,6 +33,33 @@ const toneClass = (tone: Tone) =>
     : tone === "positive"
       ? "text-primary"
       : "";
+
+/** One quiet accent colour per headline number, so they are easy to tell apart at a glance. */
+const HEADLINE_STYLE: Record<
+  string,
+  { icon: LucideIcon; bar: string; chip: string }
+> = {
+  "money-in": {
+    icon: ArrowDownLeft,
+    bar: "bg-sky-500",
+    chip: "bg-sky-500/10 text-sky-600 dark:text-sky-400",
+  },
+  "money-out": {
+    icon: ArrowUpRight,
+    bar: "bg-amber-500",
+    chip: "bg-amber-500/10 text-amber-600 dark:text-amber-400",
+  },
+  "net-income": {
+    icon: TrendingUp,
+    bar: "bg-emerald-500",
+    chip: "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400",
+  },
+  "total-profit": {
+    icon: PiggyBank,
+    bar: "bg-violet-500",
+    chip: "bg-violet-500/10 text-violet-600 dark:text-violet-400",
+  },
+};
 
 function Row({
   row,
@@ -83,25 +117,51 @@ export function MoneyOverview({ data }: { data: DashboardData }) {
     <div className="space-y-4">
       <section
         aria-label={`Summary for ${label}`}
-        className="grid gap-4 sm:grid-cols-3"
+        className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4"
       >
-        {o.headline.map((card) => (
-          <Card key={card.id} className="gap-1 py-4" data-testid={card.id}>
-            <CardContent>
-              <p className="text-sm text-muted-foreground">{card.label}</p>
-              <p
-                className={cn(
-                  "mt-1 break-words text-3xl font-semibold tabular-nums",
-                  toneClass(card.tone),
-                )}
-                data-testid={`${card.id}-value`}
-              >
-                {money(card.cents)}
-              </p>
-              <p className="mt-1 text-xs text-muted-foreground">{card.hint}</p>
-            </CardContent>
-          </Card>
-        ))}
+        {o.headline.map((card) => {
+          const style = HEADLINE_STYLE[card.id];
+          const Icon = style.icon;
+          return (
+            <Card
+              key={card.id}
+              className="relative gap-1 overflow-hidden py-5"
+              data-testid={card.id}
+            >
+              <span
+                aria-hidden
+                className={cn("absolute inset-x-0 top-0 h-1", style.bar)}
+              />
+              <CardContent>
+                <div className="flex items-start justify-between gap-3">
+                  <p className="text-sm font-medium text-muted-foreground">
+                    {card.label}
+                  </p>
+                  <span
+                    className={cn(
+                      "flex size-9 shrink-0 items-center justify-center rounded-lg",
+                      style.chip,
+                    )}
+                  >
+                    <Icon className="size-5" aria-hidden />
+                  </span>
+                </div>
+                <p
+                  className={cn(
+                    "mt-2 break-words text-3xl font-semibold tabular-nums tracking-tight",
+                    card.tone === "negative" && "text-destructive",
+                  )}
+                  data-testid={`${card.id}-value`}
+                >
+                  {money(card.cents)}
+                </p>
+                <p className="mt-1 text-xs text-muted-foreground">
+                  {card.hint}
+                </p>
+              </CardContent>
+            </Card>
+          );
+        })}
       </section>
 
       <div className="grid gap-4 lg:grid-cols-2">

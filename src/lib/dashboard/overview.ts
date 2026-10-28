@@ -13,7 +13,7 @@ export interface OverviewRow {
 export type Tone = "positive" | "negative" | "neutral";
 
 export interface MoneyOverview {
-  /** The three headline numbers: what came in, what went out, what was kept. */
+  /** The four headline numbers: what came in, what went out, what was kept, and the running total so far. */
   headline: {
     id: string;
     label: string;
@@ -68,6 +68,13 @@ export function buildMoneyOverview(
         hint: "Money in minus money out",
         cents: summary.netIncomeCents,
         tone: toneOf(summary.netIncomeCents),
+      },
+      {
+        id: "total-profit",
+        label: "Total profit so far",
+        hint: "Earlier months plus this one",
+        cents: summary.totalNetIncomeCents,
+        tone: toneOf(summary.totalNetIncomeCents),
       },
     ],
     moneyIn: [

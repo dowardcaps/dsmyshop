@@ -47,3 +47,6 @@ The Dashboard uses plain words, with the same numbers underneath (`src/lib/dashb
 - **Money in** = Sales + GCash fees + Excess money. **Money out** = Expenses + Reimbursements + Salaries paid + Short. **Profit** = in − out (the sheet's NET INCOME).
 - **Running total** = profit of earlier months + this period (the sheet's TOTAL NET INCOME).
 - Debts and GCash cash movements are shown apart because they are not income.
+
+## Dashboard layout
+The Dashboard uses the whole screen width (no centered column). The four headline cards sit in one row on wide screens (2 x 2 on tablets, stacked on phones), each with its own quiet accent colour: **Money in** blue, **Money out** amber, **Profit** green, **Total profit so far** violet. A negative profit or total is shown in red. The four charts sit in one row on very wide screens (2 x 2 otherwise). The numbers themselves are unchanged. Code: `src/components/dashboard/money-overview.tsx` (`HEADLINE_STYLE`), `src/lib/dashboard/overview.ts`.

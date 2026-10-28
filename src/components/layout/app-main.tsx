@@ -14,6 +14,8 @@ import { cn } from "@/lib/utils";
 export function AppMain({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const { collapsed } = useSidebar();
+  // The dashboard always uses the whole width; other pages do when the menu is hidden.
+  const wide = collapsed || /^\/dashboard(\/|$)/.test(pathname);
   const fullBleed =
     /^\/tools\/[^/]+/.test(pathname) ||
     /^\/(transactions|records)(\/|$)/.test(pathname);
@@ -41,9 +43,7 @@ export function AppMain({ children }: { children: React.ReactNode }) {
       className="min-h-0 flex-1 overflow-y-auto px-4 py-6 sm:px-6"
     >
       {/* With the menu hidden the page uses the whole width. */}
-      <div
-        className={cn("mx-auto w-full", collapsed ? "max-w-none" : "max-w-6xl")}
-      >
+      <div className={cn("mx-auto w-full", wide ? "max-w-none" : "max-w-6xl")}>
         {children}
       </div>
     </main>
