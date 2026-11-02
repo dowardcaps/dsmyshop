@@ -1,4 +1,5 @@
 import {
+  HOLIDAY_STYLES,
   SHOP_DAY_LABELS,
   SHOP_DAY_STATUSES,
   SHOP_DAY_STYLES,
@@ -9,6 +10,7 @@ import { cn } from "@/lib/utils";
 interface CalendarLegendProps {
   counts: Record<ShopDayStatusValue, number>;
   notSet: number;
+  holidayCount: number;
   className?: string;
 }
 
@@ -16,6 +18,7 @@ interface CalendarLegendProps {
 export function CalendarLegend({
   counts,
   notSet,
+  holidayCount,
   className,
 }: CalendarLegendProps) {
   return (
@@ -66,6 +69,24 @@ export function CalendarLegend({
           data-testid="cal-NONE-value"
         >
           {notSet}
+        </p>
+      </div>
+      <div
+        className={cn("rounded-xl border px-4 py-3", HOLIDAY_STYLES.chip)}
+        data-testid="cal-HOLIDAY"
+      >
+        <p className="flex items-center gap-2 text-sm font-medium">
+          <span
+            className={cn("size-2.5 rounded-full", HOLIDAY_STYLES.dot)}
+            aria-hidden
+          />
+          PH holidays
+        </p>
+        <p
+          className="mt-1 text-2xl font-semibold tabular-nums"
+          data-testid="cal-HOLIDAY-value"
+        >
+          {holidayCount}
         </p>
       </div>
     </section>

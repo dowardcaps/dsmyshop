@@ -29,3 +29,10 @@ Under the calendar there is a **Daily trend** bar graph for the month shown: one
 
 ## Layout
 The Calendar page uses the whole screen width. On wide screens (1280px and up) the month grid is on the left, with taller day boxes on very wide screens, and a **Month overview** column on the right: the Open / Half day / Closed / Not set counts, "Earned this month", and the Daily trend graph. On smaller screens everything stacks in one column. Code: `src/app/(app)/calendar/page.tsx`, width rule in `src/components/layout/app-main.tsx`.
+
+## Philippine holidays (cyan)
+Holidays show in **cyan**: a cyan dot next to the date, a cyan name tag inside the day box, a cyan **PH holidays** count in the month overview, and a cyan banner (name + regular / special non-working) in the day dialog. A holiday never changes the open / half day / closed colour, so a holiday on a Sunday is still red "Closed" with the cyan name on top.
+- Built in for any year: New Year's Day, Maundy Thursday, Good Friday, Black Saturday, Araw ng Kagitingan, Labor Day, Independence Day, National Heroes Day (last Monday of August), Ninoy Aquino Day, All Saints' Day, All Souls' Day, Bonifacio Day, Immaculate Conception, Christmas Eve, Christmas Day, Rizal Day, Last Day of the Year. Chinese New Year is listed per year (2024 to 2030). The 2026 list matches the Palace's official 2026 list.
+- **Not built in:** Eid'l Fitr and Eid'l Adha (the Palace announces their dates close to the day) and one-off proclamations. Add them in `EXTRA_HOLIDAYS` in `src/lib/calendar/holidays.ts`, for example `"2027-03-10": { name: "Eid'l Fitr", kind: "REGULAR" }`.
+- "Special working day" proclamations (like the EDSA anniversary) are not days off, so they are not shown.
+- Code: `src/lib/calendar/holidays.ts` (pure logic, no database), colours in `HOLIDAY_STYLES` in `constants.ts`. No migration.

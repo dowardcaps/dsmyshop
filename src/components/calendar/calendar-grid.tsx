@@ -1,8 +1,13 @@
 import Link from "next/link";
 
+import type { Holiday } from "@/lib/calendar/holidays";
 import type { DailyIncome } from "@/lib/finance/ledger";
 import { formatPeso } from "@/lib/format";
-import { SHOP_DAY_LABELS, SHOP_DAY_STYLES } from "@/lib/calendar/constants";
+import {
+  HOLIDAY_STYLES,
+  SHOP_DAY_LABELS,
+  SHOP_DAY_STYLES,
+} from "@/lib/calendar/constants";
 import type { ResolvedDay } from "@/lib/calendar/defaults";
 import { WEEKDAYS, buildMonthGrid } from "@/lib/calendar/grid";
 import { cn } from "@/lib/utils";
@@ -13,6 +18,8 @@ interface CalendarGridProps {
   /** Sales + GCash charges + excess money per day. */
   income: Map<string, DailyIncome>;
   today: string;
+  /** Philippine holidays of this month, by date. */
+  holidays: Map<string, Holiday>;
   /** Link that opens the day dialog for a date. */
   dayHref: (date: string) => string;
 }
@@ -23,6 +30,7 @@ export function CalendarGrid({
   days,
   income,
   today,
+  holidays,
   dayHref,
 }: CalendarGridProps) {
   const weeks = buildMonthGrid(month);
@@ -43,7 +51,8 @@ export function CalendarGrid({
         {weeks.flat().map((cell) => {
           const row = cell.inMonth ? days.get(cell.date) : undefined;
           const earned = cell.inMonth ? income.get(cell.date) : undefined;
-          const label = `${cell.date}: ${row ? SHOP_DAY_LABELS[row.status] : "not set"}${row?.isDefault ? " (Sunday default)" : ""}${row?.note ? `, ${row.note}` : ""}${earned ? `, earned ${formatPeso(earned.totalCents / 100)}` : ""}`;
+          const holiday = cell.inMonth ? holidays.get(cell.date) : undefined;
+          const label = `${cell.date}${holiday ? ` (${holiday.name}, holiday)` : ""}: ${row ? SHOP_DAY_LABELS[row.status] : "not set"}${row?.isDefault ? " (Sunday default)" : ""}${row?.note ? `, ${row.note}` : ""}${earned ? `, earned ${formatPeso(earned.totalCents / 100)}` : ""}`;
           if (!cell.inMonth)
             return (
               <div
@@ -61,6 +70,7 @@ export function CalendarGrid({
               data-date={cell.date}
               data-status={row?.status ?? "NONE"}
               data-default={row?.isDefault ? "true" : undefined}
+              data-holiday={holiday?.name}
               className={cn(
                 "flex min-h-16 flex-col gap-0.5 [&>[data-testid=day-income]]:mt-auto border-l-4 bg-card p-1.5 text-left outline-none transition-colors hover:brightness-95 focus-visible:z-10 focus-visible:ring-[3px] focus-visible:ring-ring sm:min-h-24 sm:p-2 xl:min-h-28 2xl:min-h-32",
                 row
@@ -70,8 +80,17 @@ export function CalendarGrid({
               )}
             >
               <span className="flex items-center justify-between">
-                <span className="text-sm font-semibold tabular-nums">
+                <span className="flex items-center gap-1.5 text-sm font-semibold tabular-nums">
                   {cell.day}
+                  {holiday ? (
+                    <span
+                      aria-hidden
+                      className={cn(
+                        "size-2.5 rounded-full",
+                        HOLIDAY_STYLES.dot,
+                      )}
+                    />
+                  ) : null}
                 </span>
                 {cell.date === today ? (
                   <span className="text-[10px] font-medium uppercase">
@@ -79,6 +98,18 @@ export function CalendarGrid({
                   </span>
                 ) : null}
               </span>
+              {holiday ? (
+                <span
+                  className={cn(
+                    "line-clamp-2 rounded px-1 py-0.5 text-[10px] font-semibold leading-tight sm:text-[11px]",
+                    HOLIDAY_STYLES.tag,
+                  )}
+                  data-testid="day-holiday"
+                  title={holiday.name}
+                >
+                  {holiday.name}
+                </span>
+              ) : null}
               {row ? (
                 <span className="text-xs font-medium">
                   {SHOP_DAY_LABELS[row.status]}

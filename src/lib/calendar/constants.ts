@@ -29,6 +29,13 @@ export const SHOP_DAY_STYLES: Record<
   },
 };
 
+/** Philippine holidays use cyan, so they never get mixed up with open / half day / closed. */
+export const HOLIDAY_STYLES = {
+  dot: "bg-cyan-500",
+  chip: "border-cyan-500 bg-cyan-100 text-cyan-900 dark:bg-cyan-950/60 dark:text-cyan-100",
+  tag: "bg-cyan-500/15 text-cyan-800 dark:text-cyan-200",
+};
+
 /** Longest range that can be set in one go (about two months). */
 export const MAX_RANGE_DAYS = 62;
 

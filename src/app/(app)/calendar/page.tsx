@@ -22,6 +22,7 @@ import {
   parseMonthParam,
   shiftMonth,
 } from "@/lib/calendar/grid";
+import { holidaysOfMonth, HOLIDAY_KIND_LABELS } from "@/lib/calendar/holidays";
 import { buildTrend, summarize } from "@/lib/calendar/trend";
 import { getDailyIncome } from "@/lib/finance/ledger";
 import { formatPeso } from "@/lib/format";
@@ -61,6 +62,8 @@ export default async function CalendarPage({
     0,
   );
 
+  const holidays = holidaysOfMonth(month);
+  const dayHoliday = day ? holidays.get(day) : undefined;
   const days = resolveMonth(month, saved);
   const counts = Object.fromEntries(
     SHOP_DAY_STATUSES.map((s) => [s, 0]),
@@ -89,17 +92,19 @@ export default async function CalendarPage({
             days={days}
             income={income}
             today={today}
+            holidays={holidays}
             dayHref={dayHref}
           />
           <p className="text-sm text-muted-foreground">
             Click a day to set it. Green is open, yellow is a half day, red is
-            closed.
+            closed. Cyan marks a Philippine holiday.
           </p>
         </div>
         <aside className="space-y-4" aria-label="Month overview">
           <CalendarLegend
             counts={counts}
             notSet={notSet}
+            holidayCount={holidays.size}
             className="sm:grid-cols-4 xl:grid-cols-2"
           />
           <p className="text-sm" data-testid="cal-month-total">
@@ -127,6 +132,21 @@ export default async function CalendarPage({
           description="Set whether the shop was open, half day or closed."
           closeHref={closeHref}
         >
+          {dayHoliday ? (
+            <p
+              className="mb-4 flex items-center gap-2 rounded-lg border border-cyan-500 bg-cyan-100 px-4 py-2 text-sm font-medium text-cyan-900 dark:bg-cyan-950/60 dark:text-cyan-100"
+              data-testid="day-holiday-banner"
+            >
+              <span
+                aria-hidden
+                className="size-2.5 shrink-0 rounded-full bg-cyan-500"
+              />
+              {dayHoliday.name}
+              <span className="font-normal opacity-80">
+                · {HOLIDAY_KIND_LABELS[dayHoliday.kind]}
+              </span>
+            </p>
+          ) : null}
           <DayEarnings income={dayIncome} />
           <DayForm
             key={day}
