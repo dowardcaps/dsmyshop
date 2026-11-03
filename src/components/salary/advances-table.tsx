@@ -3,12 +3,25 @@ import { Lock, Pencil } from "lucide-react";
 
 import { ConfirmDeleteButton } from "@/components/shared/confirm-delete-button";
 import { Button } from "@/components/ui/button";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { deleteAdvanceAction } from "@/lib/actions/salary";
 import { formatDate, formatPeso } from "@/lib/format";
 import type { AdvanceRow } from "@/lib/salary/queries";
 
-export function AdvancesTable({ rows, editHref }: { rows: AdvanceRow[]; editHref: (id: string) => string }) {
+export function AdvancesTable({
+  rows,
+  editHref,
+}: {
+  rows: AdvanceRow[];
+  editHref: (id: string) => string;
+}) {
   return (
     <div className="rounded-xl border bg-card">
       <Table>
@@ -27,20 +40,38 @@ export function AdvancesTable({ rows, editHref }: { rows: AdvanceRow[]; editHref
             const label = `${row.employeeName} advance of ${formatPeso(row.amountCents / 100)} on ${formatDate(row.advanceDate)}`;
             return (
               <TableRow key={row.id}>
-                <TableCell className="whitespace-nowrap">{formatDate(row.advanceDate)}</TableCell>
-                <TableCell className="font-medium">{row.employeeName}</TableCell>
-                <TableCell className="text-right font-medium tabular-nums">{formatPeso(row.amountCents / 100)}</TableCell>
-                <TableCell className="whitespace-nowrap">{formatDate(row.payDate)} salary</TableCell>
-                <TableCell className="max-w-56 truncate text-muted-foreground">{row.notes ?? "-"}</TableCell>
+                <TableCell className="whitespace-nowrap">
+                  {formatDate(row.advanceDate)}
+                </TableCell>
+                <TableCell className="font-medium">
+                  {row.employeeName}
+                </TableCell>
+                <TableCell className="text-right font-medium tabular-nums">
+                  {formatPeso(row.amountCents / 100)}
+                </TableCell>
+                <TableCell className="whitespace-nowrap">
+                  {formatDate(row.payDate)} salary
+                </TableCell>
+                <TableCell className="max-w-56 truncate text-muted-foreground">
+                  {row.notes ?? "-"}
+                </TableCell>
                 <TableCell>
                   <div className="flex justify-end gap-1">
                     {row.periodPaid ? (
-                      <span className="inline-flex items-center gap-1 px-2 text-xs text-muted-foreground" title="That salary is already paid. Mark it unpaid to change this advance.">
+                      <span
+                        className="inline-flex items-center gap-1 px-2 text-xs text-muted-foreground"
+                        title="That salary is already paid. Mark it unpaid to change this advance."
+                      >
                         <Lock className="size-3.5" /> Paid
                       </span>
                     ) : (
                       <>
-                        <Button asChild variant="ghost" size="icon" aria-label={`Edit ${label}`}>
+                        <Button
+                          asChild
+                          variant="ghost"
+                          size="icon"
+                          aria-label={`Edit ${label}`}
+                        >
                           <Link href={editHref(row.id)} scroll={false}>
                             <Pencil className="size-4" />
                           </Link>

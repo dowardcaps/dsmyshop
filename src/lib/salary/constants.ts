@@ -10,4 +10,7 @@ export const SECOND_PAY_DAY = 30;
 
 export const SALARY_STATUSES = ["UNPAID", "PAID"] as const;
 export type SalaryStatusValue = (typeof SALARY_STATUSES)[number];
-export const SALARY_STATUS_LABELS: Record<SalaryStatusValue, string> = { UNPAID: "Unpaid", PAID: "Paid" };
+export const SALARY_STATUS_LABELS: Record<SalaryStatusValue, string> = {
+  UNPAID: "Unpaid",
+  PAID: "Paid",
+};

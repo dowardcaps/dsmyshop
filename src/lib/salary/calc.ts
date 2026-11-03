@@ -15,23 +15,38 @@ export function daysInMonth(year: number, month: number): number {
 }
 
 /** The two pay dates of a month as YYYY-MM-DD. The "30th" is the last day of a shorter month (February). */
-export function payDatesForMonth(year: number, month: number): [string, string] {
+export function payDatesForMonth(
+  year: number,
+  month: number,
+): [string, string] {
   const second = Math.min(SECOND_PAY_DAY, daysInMonth(year, month));
-  return [`${year}-${pad(month)}-${pad(FIRST_PAY_DAY)}`, `${year}-${pad(month)}-${pad(second)}`];
+  return [
+    `${year}-${pad(month)}-${pad(FIRST_PAY_DAY)}`,
+    `${year}-${pad(month)}-${pad(second)}`,
+  ];
 }
 
 /** [first half, second half] of a monthly salary. They always add back up to the monthly salary. */
-export function splitMonthlySalaryCents(monthlyCents: number): [number, number] {
+export function splitMonthlySalaryCents(
+  monthlyCents: number,
+): [number, number] {
   const first = Math.floor(monthlyCents / 2);
   return [first, monthlyCents - first];
 }
 
 /** Every "YYYY-MM" from the start month up to and including the end month. */
-export function monthsBetween(startYearMonth: string, endYearMonth: string): string[] {
+export function monthsBetween(
+  startYearMonth: string,
+  endYearMonth: string,
+): string[] {
   const [sy, sm] = startYearMonth.split("-").map(Number);
   const [ey, em] = endYearMonth.split("-").map(Number);
   const months: string[] = [];
-  for (let y = sy, m = sm; y < ey || (y === ey && m <= em); m === 12 ? ((y += 1), (m = 1)) : (m += 1)) {
+  for (
+    let y = sy, m = sm;
+    y < ey || (y === ey && m <= em);
+    m === 12 ? ((y += 1), (m = 1)) : (m += 1)
+  ) {
     months.push(`${y}-${pad(m)}`);
     if (months.length > 600) break; // safety net: 50 years
   }
@@ -44,7 +59,11 @@ export interface PlannedPeriod {
 }
 
 /** The pay dates (with salary) an employee should have from their start month through the current month. */
-export function plannedPeriods(monthlyCents: number, startYearMonth: string, currentYearMonth: string): PlannedPeriod[] {
+export function plannedPeriods(
+  monthlyCents: number,
+  startYearMonth: string,
+  currentYearMonth: string,
+): PlannedPeriod[] {
   const [firstHalf, secondHalf] = splitMonthlySalaryCents(monthlyCents);
   return monthsBetween(startYearMonth, currentYearMonth).flatMap((ym) => {
     const [year, month] = ym.split("-").map(Number);
@@ -56,7 +75,13 @@ export function plannedPeriods(monthlyCents: number, startYearMonth: string, cur
   });
 }
 
-export const remainingCents = (grossCents: number, advancesCents: number): number => grossCents - advancesCents;
+export const remainingCents = (
+  grossCents: number,
+  advancesCents: number,
+): number => grossCents - advancesCents;
 
 /** The most that can still be advanced against a pay date. */
-export const maxNewAdvanceCents = (grossCents: number, advancesCents: number): number => Math.max(0, remainingCents(grossCents, advancesCents));
+export const maxNewAdvanceCents = (
+  grossCents: number,
+  advancesCents: number,
+): number => Math.max(0, remainingCents(grossCents, advancesCents));

@@ -27,15 +27,16 @@ Cash overage: extra cash found versus what the records say. Fields: date, amount
 every other tab. Needs a migration: `npm run db:migrate -- --name add_excess_money`.
 
 ## Salary tab
-Two employees (Doward and Sophia, ₱3,000 a month each, created automatically the first time the tab opens). The salary is paid twice a
-month: the **15th** and the **30th** (last day of February), ₱1,500 each.
+Two employees (Doward and Sophia, each with a monthly salary you can edit (pencil on the Salary tab or in Settings), created automatically the first time the tab opens). The salary is paid twice a
+month: the **15th** and the **30th** (last day of February).
 
 - Pay dates are generated automatically from the employee's start month (the month the tab was first opened) through the current month.
 - **Cash advance / salary advance**: Add cash advance -> employee, the pay date to deduct from (their unpaid 15th/30th), amount, date given.
   An advance can never be more than what is left of that pay date.
 - **Remaining balance** of a pay date = salary - advances. The cards show each employee's remaining balance (unpaid pay dates only),
   how much was deducted as advances, and how much was already paid out.
-- **Mark paid** closes a pay date; its advances are locked until you press Undo.
+- **Paid is automatic**: a pay date becomes Paid the moment its remaining balance reaches ₱0 (use "Pay remaining" when adding a payment), and goes back to Unpaid if a payment is edited or deleted. There is no Mark paid button.
+- **Salary raise**: changing the monthly salary re-prices the current month and later pay dates (half on the 15th, half on the 30th); earlier months and fully paid dates keep their amounts.
 - Salary is kept separate: it is not part of the dashboard net income or the reports.
 - Tables: `Employee`, `SalaryPeriod`, `SalaryAdvance`. Migration: `npm run db:migrate -- --name add_salary`.
 - Code: `src/lib/salary/` (calc, service, queries), `src/components/salary/`, `src/components/records/salary-panel.tsx`.

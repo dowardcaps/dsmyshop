@@ -31,10 +31,18 @@ function FieldError({ message }: { message?: string }) {
   ) : null;
 }
 
-export function AdvanceForm({ defaultValues, employees, periods, advanceId, returnHref }: AdvanceFormProps) {
-  const { form, submit, employeePeriods, selectedPeriod, onEmployeeChange } = useAdvanceForm({ defaultValues, periods, advanceId, returnHref });
+export function AdvanceForm({
+  defaultValues,
+  employees,
+  periods,
+  advanceId,
+  returnHref,
+}: AdvanceFormProps) {
+  const { form, submit, employeePeriods, selectedPeriod, onEmployeeChange } =
+    useAdvanceForm({ defaultValues, periods, advanceId, returnHref });
   const {
     register,
+    setValue,
     formState: { errors, isSubmitting },
   } = form;
 
@@ -44,7 +52,13 @@ export function AdvanceForm({ defaultValues, employees, periods, advanceId, retu
         <CardContent className="grid gap-4 sm:grid-cols-2">
           <div className="space-y-2">
             <Label htmlFor="advanceEmployee">Employee</Label>
-            <Select id="advanceEmployee" aria-invalid={!!errors.employeeId} {...register("employeeId", { onChange: (e) => onEmployeeChange(e.target.value) })}>
+            <Select
+              id="advanceEmployee"
+              aria-invalid={!!errors.employeeId}
+              {...register("employeeId", {
+                onChange: (e) => onEmployeeChange(e.target.value),
+              })}
+            >
               {employees.map((employee) => (
                 <option key={employee.id} value={employee.id}>
                   {employee.name}
@@ -55,11 +69,18 @@ export function AdvanceForm({ defaultValues, employees, periods, advanceId, retu
           </div>
           <div className="space-y-2">
             <Label htmlFor="advancePeriod">Deduct from</Label>
-            <Select id="advancePeriod" aria-invalid={!!errors.periodId} {...register("periodId")}>
-              {employeePeriods.length === 0 ? <option value="">No unpaid pay date</option> : null}
+            <Select
+              id="advancePeriod"
+              aria-invalid={!!errors.periodId}
+              {...register("periodId")}
+            >
+              {employeePeriods.length === 0 ? (
+                <option value="">No pay date available</option>
+              ) : null}
               {employeePeriods.map((period) => (
                 <option key={period.id} value={period.id}>
-                  {formatDate(parseDateInput(period.payDate))} · {formatPeso(period.roomCents / 100)} left
+                  {formatDate(parseDateInput(period.payDate))} ·{" "}
+                  {formatPeso(period.roomCents / 100)} left
                 </option>
               ))}
             </Select>
@@ -67,20 +88,55 @@ export function AdvanceForm({ defaultValues, employees, periods, advanceId, retu
           </div>
           <div className="space-y-2">
             <Label htmlFor="advanceAmount">Amount (₱)</Label>
-            <Input id="advanceAmount" type="number" inputMode="decimal" min={0} step="0.01" aria-invalid={!!errors.amount} aria-describedby="advance-help" {...register("amount", { valueAsNumber: true })} />
+            <Input
+              id="advanceAmount"
+              type="number"
+              inputMode="decimal"
+              min={0}
+              step="0.01"
+              aria-invalid={!!errors.amount}
+              aria-describedby="advance-help"
+              {...register("amount", { valueAsNumber: true })}
+            />
             <p id="advance-help" className="text-xs text-muted-foreground">
-              {selectedPeriod ? `Up to ${formatPeso(selectedPeriod.roomCents / 100)} can be advanced on this pay date.` : "Taken out of the salary on the chosen pay date."}
+              {selectedPeriod
+                ? `Up to ${formatPeso(selectedPeriod.roomCents / 100)} can be paid on this pay date. Once the remaining balance reaches ₱0, it is marked Paid automatically.`
+                : "Taken out of the salary on the chosen pay date."}
             </p>
+            {selectedPeriod && selectedPeriod.roomCents > 0 ? (
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() =>
+                  setValue("amount", selectedPeriod.roomCents / 100, {
+                    shouldValidate: true,
+                  })
+                }
+              >
+                Pay remaining {formatPeso(selectedPeriod.roomCents / 100)}
+              </Button>
+            ) : null}
             <FieldError message={errors.amount?.message} />
           </div>
           <div className="space-y-2">
             <Label htmlFor="advanceDate">Date given</Label>
-            <Input id="advanceDate" type="date" aria-invalid={!!errors.advanceDate} {...register("advanceDate")} />
+            <Input
+              id="advanceDate"
+              type="date"
+              aria-invalid={!!errors.advanceDate}
+              {...register("advanceDate")}
+            />
             <FieldError message={errors.advanceDate?.message} />
           </div>
           <div className="space-y-2 sm:col-span-2">
             <Label htmlFor="advanceNotes">Notes (optional)</Label>
-            <Textarea id="advanceNotes" rows={2} aria-invalid={!!errors.notes} {...register("notes")} />
+            <Textarea
+              id="advanceNotes"
+              rows={2}
+              aria-invalid={!!errors.notes}
+              {...register("notes")}
+            />
             <FieldError message={errors.notes?.message} />
           </div>
         </CardContent>
@@ -92,7 +148,7 @@ export function AdvanceForm({ defaultValues, employees, periods, advanceId, retu
         </Button>
         <Button type="submit" disabled={isSubmitting}>
           {isSubmitting ? <Loader2 className="animate-spin" /> : null}
-          {advanceId ? "Save changes" : "Save cash advance"}
+          {advanceId ? "Save changes" : "Save payment"}
         </Button>
       </div>
     </form>

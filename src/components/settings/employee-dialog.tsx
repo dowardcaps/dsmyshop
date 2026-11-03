@@ -51,7 +51,7 @@ export function EmployeeDialog({ employee, children }: EmployeeDialogProps) {
             <DialogTitle>{employee ? "Edit employee" : "Add employee"}</DialogTitle>
             <DialogDescription>
               {employee
-                ? "A new salary applies to unpaid pay dates without advances. Paid or advanced pay dates keep their amount."
+                ? "A new salary applies from the 1st of this month onward (half on the 15th, half on the 30th). Pay dates that are already fully paid, and earlier months, keep their amount."
                 : "Salary is paid on the 15th and 30th, starting from the month you pick."}
             </DialogDescription>
           </DialogHeader>
