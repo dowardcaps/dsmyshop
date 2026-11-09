@@ -6,13 +6,13 @@ Page: **Performance** in the side menu (`/performance`). Overview is deliberatel
 The Dashboard follows Sales.xlsx (cash basis: salary counts when it is paid out). Performance asks "did the shop earn its keep?":
 
 ```
-Gross sales   = paid Sales + GCash charges            (same revenue as the Dashboard)
+Gross sales   = paid Sales + GCash charges + Excess money   (same as "Earned" on the Calendar and Money in on the Dashboard)
 Gross profit  = Gross sales - Material costs
 Net profit    = Gross profit - Fixed cost allocation - Other expenses
 ```
 - **Fixed costs** (rent and electricity, internet, transaction expenses, plus employee salaries from the Salary tab) are counted **once** per month. In the daily view each day *with sales* carries `monthly fixed / operating days` (₱13,300 / 26 = ₱511.54). Days without sales carry none, so the sum of the days can differ slightly from the monthly figure; the monthly figure is the one to trust.
 - **Material costs** = expenses whose category is marked *Material cost*. **Other expenses** = categories marked *Other expense* (the default). Categories marked *Fixed cost* are skipped, so a "Rent" expense is not subtracted twice. Set this on **Performance > Settings > How expense categories count**.
-- Unlike the app's other pages, Excess money, Reimbursements and Short are not part of Performance.
+- Reimbursements and Short are not part of Performance.
 
 ## Reference scenario (checked by `src/lib/performance/calc.test.ts`)
 Sales 1,000, materials 250, other 50, fixed share 511.54 -> daily net **188.46**. 26 days of that, fixed 13,300 -> monthly net **4,900**.

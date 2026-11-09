@@ -57,7 +57,7 @@ export interface MonthSummary {
 
 type KindRow = { d: string; k: string; total: Prisma.Decimal | null };
 
-/** Per-day sales (paid sales + GCash charges, like the dashboard) and expenses split by cost type. */
+/** Per-day sales (paid sales + GCash charges + excess money: the same "earned" as the Calendar and the Dashboard's Money in) and expenses split by cost type. */
 async function dailyTotals(
   userId: string,
   from: string,
@@ -68,6 +68,7 @@ async function dailyTotals(
     FROM (
       SELECT "transactionDate" AS d, 'sales' AS k, "totalAmount" AS a FROM "Sale" WHERE "userId" = ${userId} AND "isPaid" = true
       UNION ALL SELECT "transactionDate", 'sales', "charge" FROM "GcashTransaction" WHERE "userId" = ${userId}
+      UNION ALL SELECT "excessDate", 'sales', "amount" FROM "ExcessMoney" WHERE "userId" = ${userId}
       UNION ALL SELECT e."expenseDate", lower(c."kind"::text), e."amount"
         FROM "Expense" e JOIN "ExpenseCategory" c ON c."id" = e."categoryId" WHERE e."userId" = ${userId}
     ) t
