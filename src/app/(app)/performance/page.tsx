@@ -7,6 +7,7 @@ import {
   DailyTable,
   MonthlyProfitLoss,
 } from "@/components/performance/profit-tables";
+import { SimpleOverview } from "@/components/performance/simple-overview";
 import { PerformanceSettingsPanel } from "@/components/performance/settings-panel";
 import { PerformanceSummary } from "@/components/performance/summary-cards";
 import { PerformanceTabs } from "@/components/performance/tabs";
@@ -55,12 +56,19 @@ export default async function PerformancePage({
         title="Performance"
         description={`How much DS Prints earns, spends and keeps · ${monthLabel(month)}`}
         actions={
-          <MonthPicker month={month} tab={tab} currentMonth={currentMonth} />
+          <MonthPicker
+            month={month}
+            tab={tab}
+            currentMonth={currentMonth}
+            showExport={tab === "details" || tab === "daily"}
+          />
         }
       />
       <PerformanceTabs active={tab} month={month} />
 
-      {tab === "overview" ? (
+      {tab === "overview" ? <SimpleOverview data={data} /> : null}
+
+      {tab === "details" ? (
         <div className="space-y-6">
           {noRecords ? (
             <p

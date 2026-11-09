@@ -313,3 +313,61 @@ export function PerformanceCharts({
     </div>
   );
 }
+
+/** The one chart on the simple Overview: each day is green when it reached the daily target. */
+export function DailyTargetChart({
+  days,
+  dailyTarget,
+}: {
+  days: { label: string; sales: number }[];
+  dailyTarget: number;
+}) {
+  const hasDays = days.some((d) => d.sales > 0);
+  return (
+    <ChartCard
+      testId="chart-daily-simple"
+      title="Daily sales"
+      description="Green days reached the target. The dashed line is the target."
+      hasData={hasDays}
+      emptyText="No sales recorded this month yet."
+    >
+      <ResponsiveContainer width="100%" height="100%">
+        <BarChart data={days} margin={{ top: 4, right: 4, bottom: 0, left: 0 }}>
+          <CartesianGrid vertical={false} stroke={GRID} />
+          <XAxis
+            dataKey="label"
+            tickLine={false}
+            axisLine={false}
+            tick={{ fill: AXIS, fontSize: 11 }}
+            interval="preserveStartEnd"
+          />
+          <YAxis
+            tickLine={false}
+            axisLine={false}
+            width={48}
+            tick={{ fill: AXIS, fontSize: 12 }}
+            tickFormatter={compact}
+          />
+          <Tooltip
+            formatter={peso}
+            cursor={{ fill: "var(--muted)" }}
+            contentStyle={tooltipStyle}
+          />
+          <Bar dataKey="sales" name="Sales" radius={[3, 3, 0, 0]}>
+            {days.map((d) => (
+              <Cell
+                key={d.label}
+                fill={d.sales >= dailyTarget ? PROFIT : SALES}
+              />
+            ))}
+          </Bar>
+          <ReferenceLine
+            y={dailyTarget}
+            stroke={PROFIT}
+            strokeDasharray="5 4"
+          />
+        </BarChart>
+      </ResponsiveContainer>
+    </ChartCard>
+  );
+}

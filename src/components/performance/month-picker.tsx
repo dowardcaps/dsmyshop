@@ -12,10 +12,12 @@ export function MonthPicker({
   month,
   tab,
   currentMonth,
+  showExport = true,
 }: {
   month: string;
   tab: string;
   currentMonth: string;
+  showExport?: boolean;
 }) {
   const href = (m: string) => `/performance?tab=${tab}&month=${m}`;
   return (
@@ -58,12 +60,16 @@ export function MonthPicker({
         </Button>
       ) : null}
       <span className="sr-only">{monthLabel(month)}</span>
-      <Button asChild variant="outline">
-        <a href={`/performance/export?month=${month}`} download>
-          <Download /> CSV
-        </a>
-      </Button>
-      <PrintButton icon={<Printer />} />
+      {showExport ? (
+        <>
+          <Button asChild variant="outline">
+            <a href={`/performance/export?month=${month}`} download>
+              <Download /> CSV
+            </a>
+          </Button>
+          <PrintButton icon={<Printer />} />
+        </>
+      ) : null}
     </div>
   );
 }

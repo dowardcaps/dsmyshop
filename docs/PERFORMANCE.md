@@ -1,6 +1,6 @@
 # Performance (Business Performance)
 
-Page: **Performance** in the side menu (`/performance`). Tabs: Overview, Daily, Break-even, Settings. Pick the month at the top; **CSV** downloads the month, **Print** prints the page.
+Page: **Performance** in the side menu (`/performance`). Overview is deliberately simple: today vs the daily target, the month vs the monthly target, and one daily chart. Details (cards, charts, profit and loss), Daily, Break-even and Settings hold everything else. Pick the month at the top; **CSV** downloads the month, **Print** prints the page.
 
 ## Basis (different from the Dashboard on purpose)
 The Dashboard follows Sales.xlsx (cash basis: salary counts when it is paid out). Performance asks "did the shop earn its keep?":
