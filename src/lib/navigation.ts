@@ -6,6 +6,7 @@ import {
   TableProperties,
   FileBarChart,
   Settings,
+  TrendingUp,
   type LucideIcon,
 } from "lucide-react";
 
@@ -19,6 +20,7 @@ export interface NavItem {
 
 export const NAV_ITEMS: readonly NavItem[] = [
   { title: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
+  { title: "Performance", href: "/performance", icon: TrendingUp },
   { title: "POS", href: "/transactions", icon: Calculator },
   { title: "Records", href: "/records", icon: TableProperties, alsoActiveOn: ["/sales", "/gcash", "/expenses", "/debts"] },
   { title: "Inventory", href: "/inventory", icon: Boxes },

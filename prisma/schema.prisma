@@ -56,6 +56,14 @@ enum AdjustmentType {
   OTHER_ADJUSTMENT
 }
 
+/// How an expense category counts in Business Performance: MATERIAL = consumables used up for customers,
+/// FIXED = already covered by the monthly fixed-cost allocation (rent, internet...), VARIABLE = other daily costs.
+enum ExpenseKind {
+  VARIABLE
+  MATERIAL
+  FIXED
+}
+
 // ───────────────────────── Models ─────────────────────────
 
 model User {
@@ -83,6 +91,8 @@ model User {
   expenses           Expense[]
   debts              Debt[]
   monthlyAdjustments MonthlyAdjustment[]
+  businessSettings   BusinessSettings?
+  fixedExpenses      FixedExpense[]
 }
 
 /// Sale item categories (Printing, Xerox, ...). A table instead of an enum so users can add custom ones.
@@ -270,6 +280,7 @@ model ExpenseCategory {
   userId      String
   name        String
   description String?
+  kind        ExpenseKind @default(VARIABLE)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
@@ -465,4 +476,37 @@ model GcashBalanceCheck {
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId, createdAt])
+}
+
+/// Editable assumptions for the Business Performance section (one row per user).
+model BusinessSettings {
+  userId          String   @id
+  operatingDays   Int      @default(26)
+  minDailyTarget  Decimal  @default(600) @db.Decimal(12, 2)
+  dailyTarget     Decimal  @default(1000) @db.Decimal(12, 2)
+  growthTarget    Decimal  @default(1500) @db.Decimal(12, 2)
+  /// Variable cost % used by the break-even calculator. Null = use the real material + other cost % of sales.
+  variableCostPct Decimal? @db.Decimal(5, 2)
+  updatedAt       DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+/// A recurring monthly fixed cost (rent, internet...). Changing an amount creates a new version from a month,
+/// so earlier months keep the amount that applied then. Salaries come from the Salary tab, not from here.
+model FixedExpense {
+  id         String    @id @default(cuid())
+  userId     String
+  name       String
+  amount     Decimal   @db.Decimal(12, 2)
+  /// First day of the first month it applies to.
+  startMonth DateTime  @db.Date
+  /// First day of the last month it applies to. Null = still active.
+  endMonth   DateTime? @db.Date
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, startMonth])
 }

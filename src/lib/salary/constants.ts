@@ -1,7 +1,7 @@
 /** Employees created automatically the first time the Salary tab is opened. Monthly salary in pesos. */
 export const DEFAULT_EMPLOYEES = [
-  { name: "Doward", monthlySalary: 3000 },
-  { name: "Sophia", monthlySalary: 3000 },
+  { name: "Doward", monthlySalary: 4000 },
+  { name: "Sophia", monthlySalary: 4000 },
 ] as const;
 
 /** The salary is paid twice a month: on the 15th and on the 30th (the last day in February). */
