@@ -1,6 +1,6 @@
 # Performance (Business Performance)
 
-Page: **Performance** in the side menu (`/performance`). Overview is deliberately simple: today vs the daily target, the month vs the monthly target, and one daily chart. Details (cards, charts, profit and loss), Daily, Break-even and Settings hold everything else. Pick the month at the top; **CSV** downloads the month, **Print** prints the page.
+Page: **Performance** in the side menu (`/performance`). Tabs: Overview (today vs the daily target, the month vs the monthly target, one daily chart), Break-even and Settings. Pick the month at the top.
 
 ## Basis (different from the Dashboard on purpose)
 The Dashboard follows Sales.xlsx (cash basis: salary counts when it is paid out). Performance asks "did the shop earn its keep?":
@@ -35,5 +35,5 @@ Tests: `npm run test:performance`.
 
 ## Limits
 - Materials are the purchases you record as expenses in Material categories, not stock actually used. There is no per-sale material link yet.
-- Dashboard date-range filtering is by month (previous/next, or any month), not arbitrary dates.
-- PDF export is not added; use Print (save as PDF) or CSV.
+- Date filtering is by month (previous/next, or any month), not arbitrary dates.
+- The profit-and-loss Details tab, the Daily table and the CSV/Print export were removed to keep the page simple. The profit maths (`calc.ts`, `queries.ts`) is still there if you want them back.

@@ -1,7 +1,6 @@
 import Link from "next/link";
-import { ChevronLeft, ChevronRight, Download, Printer } from "lucide-react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 
-import { PrintButton } from "@/components/performance/print-button";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -12,12 +11,10 @@ export function MonthPicker({
   month,
   tab,
   currentMonth,
-  showExport = true,
 }: {
   month: string;
   tab: string;
   currentMonth: string;
-  showExport?: boolean;
 }) {
   const href = (m: string) => `/performance?tab=${tab}&month=${m}`;
   return (
@@ -60,16 +57,6 @@ export function MonthPicker({
         </Button>
       ) : null}
       <span className="sr-only">{monthLabel(month)}</span>
-      {showExport ? (
-        <>
-          <Button asChild variant="outline">
-            <a href={`/performance/export?month=${month}`} download>
-              <Download /> CSV
-            </a>
-          </Button>
-          <PrintButton icon={<Printer />} />
-        </>
-      ) : null}
     </div>
   );
 }

@@ -1,17 +1,9 @@
 import { PageHeader } from "@/components/layout/page-header";
 import { BreakEvenCalculator } from "@/components/performance/break-even-calculator";
-import { PerformanceCharts } from "@/components/performance/charts";
 import { MonthPicker } from "@/components/performance/month-picker";
-import {
-  BreakdownLists,
-  DailyTable,
-  MonthlyProfitLoss,
-} from "@/components/performance/profit-tables";
 import { SimpleOverview } from "@/components/performance/simple-overview";
 import { PerformanceSettingsPanel } from "@/components/performance/settings-panel";
-import { PerformanceSummary } from "@/components/performance/summary-cards";
 import { PerformanceTabs } from "@/components/performance/tabs";
-import { TargetMonitor } from "@/components/performance/target-monitor";
 import { requireUser } from "@/lib/auth/require-user";
 import { todayInManila } from "@/lib/dates";
 import {
@@ -46,76 +38,19 @@ export default async function PerformancePage({
     tab === "settings" ? listCategoryKinds(user.id) : Promise.resolve([]),
   ]);
   const pesos = (cents: number) => cents / 100;
-  const noRecords =
-    data.monthTotals.salesCents === 0 &&
-    data.monthTotals.materialCents + data.monthTotals.otherCents === 0;
 
   return (
     <div className="space-y-6">
       <PageHeader
         title="Performance"
-        description={`How much DS Prints earns, spends and keeps · ${monthLabel(month)}`}
+        description={`Are we hitting the sales target? · ${monthLabel(month)}`}
         actions={
-          <MonthPicker
-            month={month}
-            tab={tab}
-            currentMonth={currentMonth}
-            showExport={tab === "details" || tab === "daily"}
-          />
+          <MonthPicker month={month} tab={tab} currentMonth={currentMonth} />
         }
       />
       <PerformanceTabs active={tab} month={month} />
 
       {tab === "overview" ? <SimpleOverview data={data} /> : null}
-
-      {tab === "details" ? (
-        <div className="space-y-6">
-          {noRecords ? (
-            <p
-              className="rounded-md border border-dashed p-4 text-sm text-muted-foreground"
-              data-testid="perf-empty"
-            >
-              No sales or expenses recorded for {monthLabel(month)} yet. Fixed
-              costs of{" "}
-              {new Intl.NumberFormat("en-PH", {
-                style: "currency",
-                currency: "PHP",
-              }).format(pesos(data.monthlyFixedCents))}{" "}
-              still apply, so the month starts in the red until sales come in.
-            </p>
-          ) : null}
-          <PerformanceSummary data={data} />
-          <TargetMonitor data={data} />
-          <PerformanceCharts
-            days={data.days.map((d) => ({
-              label: d.date.slice(8),
-              sales: pesos(d.salesCents),
-            }))}
-            trend={data.trend.map((t) => ({
-              month: t.month,
-              sales: pesos(t.salesCents),
-              expenses: pesos(t.materialCents + t.otherCents + t.fixedCents),
-              net: pesos(t.profit.netProfitCents),
-            }))}
-            breakdown={data.expenseBreakdown.map((e) => ({
-              name: e.name,
-              value: pesos(e.cents),
-            }))}
-            dailyTarget={pesos(data.settings.dailyTargetCents)}
-            breakEven={
-              data.breakEven.dailyBreakEvenCents === null
-                ? null
-                : pesos(data.breakEven.dailyBreakEvenCents)
-            }
-          />
-          <div className="grid gap-4 xl:grid-cols-[2fr_3fr]">
-            <MonthlyProfitLoss data={data} />
-            <BreakdownLists data={data} />
-          </div>
-        </div>
-      ) : null}
-
-      {tab === "daily" ? <DailyTable data={data} /> : null}
 
       {tab === "breakeven" ? (
         <BreakEvenCalculator

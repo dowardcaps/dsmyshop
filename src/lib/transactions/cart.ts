@@ -280,7 +280,7 @@ export function summarizeCart(
 export function buildSummaryText(groups: readonly SummaryGroup[]): string {
   return groups
     .map((g) => `[${g.category}]\n${g.lines.map((l) => l.text).join("\n")}`)
-    .join("\n\n");
+    .join("\n");
 }
 
 /** One "Details <tab> Amount" row that pastes into Excel as two columns (details stay in one cell). */

@@ -23,8 +23,6 @@ export const EXPENSE_KIND_LABELS: Record<ExpenseKindValue, string> = {
 
 export const PERFORMANCE_TABS = [
   { id: "overview", label: "Overview" },
-  { id: "details", label: "Details" },
-  { id: "daily", label: "Daily" },
   { id: "breakeven", label: "Break-even" },
   { id: "settings", label: "Settings" },
 ] as const;
